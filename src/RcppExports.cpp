@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// create_tree
-std::string create_tree(std::vector<double> parameters, std::vector<double> waterlevel_changes, int seed, int maximum_time);
-RcppExport SEXP _enviDiv_create_tree(SEXP parametersSEXP, SEXP waterlevel_changesSEXP, SEXP seedSEXP, SEXP maximum_timeSEXP) {
+// create_tree_cpp
+std::string create_tree_cpp(std::vector<double> parameters, std::vector<double> waterlevel_changes, int seed, int maximum_time);
+RcppExport SEXP _enviDiv_create_tree_cpp(SEXP parametersSEXP, SEXP waterlevel_changesSEXP, SEXP seedSEXP, SEXP maximum_timeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -15,12 +15,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<double> >::type waterlevel_changes(waterlevel_changesSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type maximum_time(maximum_timeSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_tree(parameters, waterlevel_changes, seed, maximum_time));
+    rcpp_result_gen = Rcpp::wrap(create_tree_cpp(parameters, waterlevel_changes, seed, maximum_time));
     return rcpp_result_gen;
 END_RCPP
 }
 
+RcppExport SEXP _enviDiv_create_tree(SEXP, SEXP, SEXP, SEXP);
+
 static const R_CallMethodDef CallEntries[] = {
+    {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 4},
     {"_enviDiv_create_tree", (DL_FUNC) &_enviDiv_create_tree, 4},
     {NULL, NULL, 0}
 };

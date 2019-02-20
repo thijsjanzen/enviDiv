@@ -19,13 +19,11 @@ using namespace Rcpp;
 // ' @vector parameters a vector of the four paramaters of the model
 // ' @vector waterlevel_changes a vector that indicates the time points of water level chagnes
 // [[Rcpp::export]]
-std::string create_tree(
-  std::vector<double> parameters,
-  std::vector<double> waterlevel_changes,
-  int seed,
-  int maximum_time) {
+std::string create_tree_cpp(std::vector<double> parameters,
+                            std::vector<double> waterlevel_changes,
+                            int seed,
+                            int maximum_time) {
 	// read parameter values
-
 	set_seed(seed);
 
 	std::string newick_tree = do_run(parameters,
@@ -80,7 +78,6 @@ std::string do_run(std::vector<double> parameters,
 
 	return output;
 }
-
 
 std::vector<spec_point> run(const std::vector<double> parameters,
                             const std::vector<double>& W,
