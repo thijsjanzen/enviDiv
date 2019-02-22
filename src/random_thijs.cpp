@@ -24,6 +24,15 @@ double Expon(double lambda) {
     return std::exponential_distribution<double>(lambda)(rndgen);
 }
 
+double trunc_normal(double m, double s, double t) {
+  double output = normal(m, s);
+  while(output >= t || output <= -t) {
+    output = normal(m, s);
+  }
+  return output;
+}
+
+
 void set_seed(unsigned seed)    {
     std::mt19937 new_randomizer(seed);
     rndgen = new_randomizer;

@@ -1,6 +1,3 @@
-// Gillespie.cpp : Defines the entry point for the console application.
-//
-
 #include "Gillespie.h"
 #include "species.h"
 #include "spec_point.h"
@@ -9,29 +6,37 @@
 #include "find.h"
 #include <math.h>
 
-
 #include <Rcpp.h>
-// [[Rcpp::plugins(cpp11)]]
 using namespace Rcpp;
 
+//' bogus testing function
+//' @param input double number
+//' @return square of input
+//' @export
+// [[Rcpp::export]]
+double square_number(double input) {
+  return input*input;
+}
 
-// ' simulate a tree using environmental diversification
-// ' @vector parameters a vector of the four paramaters of the model
-// ' @vector waterlevel_changes a vector that indicates the time points of water level chagnes
+//' simulate a tree using environmental diversification
+//' @param parameters a vector of the four paramaters of the model
+//' @param waterlevel_changes a vector that indicates the time points of water level changes
+//' @param seed pseudo-random number generator seed
+//' @param crown_age crown age of the tree to be simulated
+//' @return newick string
+//' @export
 // [[Rcpp::export]]
 std::string create_tree_cpp(std::vector<double> parameters,
                             std::vector<double> waterlevel_changes,
                             int seed,
-                            int maximum_time) {
+                            int crown_age) {
 	// read parameter values
 	set_seed(seed);
-
 	std::string newick_tree = do_run(parameters,
                                    waterlevel_changes,
-                                   maximum_time);
+                                   crown_age);
   return newick_tree;
 }
-
 
 std::string do_run(std::vector<double> parameters,
                    std::vector<double> waterlevel_changes,
@@ -74,7 +79,11 @@ std::string do_run(std::vector<double> parameters,
 	  return "extinction";
 	}
 
-	std::string output =	create_newick_string(s1, s2, branch1, branch2);
+  int jiggle_amount = parameters[4];
+
+	jiggle(s1, s2, maximum_time, jiggle_amount);
+
+	std::string output =	create_newick_string(s1, s2, branch1, branch2, maximum_time);
 
 	return output;
 }
@@ -90,7 +99,6 @@ std::vector<spec_point> run(const std::vector<double> parameters,
   double sympatric_high_water = parameters[1];
   double sympatric_low_water  = parameters[2];
   double allopatric_spec_rate = parameters[3];
-
 
   std::vector<double> speciationCompletionTimes;
   allSpecies.clear();
@@ -131,6 +139,7 @@ std::vector<spec_point> run(const std::vector<double> parameters,
     double timestep = Expon(rate);
 
     time += timestep;
+    if(time > maximum_time) break;
 
     if(time > W[numberWlevelChanges] && (time-timestep) < W[numberWlevelChanges]) {
 
@@ -138,7 +147,7 @@ std::vector<spec_point> run(const std::vector<double> parameters,
       numberWlevelChanges++;
       waterLevelChange(pop, water_level);
     } else	{
-      if(time > maximum_time) break;
+
       int event_chosen = drawEvent(Pe, Ps, Pa);
 
       double time_of_previous_waterlevelchange = 0.0;
@@ -200,7 +209,7 @@ std::vector<spec_point> run(const std::vector<double> parameters,
   if(numberExtinctions == 0) lineages = calculateLineages_noextinct(allSpecies);
   else
   {
-    lineages = calculateLineages_withextinct(allSpecies);
+    lineages = calculateLineages_withextinct(allSpecies, maximum_time);
   }
 
   lins += lineages.back().ID;
@@ -426,8 +435,11 @@ std::vector<newick_node> generateNodeList(const std::vector<species>& v,
 	for(auto it = v.begin(); it != v.end(); ++it) {
 		if((*it).ID > maxID) maxID = (*it).ID;
 
-		if((*it).death_time == -1) extant.push_back((*it));
-		else extinct.push_back((*it));
+		if((*it).death_time == -1) {
+		  extant.push_back((*it));
+		} else {
+		  extinct.push_back((*it));
+		}
 	}
 	maxID++;
 
@@ -571,8 +583,11 @@ std::string writeTREE2(const std::vector<species>& v,
 	for(auto it = v.begin(); it != v.end(); ++it) {
 		if((*it).ID > maxID) maxID = (*it).ID;
 
-		if((*it).death_time == -1) extant.push_back((*it));
-		else extinct.push_back((*it));
+		if((*it).death_time == -1) {
+		  extant.push_back((*it));
+		} else {
+		  extinct.push_back((*it));
+		}
 	}
 	maxID++;
 
@@ -580,7 +595,7 @@ std::string writeTREE2(const std::vector<species>& v,
 	if(extant.size() ==1) { //there is only one, or two species
 		std::string s_ID = std::to_string(extant[0].ID);
 		std::string s_BL = std::to_string(maximum_time - extant[0].birth_time);
-		std::string output = s_ID + ":" + s_BL;
+		std::string output = s_ID;
 		return output;
 	}
 	if(extant.size()==2)  {
@@ -745,4 +760,106 @@ int drawEvent(double E, double S, double A) {
     if(r <= 0) return i;
   }
   return 0;
+}
+
+void jiggle_species_vector( std::vector< species > & s,
+                            double focal_time,
+                            double maximum_time,
+                            double jiggle_amount) {
+
+  for(auto brother = s.begin(); brother != s.end(); ++brother) {
+    if((*brother).birth_time == focal_time ) {
+
+      // find sister species
+      auto sister = brother;
+      for( auto jt = brother; jt != s.end(); ++jt) {
+        if((*jt).birth_time == (*brother).birth_time) {
+          if( (*jt).parent == (*brother).parent) {
+            if( (*jt).ID != (*brother).ID) { //because we start at self, we will always have an immediate hit
+              sister = jt;
+              break;
+            }
+          }
+        }
+      }
+
+      double dist_to_upper = 1e6;
+      double dist_to_lower = maximum_time - (*brother).birth_time;
+
+      //find parent for upper limit
+      //they both have the same parent, so we only have to check against one child
+      for(auto p = s.begin(); p != s.end(); ++p) {
+        if( (*p).ID == (*brother).parent) {
+          dist_to_upper = (*brother).birth_time - (*p).birth_time;
+          break;
+        }
+      }
+
+      //find youngest offspring for lower limit
+      for(auto o = s.begin(); o != s.end(); ++o) {
+        if((*o).parent == (*brother).ID) {
+          double diff = (*o).birth_time - (*brother).birth_time;
+          if(diff < dist_to_lower) dist_to_lower = diff;
+        }
+        if((*o).parent == (*sister).ID) {
+          double diff = (*o).birth_time - (*sister).birth_time;
+          if(diff < dist_to_lower) dist_to_lower = diff;
+        }
+      }
+
+      //truncation should be shortest distance
+      double trunc = dist_to_lower;
+      if(dist_to_upper < dist_to_lower) trunc = dist_to_upper;
+
+      double new_birth_time = focal_time + trunc_normal(0.0, jiggle_amount, trunc);
+      (*brother).birth_time = new_birth_time;
+      (*sister).birth_time = new_birth_time;
+    }
+  }
+  return;
+}
+
+
+
+//new version
+void jiggle(std::vector< species > & s1,
+            std::vector< species > & s2,
+            double maximum_time,
+            double jiggle_amount) {
+  //we have to identify all multiples
+
+  std::vector<double> b_times;
+  for(auto it = s1.begin(); it != s1.end(); ++it) { //collect all branching times across both sides of the tree
+    b_times.push_back((*it).birth_time);
+  }
+  for(auto it = s2.begin(); it != s2.end(); ++it) {
+    b_times.push_back((*it).birth_time);
+  }
+  std::sort(b_times.begin(), b_times.end()); //sort them (needed for remove_unique)
+
+  //now we need to find those branching times that occur > 2 times
+  std::vector<double> focal_times;
+  int counter = 0;
+  for(int i = 1; i < (int)b_times.size(); ++i) {
+    if(b_times[i] == b_times[i-1]) {
+      counter++;
+    } else {
+      if(counter > 2) {
+        focal_times.push_back(b_times[i-1]);
+      }
+      counter = 0;
+    }
+  }
+
+  if(focal_times.size() > 0) {
+    for(int i = 0; i < (int)focal_times.size(); ++i) {
+      double focal_time = focal_times[i];
+
+      if(focal_time > 0) {
+        jiggle_species_vector(s1, focal_time, maximum_time, jiggle_amount); //jiggle all species with that time
+        jiggle_species_vector(s2, focal_time, maximum_time, jiggle_amount);
+      }
+    }
+  }
+  return;
 }
