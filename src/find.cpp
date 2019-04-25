@@ -49,7 +49,7 @@ int findOther( int youngest,
     for(std::size_t i = 0; i < v.size(); ++i) {
         if(youngest != i) {
             if(v[i].parent == parent) {
-                if(v[i].birth_time == v[youngest].birth_time)
+                if(v[i].get_birth_time() == v[youngest].get_birth_time())
                     return i;
             }
         }
@@ -64,8 +64,8 @@ int findYoungest(const std::vector<species>& v) {
     int count = 0;
 
     for(auto it = v.begin(); it != v.end(); ++it) {
-        if((*it).birth_time > min)  {
-            min = (*it).birth_time;
+        if((*it).get_birth_time() > min)  {
+            min = (*it).get_birth_time();
             index = count;
         }
         count++;

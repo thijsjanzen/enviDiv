@@ -3,11 +3,11 @@
 #' @return vector with 7 entries: extinction, sympatric speciation at high water, sympatric speciation at low water, allopatric speciation, amount of jiggle and the chosen water model
 param_from_prior <- function(empty_input) {
   output <- c()
-  output[1] <- 10 ^ (-3 + 5 * runif(1, 0, 1))  #extinction
-  output[2] <- 10 ^ (-3 + 5 * runif(1, 0, 1))  #symp spec high
-  output[3] <- 10 ^ (-3 + 5 * runif(1, 0, 1))  #symp spec low
-  output[4] <- 10 ^ (-3 + 5 * runif(1, 0, 1))  #allo spec
-  output[5] <- 10 ^ (-3 + 3 * runif(1, 0, 1))  #jiggle
+  output[1] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #extinction
+  output[2] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #symp spec high
+  output[3] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #symp spec low
+  output[4] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #allo spec
+  output[5] <- 10 ^ (-3 + 3 * stats::runif(1, 0, 1))  #jiggle
   output[6] <- sample(1:3, 1) # model
   output[7] <- 1
 
@@ -21,7 +21,7 @@ param_from_prior <- function(empty_input) {
 mutate_param <- function(params, local_sd) {
   output <- c()
   for(i in 1:5) {
-    output[i] <- 10^(rnorm(1, log10(params[i]), local_sd))
+    output[i] <- 10^(stats::rnorm(1, log10(params[i]), local_sd))
   }
 
   output[6] <- params[6]
@@ -40,13 +40,20 @@ mutate_param <- function(params, local_sd) {
 #' @param emp_tree reference empirical tree, necessary to calculate the nLTT.
 #' @return vector of four summary statistics
 calc_sum_stats <- function(focal_tree, emp_tree) {
+  # trees that are extinct turn up as NULL:
   if(is.null(focal_tree)) {
+    return(rep(Inf, 4))
+  }
+
+  # trees with only 2 tips turn up with an empty edgelist (they are only a crown)
+  if(is.null(focal_tree$edge.length)) {
     return(rep(Inf, 4))
   }
 
   focal_tree <- ape::multi2di(focal_tree)
 
-  if(min(ape::branching.times(focal_tree)) < 0) {
+  if(min(ape::branching.times(focal_tree), na.rm=T) < 0) {
+    cat("ERROR, negative branch lengths!\n")
     return(rep(Inf, 4))
   }
   if(focal_tree$Nnode + 1 < 3) {
@@ -90,7 +97,7 @@ calculate_weight <- function(params,
                              weights,
                              sigma) {
   diff <- log10(params[1:5]) - log10(other_params[,1:5]) #only the numerical ones
-  vals <- weights * dnorm(diff, mean = 0, sd = sigma)
+  vals <- weights * stats::dnorm(diff, mean = 0, sd = sigma)
 
   model_prob <- params[6] - other_params[,6]
   model_prob[which(model_prob != 0)] <- 0.25

@@ -2,6 +2,8 @@
 #' @param params parameters used to simulate
 #' @param crown_age age of the crown of the tree
 #' @return phy object
+#' @rawNamespace useDynLib(enviDiv)
+#' @export
 sim_envidiv_tree <- function(params,
                              crown_age) {
 
@@ -13,8 +15,32 @@ sim_envidiv_tree <- function(params,
                                          seed,
                                          crown_age)
 
-  phy_tree <- ape::read.tree(text = local_newick_string)
-  return(phy_tree)
+  if(local_newick_string == "extinction") {
+    return(NULL)
+  }
+
+  if(local_newick_string == "overflow") {
+    return(NULL)
+  }
+
+  phy_tree <- phytools::read.newick(text = local_newick_string)
+
+  valid_tree <- TRUE
+  if(is.null(phy_tree)) valid_tree <- FALSE
+  if(is.null(phy_tree$edge.length)) valid_tree <- FALSE
+  if (!"phylo" %in% class(phy_tree)) valid_tree <- FALSE
+  if(length(phy_tree$tip.label) == 2) valid_tree <- FALSE
+
+  if(!valid_tree) return(NULL)
+
+  output_tree <- phy_tree
+  graphics::plot(output_tree)
+  if(length(geiger::is.extinct(output_tree)) > 0)  {
+    output_tree <- geiger::drop.extinct(phy_tree, tol = 0.01)
+  }
+
+  #output_tree <- ape::di2multi(output_tree)
+  return(output_tree)
 }
 
 #' generate a sequence of waterlevel changes, depending on the model
@@ -45,7 +71,7 @@ generate_water <- function(water_model,
     time = 0;
     tempTime = time;
     while(tempTime < (maximum_time - 1.1)) {
-      tempTime = tempTime + rexp(1, 10)
+      tempTime = tempTime + stats::rexp(1, 10)
       if(tempTime > (maximum_time - 1.1)) break;
       time = tempTime;
       output2 <- c(output2, time)

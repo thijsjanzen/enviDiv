@@ -14,4 +14,9 @@ LinkingTo:
     Rcpp
 Imports: 
     Rcpp,
-    ape
+    ape,
+    nLTT,
+    geiger,
+    phytools,
+    readr,
+    tibble

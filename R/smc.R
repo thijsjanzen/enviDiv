@@ -22,7 +22,7 @@ infer_params <- function(number_of_particles,
   # now we start SMC
   for(iter in 2:max_iter) {
     cat("iteration: ", iter,"\n")
-    local_eps <- 200*exp(-0.5 * iter)
+    local_eps <- 300*exp(-0.5 * iter)
 
     next_par <- c()
 

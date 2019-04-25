@@ -9,6 +9,7 @@
 #define species_h
 
 #include <vector>
+#include "Rcpp.h"
 
 // [[Rcpp::plugins(cpp11)]]
 
@@ -17,15 +18,11 @@ struct species
     species();
     species(int& id);
     species(const species& parent_species, int& id_count, double b_time);
-    //species(species&& other);
     species(const species& other);
 
     // move assignment
-   // species& operator=(species&& other);
-
 
     int ID;
-    double birth_time; //time of birth;
     double death_time; //time of death;
 
     int parent;
@@ -47,18 +44,19 @@ struct species
 
     species& operator=(const species& other);
 
-    void swap(species& other);
-};
-
-namespace std {
-
-    // inject specialization for species into namespace std
-    template<>
-    inline void swap(species& a, species& b)
-    {
-        a.swap(b);
+    void set_birth_time(double t) {
+      if(t < 0) {
+        Rcpp::Rcout << "set_birth_time < 0!\n";
+      }
+      birth_time = t;
+    }
+    double get_birth_time() const {
+      return birth_time;
     }
 
-}
+  private:
+    double birth_time; //time of birth;
+
+};
 
 #endif /* species_h */

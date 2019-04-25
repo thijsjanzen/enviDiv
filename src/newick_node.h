@@ -21,13 +21,16 @@ struct newick_node
     bool extant;
     int ID;
     int parent;
-    double branch_length;
 
     bool checked;
     int left;
     int right;
 
     std::string composeString(const std::vector<newick_node>& v) const;
+    double get_branch_length() const;
+    void   set_branch_length(double bl);
+  private:
+    double branch_length;
 };
 
 #endif /* newick_node_hpp */

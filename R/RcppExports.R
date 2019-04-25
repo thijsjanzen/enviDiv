@@ -6,7 +6,7 @@
 #' @return square of input
 #' @export
 square_number <- function(input) {
-    .Call(`_enviDiv_square_number`, input)
+    .Call('_enviDiv_square_number', PACKAGE = 'enviDiv', input)
 }
 
 #' simulate a tree using environmental diversification
@@ -17,6 +17,6 @@ square_number <- function(input) {
 #' @return newick string
 #' @export
 create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age) {
-    .Call(`_enviDiv_create_tree_cpp`, parameters, waterlevel_changes, seed, crown_age)
+    .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, seed, crown_age)
 }
 

@@ -7,16 +7,6 @@ species::species()  {
     death_time = -1;
 }
 
-/*species::species(species&& other)   :   ID(other.ID),
-                                        birth_time(other.birth_time),
-                                        death_time(other.death_time),
-                                        parent(other.parent),
-                                        extant_offspring(other.extant_offspring),
-                                        checked(other.checked),
-                                        alloSpeciated(other.alloSpeciated)
-{
-}*/
-
 species::species(const species& other): ID(other.ID),
                                         birth_time(other.birth_time),
                                         death_time(other.death_time),
@@ -26,22 +16,6 @@ species::species(const species& other): ID(other.ID),
                                         alloSpeciated(other.alloSpeciated)
 {
 }
-
-/*
-species::species& operator=(species&& other)  {
-    // Protect against self-assignment, required.
-    if (*this != &other) {
-        ID = other.ID;
-        birth_time = other.birth_time;
-        death_time = other.death_time;
-        parent = other.parent;
-        extant_offspring = other.extant_offspring;
-        checked = other.checked;
-        alloSpeciated = other.alloSpeciated;
-    }
-    return *this;
-}
-*/
 
 species::species(int& id) { //constructor
 
@@ -76,19 +50,6 @@ bool species::operator>=(const species& other) const {return !operator< (other);
 bool species::operator==(const species& other) const { return ID == other.ID; }
 bool species::operator!=(const species& other) const {return !((*this) == other);}
 
-
-void species::swap(species& other)  {
-    std::swap(ID, other.ID);
-    std::swap(birth_time,other.birth_time);
-    std::swap(death_time,other.death_time);
-
-    std::swap(parent,other.parent);
-    std::swap(extant_offspring,other.extant_offspring);
-    std::swap(checked,other.checked);
-
-    std::swap(alloSpeciated,other.alloSpeciated);
-}
-
 species::species(const species& parent_species, int& id_count, double b_time)
 {
     ID = id_count;
@@ -99,6 +60,3 @@ species::species(const species& parent_species, int& id_count, double b_time)
     alloSpeciated = false;
     checked = false;
 }
-
-
-

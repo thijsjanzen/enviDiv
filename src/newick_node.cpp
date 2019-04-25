@@ -7,6 +7,7 @@
 
 #include "newick_node.h"
 #include "find.h"
+#include "Rcpp.h"
 
 newick_node::newick_node()  {
     ID = -1;
@@ -54,12 +55,28 @@ newick_node::newick_node(const species& S,
 {
     if(S.death_time == -1)  {
         extant = true;
-        branch_length = maximum_time - S.birth_time;
+        branch_length = maximum_time - S.get_birth_time();
     } else {
         extant = false;
-        branch_length = S.death_time - S.birth_time;
+        branch_length = S.death_time - S.get_birth_time();
     }
 
     parent = S.parent;
     ID = S.ID;
 }
+
+double newick_node::get_branch_length() const {
+  return branch_length;
+}
+
+void newick_node::set_branch_length(double bl) {
+  if(bl < 0) {
+    Rcpp::Rcout << "newick_node sets negative BL\n";
+  }
+  branch_length = bl;
+  return;
+}
+
+
+
+

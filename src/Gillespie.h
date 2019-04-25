@@ -14,16 +14,15 @@ std::string do_run(std::vector<double> parameters,
                    std::vector<double> waterlevel_changes,
                    int maximum_time);
 
-std::vector<spec_point> run(const std::vector<double> parameters,
-                            const std::vector<double>& W,
-                            int& id_count,
-                            std::vector<species>& allSpecies,
-                            int& lins,
-                            int maximum_time);
+int run(const std::vector<double> parameters,
+        const std::vector<double>& W,
+        int& id_count,
+        std::vector<species>& allSpecies,
+        int maximum_time);
 
 int drawEvent(double E, double S, double A);
 
-void updatePairs2(std::vector<species>& v,
+void updatePairs(std::vector<species>& v,
                   std::vector<allo_pair>& p);
 
 void waterLevelChange(std::vector<species>& v, int& wLevel);
@@ -59,12 +58,16 @@ void Allo_speciation(std::vector<species>& v,
                      double time,
                      double water_time,
                      const std::vector<allo_pair>& p,
-                     std::vector<double>& specTimes);
+                     std::vector<double>& specTimes,
+                     std::vector<species>& extinct_species);
 
 std::vector<spec_point>  calculateLineages_noextinct(const std::vector<species>& allSp);
 std::vector<spec_point>  calculateLineages_withextinct(    std::vector<species>& allSp,
                                                            double maximum_time);
 
+std::string create_newick_string_r(const std::vector<species>& s1,
+                                   const std::vector<species>& s2,
+                                   double maximum_time);
 
 
 void jiggle(std::vector< species > & s1,
