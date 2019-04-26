@@ -27,13 +27,6 @@ void updatePairs(std::vector<species>& v,
 
 void waterLevelChange(std::vector<species>& v, int& wLevel);
 
-
-std::string create_newick_string( const std::vector<species>& s1,
-                                  const std::vector<species>& s2,
-                                  const std::vector<spec_point>& b1,
-                                  const std::vector<spec_point>& b2,
-                                  double maximum_time);
-
 template<typename T>
 void removeDuplicates(std::vector<T>& vec);
 
@@ -61,10 +54,6 @@ void Allo_speciation(std::vector<species>& v,
                      std::vector<double>& specTimes,
                      std::vector<species>& extinct_species);
 
-std::vector<spec_point>  calculateLineages_noextinct(const std::vector<species>& allSp);
-std::vector<spec_point>  calculateLineages_withextinct(    std::vector<species>& allSp,
-                                                           double maximum_time);
-
 std::string create_newick_string_r(const std::vector<species>& s1,
                                    const std::vector<species>& s2,
                                    double maximum_time);
@@ -75,8 +64,6 @@ void jiggle(std::vector< species > & s1,
             double maximum_time,
             double jiggle_amount);
 
-
-
-
-
+void remove_extinct_branches(std::vector<species>& allSpecies);
+void merge_single_branches(std::vector<species>& all_species);
 #endif

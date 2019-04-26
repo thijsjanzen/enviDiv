@@ -60,9 +60,9 @@ std::string do_run(std::vector<double> parameters,
 	std::vector<species> s2;
 
 	int local_lins2 = run(parameters,
-                                        waterlevel_changes,
-                                        idCount, s2,
-                                        maximum_time);
+                        waterlevel_changes,
+                        idCount, s2,
+                        maximum_time);
 
 	if(local_lins == 0 || local_lins2 == 0) {
 	  return "extinction";
@@ -81,10 +81,10 @@ std::string do_run(std::vector<double> parameters,
 }
 
 int run(const std::vector<double> parameters,
-                            const std::vector<double>& W,
-                            int& id_count,
-                            std::vector<species>& allSpecies,
-                            int maximum_time)  {
+        const std::vector<double>& W,
+        int& id_count,
+        std::vector<species>& allSpecies,
+        int maximum_time)  {
 
   double extinction_rate =      parameters[0];
   double sympatric_high_water = parameters[1];
@@ -194,12 +194,12 @@ int run(const std::vector<double> parameters,
     allSpecies.push_back((*it));
   }
 
+  if(numberExtinctions > 0) {
+    remove_extinct_branches(allSpecies);
+  }
 
- // if(numberExtinctions == 0) lineages = calculateLineages_noextinct(allSpecies);
-//  else
-//  {
-//   lineages = calculateLineages_withextinct(allSpecies, maximum_time);
-//  }
+  merge_single_branches(allSpecies);
+
   return pop.size();
 }
 
@@ -454,156 +454,6 @@ void updateReferences(int oldID,
 	}
 }
 
-std::vector<newick_node> generateNodeList(const std::vector<species>& v,
-                                          double maximum_time)  {
-	std::vector<newick_node> node_list;
-
-	std::vector<species> extant;
-	std::vector<species> extinct;
-
-	int maxID = 0;
-
-	for(auto it = v.begin(); it != v.end(); ++it) {
-		if((*it).ID > maxID) maxID = (*it).ID;
-
-		if((*it).death_time == -1) {
-		  extant.push_back((*it));
-		} else {
-		  extinct.push_back((*it));
-		}
-	}
-	maxID++;
-
-	//we have all extant species, that are connected through the extinct species to the ancestor (parent ID = -1);
-	while(!extant.empty())  {
-		//we find the instance with the most recent branching time, e.g. the most recent branching moment
-		int youngest = findYoungest(extant);
-		int other = findOther(youngest,extant);
-
-		if(extant[youngest].parent == -1) //we have reached the root!
-		{
-			newick_node root(extant[0], maximum_time);
-			node_list.push_back(root);
-			break;
-		}
-
-		if(other != -1) //two species branched off from one other species
-		{
-			newick_node temp1(extant[youngest], maximum_time);
-			newick_node temp2(extant[other], maximum_time);
-
-			node_list.push_back(temp1);
-			node_list.push_back(temp2);
-
-			//remove both offspring, and add the parent
-			int parent = find_parent(extinct,
-                            extant[youngest].parent);
-
-			if(parent != -1)
-			{
-				extant[youngest] = extinct[parent];
-				extant[other] = extant.back();
-				extant.pop_back();
-
-				extinct[parent] = extinct.back();
-				extinct.pop_back();
-			}
-			else
-			{
-				//the parent is already in the extant community
-				std::vector<species> temp;
-				for(std::size_t i = 0; i < extant.size(); ++i)
-				{
-					if(i != youngest && i != other) temp.push_back(extant[i]);
-				}
-				extant = temp;
-			}
-		}
-		else
-		{
-			//either the species branched off from an extant species, or not:
-			int parent = find_parent(extant,
-                               extant[youngest].parent);
-
-			if(parent == -1)
-			{
-				///////////////////////////////////
-				/////////   1   /          1 /
-				////////       /    -->     /
-				////////   2  /          1 /
-				///////////////////////////////////////
-				parent = find_parent(extinct,
-                             extant[youngest].parent);
-				int oldID = extant[youngest].ID;
-				int newID = extinct[parent].ID;
-
-				double time = extant[youngest].get_birth_time();
-
-				extinct[parent].death_time = extant[youngest].death_time;
-				extant[youngest] = extinct[parent];
-				extinct[parent] = extinct.back();
-				extinct.pop_back();
-
-				updateReferences(oldID,newID,extinct,time);
-				updateReferences(oldID,newID,extant,time);
-				updateReferences(oldID,newID,node_list);
-			}
-			else //I don't think this can happen, but just in case
-			{
-				if(extant[parent].death_time == extant[youngest].get_birth_time())
-				{
-					///////////////////////////////////
-					/////////   1   /
-					////////       /
-					////////   2  /
-					///////////////////////////////////////
-					newick_node temp(extant[youngest], maximum_time);
-					node_list.push_back(temp);
-
-					extant[youngest] = extant.back();
-					extant.pop_back();
-				}
-				else
-				{
-					///////////////////////////////////
-					/////////   1   /           1  /
-					////////       /\    -->      /\
-					////////   1  /  \ 2       3 /  \ 2
-					///////////////////////////////////////
-					newick_node temp1(extant[youngest], maximum_time); //number 2
-					newick_node temp2(extant[parent], maximum_time); //future number 3
-
-					temp1.parent = extant[parent].ID;
-					temp2.parent = extant[parent].ID; //they both have the same parents
-
-					maxID++;
-					temp2.ID = maxID;  //make it number 3
-					temp2.set_branch_length(maximum_time - extant[youngest].get_birth_time()); //adjust branch length (shorten it)
-					if(extant[parent].death_time != -1)
-					  temp2.set_branch_length(extant[parent].death_time -
-					                          extant[youngest].get_birth_time());
-
-
-					extant[parent].death_time = extant[youngest].get_birth_time();
-
-					updateReferences(extant[parent].ID, maxID, extant, extant[youngest].get_birth_time()); //adjust all downstream references
-					updateReferences(extant[parent].ID, maxID, extinct, extant[youngest].get_birth_time());
-					updateReferences(extant[parent].ID, maxID, node_list);
-
-					node_list.push_back(temp1); //add
-					node_list.push_back(temp2);
-
-					extant[youngest] = extant.back();
-					extant.pop_back();
-				}
-			}
-		}
-	}
-
-
-	return node_list;
-}
-
 std::string to_string_local( double d ) {
 
   std::ostringstream stm ;
@@ -672,126 +522,33 @@ std::string create_newick_string_local(const std::vector<newick_node>& v) {
 }
 
 
-
-std::string writeTREE2(const std::vector<species>& v,
-                       double maximum_time)
-{
-	std::vector<species> extant;
-	std::vector<species> extinct;
-
-	int maxID = 0;
-
-	for(auto it = v.begin(); it != v.end(); ++it) {
-		if((*it).ID > maxID) maxID = (*it).ID;
-
-		if((*it).death_time == -1) {
-		  extant.push_back((*it));
-		} else {
-		  extinct.push_back((*it));
-		}
-	}
-	maxID++;
-
-	if(extant.size() ==1) { //there is only one, or two species
-		std::string s_ID = std::to_string(extant[0].ID);
-		std::string s_BL = std::to_string(maximum_time - extant[0].get_birth_time());
-		if(atof(s_BL.c_str()) < 0) {
-		  Rcpp::Rcout << "extant.size = 1 bl < 0\n";
-		}
-		std::string output = s_ID;
-		return output;
-	}
-	if(extant.size()==2)  {
-		std::string s_ID1 = std::to_string(extant[0].ID);
-		std::string s_BL1 = std::to_string(maximum_time - extant[0].get_birth_time());
-		std::string s_ID2 =  std::to_string(extant[1].ID);
-		std::string s_BL2 = std::to_string(maximum_time - extant[1].get_birth_time());
-
-		if(atof(s_BL1.c_str()) < 0) {
-		  Rcpp::Rcout << "extant.size == 2 bl1 < 0\n";
-		}
-
-		if(atof(s_BL2.c_str()) < 0) {
-		  Rcpp::Rcout << "extant.size == 2 bl2 < 0\n";
-		}
-
-		std::string output = "(" + s_ID1 + ":" + s_BL1 + "," + s_ID2 + ":" + s_BL2 + ")";
-		return output;
-	}
-
-	std::vector< newick_node > node_list = generateNodeList(v, maximum_time);
-
-	//std::string core = node_list.back().composeString(node_list);
-	Rcout << "creating newick string\n";
-	std::string core = create_newick_string_local(node_list);
-	return core;
-}
-
-std::vector<spec_point>  calculateLineages_noextinct(const std::vector<species>& allSp) {
-	std::vector<spec_point> output;
-	std::vector<species> allSpecies = allSp;
-
-	std::sort(allSpecies.begin(), allSpecies.end(), sortOnTime);
-
-	for(auto it = allSpecies.begin(); it != allSpecies.end(); ++it) {
-		double time = (*it).get_birth_time();
-		double previously_checked_time = -10;
-		if(!output.empty()) previously_checked_time = output.back().get_time();
-
-		if(time != previously_checked_time) {
-			int lins = countLin(allSpecies,time);
-			output.push_back(spec_point(lins, time));
-		}
-	}
-
-	purgeOutput(output);
-
-	return output;
-}
-
 bool species::check_has_viable_offspring(std::vector<species>& v) {
-	if(checked == true) return extant_offspring;
+	if(checked == true) return has_extant_offspring;
+	if(death_time == -1) {
+	  has_extant_offspring = true;
+	  checked = true;
+	  return has_extant_offspring;
+	}
 
+	has_extant_offspring = false;
 	std::vector<int> offspring = find_indices(v, ID); //find the positions of the offspring;
-	extant_offspring = false;
 
 	for(std::size_t i = 0; i < offspring.size(); ++i) { //ofspring is of size 2 (or 1), so using iterators is useless here
 		int index = offspring[i];
 
-		if(v[index].death_time == -1) extant_offspring  = true;  //the offspring is extant
-		else   //the offspring has died, but might have given birth to other species that have survived
-		{
-			if(v[index].checked == true) extant_offspring  = v[index].extant_offspring;
-			else extant_offspring = v[index].check_has_viable_offspring(v);
+		if(v[index].death_time == -1) {
+		  has_extant_offspring  = true;  //the offspring is extant
+		} else  { //the offspring has died, but might have given birth to other species that have survived
+			if(v[index].checked == true) has_extant_offspring  = v[index].has_extant_offspring;
+			else has_extant_offspring = v[index].check_has_viable_offspring(v);
 		}
 
-		if(extant_offspring == true) break;
+		if(has_extant_offspring == true) break;
 	}
 
 	checked = true;
 
-	return extant_offspring;
-}
-
-std::vector<spec_point>  calculateLineages_withextinct(std::vector<species>& allSp,
-                                                       double maximum_time)  {
-	std::vector<spec_point> output;
-	std::vector<species> lineages;
-
-	for(auto it = allSp.begin(); it != allSp.end(); ++it)   {
-	  if((*it).death_time == -1) lineages.push_back((*it)); //the species is an extant species and is added to the list to create the ltt plot
-		else
-		{
-		  (*it).check_has_viable_offspring(allSp);
-			if((*it).extant_offspring == true) lineages.push_back((*it));
-		}
-	}
-	allSp = lineages;
-	std::vector<species> filler;
-	output = calculateLineages_noextinct(allSp);
-	output.push_back(spec_point(output.back().ID, maximum_time));
-
-	return output;
+	return has_extant_offspring;
 }
 
 int countLineages(const std::vector<spec_point>& v, double time)  {
@@ -803,32 +560,6 @@ int countLineages(const std::vector<spec_point>& v, double time)  {
 		}
 	}
 	return (int)v.back().ID;
-}
-
-std::vector<spec_point> sumBranches(const std::vector<spec_point>& b1,
-                                    const std::vector<spec_point>& b2,
-                                    double maximum_time)
-{
-	std::vector<spec_point> output;
-	std::vector<double> times;
-	for(auto it = b1.begin(); it != b1.end(); ++it) times.push_back((*it).get_time());
-	for(auto it = b2.begin(); it != b2.end(); ++it) times.push_back((*it).get_time());
-
-	removeDuplicates(times); //to remove duplicates, the list also gets sorted, how convenient!
-
-	int L1, L2;
-
-	for(auto it = times.begin(); it != times.end(); ++it) {
-		L1 = countLineages(b1, (*it));
-		L2 = countLineages(b2, (*it));
-
-		spec_point add(L1+L2, (*it));
-		output.push_back(add);
-	}
-
-	output.push_back(spec_point(output.back().ID, maximum_time));
-	removeDuplicates(output);
-	return output;
 }
 
 std::string acquire_offspring_strings(const std::vector<species>& v,
@@ -896,45 +627,6 @@ std::string create_newick_string_r(const std::vector<species>& s1,
   output += ");";
 
   return output;
-}
-
-
-std::string create_newick_string( const std::vector<species>& s1,
-                                  const std::vector<species>& s2,
-                                  const std::vector<spec_point>& b1,
-                                  const std::vector<spec_point>& b2,
-                                  double maximum_time)
-{
-	double b_1, b_2;
-	if(b1.size() == 1) b_1 = maximum_time - b1[0].get_time();
-	else b_1 = b1[1].get_time();
-
-	if(b2.size() == 1) b_2 = maximum_time - b2[0].get_time();
-	else b_2 = b2[1].get_time();
-
-	if(b_1 < 0) {
-	  Rcpp::Rcout << "b_1 < 0!\n";
-	}
-	if(b_2 < 0) {
-	  Rcpp::Rcout << "b_2 < 0!\n";
-	}
-
-	std::string left = writeTREE2(s1, maximum_time);
-	std::string right = writeTREE2(s2, maximum_time);
-	std::string BL_left = std::to_string(b_1);
-	std::string BL_right = std::to_string(b_2);
-
-	std::string output = "(";
-    output += left;
-	  output += ":";
-  	output += BL_left;
-  	output += ",";
-  	output += right;
-  	output += ":";
-  	output += BL_right;
-  	output += ");";
-
-	return output;
 }
 
 int drawEvent(double E, double S, double A) {
@@ -1050,3 +742,59 @@ void jiggle(std::vector< species > & s1,
   }
   return;
 }
+
+void remove_extinct_branches(std::vector<species>& all_species) {
+
+  std::vector< species > selected_species;
+  for(auto it = all_species.begin(); it != all_species.end(); ++it) {
+    (*it).check_has_viable_offspring(all_species);
+    if((*it).has_extant_offspring == true) {
+      selected_species.push_back((*it));
+    }
+  }
+  all_species = selected_species;
+  return;
+}
+
+
+void merge_single_branches(std::vector<species>& all_species) {
+  std::vector<int> indices_to_copy;
+  for(int i = 0; i < all_species.size(); ++i) {
+    std::vector<int> offspring = find_indices(all_species, all_species[i].ID); //find the positions of the offspring;
+
+    if(offspring.size() > 1) {
+      indices_to_copy.push_back(i);
+    }
+    if(offspring.size() == 1) {
+      // this species only gave rise to one other species
+      // let's see if it is extant
+      if(all_species[i].death_time == -1) {
+        indices_to_copy.push_back(i);
+      } else {
+        // all right, so we have to merge the offspring with the parent.
+       // species parent_branch = all_species[i];
+      //  species offspring_branch = all_species[ offspring[0] ];
+        // now the birth time of the offspring has to be set to be the parents
+        all_species[ offspring[0] ].set_birth_time( all_species[i].get_birth_time() ) ;
+      }
+    }
+    if(offspring.size() == 0) {
+      if(all_species[i].death_time == -1) {
+        indices_to_copy.push_back(i);
+      } else {
+        std::cout << "ERROR in merge branches\n";
+      }
+    }
+  }
+
+  std::vector< species > selected_species;
+
+
+  for(int i = 0; i < indices_to_copy.size(); ++i) {
+    selected_species.push_back(all_species [ indices_to_copy[i] ]);
+  }
+  all_species = selected_species;
+}
+
+
+

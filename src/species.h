@@ -26,7 +26,7 @@ struct species
     double death_time; //time of death;
 
     int parent;
-    bool extant_offspring;
+    bool has_extant_offspring;
     bool checked;
 
     bool alloSpeciated;

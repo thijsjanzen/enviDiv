@@ -8,12 +8,12 @@ species::species()  {
 }
 
 species::species(const species& other): ID(other.ID),
-                                        birth_time(other.birth_time),
                                         death_time(other.death_time),
                                         parent(other.parent),
-                                        extant_offspring(other.extant_offspring),
+                                        has_extant_offspring(other.has_extant_offspring),
                                         checked(other.checked),
-                                        alloSpeciated(other.alloSpeciated)
+                                        alloSpeciated(other.alloSpeciated),
+                                        birth_time(other.birth_time)
 {
 }
 
@@ -26,6 +26,7 @@ species::species(int& id) { //constructor
     parent = -1;
     alloSpeciated = false;
     checked = false;
+    has_extant_offspring = false;
 }
 
 species& species::operator=(const species& other) {
@@ -36,7 +37,7 @@ species& species::operator=(const species& other) {
     death_time = other.death_time;
     parent = other.parent;
     alloSpeciated = other.alloSpeciated;
-    extant_offspring = other.extant_offspring;
+    has_extant_offspring = other.has_extant_offspring;
     checked = other.checked;
 
     return *this;
@@ -50,8 +51,9 @@ bool species::operator>=(const species& other) const {return !operator< (other);
 bool species::operator==(const species& other) const { return ID == other.ID; }
 bool species::operator!=(const species& other) const {return !((*this) == other);}
 
-species::species(const species& parent_species, int& id_count, double b_time)
-{
+species::species(const species& parent_species,
+                 int& id_count,
+                 double b_time) {
     ID = id_count;
     id_count++;
     death_time = -1;
