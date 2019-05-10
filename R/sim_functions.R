@@ -33,14 +33,19 @@ sim_envidiv_tree <- function(params,
 
   if(!valid_tree) return(NULL)
 
-  output_tree <- phy_tree
-  graphics::plot(output_tree)
-  if(length(geiger::is.extinct(output_tree)) > 0)  {
-    output_tree <- geiger::drop.extinct(phy_tree, tol = 0.01)
+  if(!ape::is.binary(phy_tree)) {
+    new_phy_tree <- ape::collapse.singles(phy_tree)
+    if(!ape::is.binary(new_phy_tree)) {
+      cat(params,"\n")
+      cat(local_newick_string,"\n")
+      cat("ERROR, could not generate binary tree\n")
+      stop()
+      #return(NULL)
+    }
+    phy_tree <- new_phy_tree
   }
 
-  #output_tree <- ape::di2multi(output_tree)
-  return(output_tree)
+  return(phy_tree)
 }
 
 #' generate a sequence of waterlevel changes, depending on the model

@@ -44,7 +44,7 @@ std::string do_run(std::vector<double> parameters,
 
   std::vector<species> s1;
 
- 	int idCount = 0;
+ 	int idCount = 1e5;
 	int local_lins = run(parameters,
                        waterlevel_changes,
                        idCount, s1,
@@ -58,6 +58,8 @@ std::string do_run(std::vector<double> parameters,
 	}
 
 	std::vector<species> s2;
+
+	idCount = 2e5;
 
 	int local_lins2 = run(parameters,
                         waterlevel_changes,
@@ -203,41 +205,51 @@ int run(const std::vector<double> parameters,
   return pop.size();
 }
 
-bool onlyInstance(const std::vector< species >& v, int i) {
-	if(v.size() < 2) return true;
+bool onlyInstance(const std::vector<species>& v,
+                  int i,
+                  std::vector< int >& indices) {
+  indices.clear();
+  if(v.size() < 2) return true;
 
-	int local_ID = v[i].ID;
-	int count = 0;
-	for(auto it = v.begin(); it != v.end(); ++it) {
-		if((*it).ID == local_ID) count++;
+  int local_ID = v[i].ID;
 
-		if(count > 1) return false;
-	}
-	return true;
+  int count = 0;
+  for(std::vector<species>::const_iterator s = v.begin(); s != v.end(); ++s) {
+    if((*s).ID == local_ID) {
+      indices.push_back(count);
+    }
+    count++;
+  }
+  if(indices.size() == 1) return true; //only found self.
+
+  return false;
 }
+
 
 void extinction(std::vector<species>& v,
                 std::vector<species>& extinct_species,
                 double time,
                 int wLevel) {
 
-	int i = random_number(v.size());
+  int i = random_number((int)v.size());
 
-	v[i].death_time = time;
+  v[i].death_time = time;
+  std::vector< int > indices; // not used here
+  if(wLevel == 0) { //low water level, there might be two instances of the same species
 
-	if(wLevel == 0) {//low water level, there might be two instances of the same species
-		if(onlyInstance(v,i)) extinct_species.push_back(v[i]);
-	}
-	if(wLevel == 1) { //high water level, there is only one instance of this species
-		extinct_species.push_back(v[i]);
-	}
+    bool no_other_instance_in_other_pocket = onlyInstance(v,i, indices);
 
-	v[i] = v.back();
-	v.pop_back();
+    if(no_other_instance_in_other_pocket) extinct_species.push_back(v[i]);
+  }
+  if(wLevel == 1) {//high water level, there is only one instance of this species
+    extinct_species.push_back(v[i]);
+  }
 
-	return;
+  v[i] = v.back();
+  v.pop_back();
+
+  return;
 }
-
 
 void Symp_speciation(std::vector<species>& v,
                      int& id_count,
@@ -250,21 +262,26 @@ void Symp_speciation(std::vector<species>& v,
   if(wLevel == 1) {
     // high water level, this should be easy, just a split
     // pick random parent
-    int i = random_number(v.size());
+    int i = random_number((int)v.size());
     species offspring1 = species(v[i], id_count, time);
     species offspring2 = species(v[i], id_count, time);
 
     // kill parent:
     v[i].death_time = time;
     extinct_species.push_back(v[i]);
-    v[i] = offspring1;
+    v[i] = v.back();
+    v.pop_back();
+
+    v.push_back(offspring1);
     v.push_back(offspring2);
     return;
   }
 
   if(wLevel == 0) {
-    int i = random_number(v.size());
-    bool only_instance = onlyInstance(v, i);
+    int i = random_number((int)v.size());
+    std::vector< int > pair_indices;
+
+    bool only_instance = onlyInstance(v, i, pair_indices);
 
     if(only_instance) {
       // no paired species in other pocket, "simple" diversification
@@ -274,7 +291,10 @@ void Symp_speciation(std::vector<species>& v,
       // kill parent:
       v[i].death_time = time;
       extinct_species.push_back(v[i]);
-      v[i] = offspring1;
+      v[i] = v.back();
+      v.pop_back();
+
+      v.push_back(offspring1);
       v.push_back(offspring2);
       return;
     } else {
@@ -287,13 +307,8 @@ void Symp_speciation(std::vector<species>& v,
       //              ------ c2
 
       // we first generate p2 and p3
-      species parent2 = species(v[i], id_count, waterTime);
-      species parent3 = species(v[i], id_count, waterTime);
-      // we kill parent 1:
-      v[i].death_time = waterTime;
-      extinct_species.push_back(v[i]);
-      // we replace parent1 with parent 3
-      v[i] = parent3;
+      species parent2 = species(v[pair_indices[0]], id_count, waterTime);
+      species parent3 = species(v[pair_indices[1]], id_count, waterTime);
 
       // we generate children 1 and 2:
       species child1 = species(parent2, id_count, time);
@@ -302,13 +317,14 @@ void Symp_speciation(std::vector<species>& v,
       parent2.death_time = time;
       extinct_species.push_back(parent2);
 
-      //add the children to the vector:
-      v.push_back(child1);
-      v.push_back(child2);
+      //add the children and parent3 to the vector:
+      v[pair_indices[0] ] = child1;
+      v[pair_indices[1] ] = child2;
+      v.push_back(parent3);
       return;
     }
   }
-	return;
+  return;
 }
 
 void waterLevelChange(std::vector<species>& v,
@@ -335,7 +351,7 @@ void Allo_speciation(std::vector<species>& v,
                      std::vector<double>& specTimes,
                      std::vector<species>& extinct_species)
 {
-	int i = random_number(p.size());
+  int i = random_number( (int)p.size());
   allo_pair focal_pair = p[i];
 
   //allright, we have a pair and they are branching:
@@ -354,8 +370,9 @@ void Allo_speciation(std::vector<species>& v,
   v[focal_pair.index_a] = child1;
   v[focal_pair.index_b] = child2;
 
-	return;
+  return;
 }
+
 
 void updatePairs(std::vector<species>& v,
                   std::vector<allo_pair>& p)
@@ -562,73 +579,6 @@ int countLineages(const std::vector<spec_point>& v, double time)  {
 	return (int)v.back().ID;
 }
 
-std::string acquire_offspring_strings(const std::vector<species>& v,
-                                      const species& focal,
-                                      double maximum_time) {
-
-  std::vector<int> offspring = findOffspring(focal.ID, v);
-
-  if(offspring.size() > 0) {
-    std::string output = "(";
-    for(int i = 0; i < offspring.size(); ++i) {
-      output += acquire_offspring_strings(v,
-                                          v[offspring[i]],
-                                           maximum_time);
-      if(i != offspring.size() -1) output += ",";
-    }
-    output += ")";
-
-    double bl = focal.death_time - focal.get_birth_time();
-    if(focal.death_time == -1) bl = maximum_time - focal.get_birth_time();
-    output += ":" + std::to_string(bl);
-    return output;
-  } else {
-    std::string output = std::to_string(focal.ID) + ":";
-    double bl = maximum_time - focal.get_birth_time();
-    if(focal.death_time > 0)    bl = focal.death_time - focal.get_birth_time();
-    output += std::to_string(bl);
-    return output;
-  }
-}
-
-
-std::string writeTREE_3(const std::vector<species> v,
-                        double maximum_time) {
-  //find the root
-  //std::cout << "looking for root\n";
-  species root;
-  for(auto it = v.begin(); it != v.end(); ++it) {
-    if((*it).parent == -1) {
-      root = (*it);
-   //   std::cout << "found root, let's dive\n";
-      break;
-    }
-  }
-
-  // we start with the root
-  std::string output = "(";
-  std::string center = acquire_offspring_strings(v, root, maximum_time);
-  output += center;
-  output += ")";
-
-  return output;
-}
-
-std::string create_newick_string_r(const std::vector<species>& s1,
-                                   const std::vector<species>& s2,
-                                   double maximum_time) {
-  std::string left = writeTREE_3(s1, maximum_time);
-  std::string right = writeTREE_3(s2, maximum_time);
-
-  std::string output = "(";
-  output += left;
-  output += ",";
-  output += right;
-  output += ");";
-
-  return output;
-}
-
 int drawEvent(double E, double S, double A) {
   double sum = E + S + A;
   double events[3] = {E/sum, S/sum, A/sum};
@@ -743,58 +693,122 @@ void jiggle(std::vector< species > & s1,
   return;
 }
 
+std::string acquire_offspring_strings(const std::vector<species>& v,
+                                      const species& focal,
+                                      double maximum_time) {
+
+    std::vector<int> offspring = findOffspring(focal.ID, v);
+
+    if(offspring.size() > 0) {
+        std::string output = "(";
+        for(int i = 0; i < offspring.size(); ++i) {
+            output += acquire_offspring_strings(v,
+                                                v[offspring[i]],
+                                                maximum_time);
+            if(i != offspring.size() -1) output += ",";
+        }
+        output += ")";
+
+        double bl = focal.death_time - focal.get_birth_time();
+        if(focal.death_time == -1) bl = maximum_time - focal.get_birth_time();
+        output += ":" + std::to_string(bl);
+        return output;
+    } else {
+        std::string output = std::to_string(focal.ID) + ":";
+        double bl = maximum_time - focal.get_birth_time();
+        if(focal.death_time > 0)    bl = focal.death_time - focal.get_birth_time();
+        output += std::to_string(bl);
+        return output;
+    }
+}
+
+
+std::string writeTREE_3(const std::vector<species> v,
+                        double maximum_time) {
+    //find the root
+    // std::cout << "looking for root\n";
+    species root;
+    for(auto it = v.begin(); it != v.end(); ++it) {
+        if((*it).parent == -1) {
+            root = (*it);
+            // std::cout << "found root, let's dive\n";
+            break;
+        }
+    }
+
+    // we start with the root
+    std::string output = "(";
+    std::string center = acquire_offspring_strings(v, root, maximum_time);
+    output += center;
+    output += ")";
+
+    return output;
+}
+
+std::string create_newick_string_r(const std::vector<species>& s1,
+                                   const std::vector<species>& s2,
+                                   double maximum_time) {
+    std::string left = writeTREE_3(s1, maximum_time);
+    std::string right = writeTREE_3(s2, maximum_time);
+
+    std::string output = "(";
+    output += left;
+    output += ",";
+    output += right;
+    output += ");";
+
+    return output;
+}
+
 void remove_extinct_branches(std::vector<species>& all_species) {
 
-  std::vector< species > selected_species;
-  for(auto it = all_species.begin(); it != all_species.end(); ++it) {
-    (*it).check_has_viable_offspring(all_species);
-    if((*it).has_extant_offspring == true) {
-      selected_species.push_back((*it));
+    std::vector< species > selected_species;
+    for(auto it = all_species.begin(); it != all_species.end(); ++it) {
+        (*it).check_has_viable_offspring(all_species);
+        if((*it).has_extant_offspring == true) {
+            selected_species.push_back((*it));
+        }
     }
-  }
-  all_species = selected_species;
-  return;
+    all_species = selected_species;
+    return;
 }
-
 
 void merge_single_branches(std::vector<species>& all_species) {
-  std::vector<int> indices_to_copy;
-  for(int i = 0; i < all_species.size(); ++i) {
-    std::vector<int> offspring = find_indices(all_species, all_species[i].ID); //find the positions of the offspring;
+    std::vector<int> indices_to_copy;
+    for(int i = 0; i < all_species.size(); ++i) {
+        std::vector<int> offspring = find_indices(all_species, all_species[i].ID); //find the positions of the offspring;
 
-    if(offspring.size() > 1) {
-      indices_to_copy.push_back(i);
+        if(offspring.size() > 1) {
+            indices_to_copy.push_back(i);
+        }
+        if(offspring.size() == 1) {
+            // this species only gave rise to one other species
+            // let's see if it is extant
+            if(all_species[i].death_time == -1) {
+                indices_to_copy.push_back(i);
+            } else {
+                // all right, so we have to merge the offspring with the parent.
+                species parent_branch = all_species[i];
+                species offspring_branch = all_species[ offspring[0] ];
+                // now the birth time of the offspring has to be set to be the parents
+                double parent_birth_time = all_species[i].get_birth_time();
+                all_species[ offspring[0] ].set_birth_time(parent_birth_time);
+            }
+        }
+        if(offspring.size() == 0) {
+            if(all_species[i].death_time == -1) {
+                indices_to_copy.push_back(i);
+            } else {
+                std::cout << "ERROR in merge branches\n";
+            }
+        }
     }
-    if(offspring.size() == 1) {
-      // this species only gave rise to one other species
-      // let's see if it is extant
-      if(all_species[i].death_time == -1) {
-        indices_to_copy.push_back(i);
-      } else {
-        // all right, so we have to merge the offspring with the parent.
-       // species parent_branch = all_species[i];
-      //  species offspring_branch = all_species[ offspring[0] ];
-        // now the birth time of the offspring has to be set to be the parents
-        all_species[ offspring[0] ].set_birth_time( all_species[i].get_birth_time() ) ;
-      }
+
+    std::vector< species > selected_species;
+
+
+    for(int i = 0; i < indices_to_copy.size(); ++i) {
+        selected_species.push_back(all_species [ indices_to_copy[i] ]);
     }
-    if(offspring.size() == 0) {
-      if(all_species[i].death_time == -1) {
-        indices_to_copy.push_back(i);
-      } else {
-        std::cout << "ERROR in merge branches\n";
-      }
-    }
-  }
-
-  std::vector< species > selected_species;
-
-
-  for(int i = 0; i < indices_to_copy.size(); ++i) {
-    selected_species.push_back(all_species [ indices_to_copy[i] ]);
-  }
-  all_species = selected_species;
+    all_species = selected_species;
 }
-
-
-
