@@ -4,10 +4,18 @@
 \alias{sim_envidiv_tree}
 \title{simulate a tree using the environmental diversification model}
 \usage{
-sim_envidiv_tree(params, crown_age)
+sim_envidiv_tree(params, crown_age, abc = FALSE)
 }
 \arguments{
-\item{params}{parameters used to simulate}
+\item{params}{parameters used to simulate:
+\itemize{
+  \item{extinction}{per lineage extinction rate}
+  \item{sympatric speciation rate at high water}{per lineage rate of speciation when the water level is high}
+  \item{sympatric speciation rate at low water}{per lineage rate of speciation when the water level is low}
+  \item{allopatric speciation rate}{per allopatric pair rate of speciation}
+  \item{perturbation}{standard deviation of post-hoc brancing time perturbation}
+  \item{water model}{Water model: 1) no water level changes, 2) literature water level change, 3) extrapolated water level changes}
+}}
 
 \item{crown_age}{age of the crown of the tree}
 }

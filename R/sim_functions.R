@@ -1,11 +1,20 @@
 #' simulate a tree using the environmental diversification model
-#' @param params parameters used to simulate
+#' @param params parameters used to simulate:
+#' \itemize{
+#'   \item{extinction}{per lineage extinction rate}
+#'   \item{sympatric speciation rate at high water}{per lineage rate of speciation when the water level is high}
+#'   \item{sympatric speciation rate at low water}{per lineage rate of speciation when the water level is low}
+#'   \item{allopatric speciation rate}{per allopatric pair rate of speciation}
+#'   \item{perturbation}{standard deviation of post-hoc brancing time perturbation}
+#'   \item{water model}{Water model: 1) no water level changes, 2) literature water level change, 3) extrapolated water level changes}
+#' }
 #' @param crown_age age of the crown of the tree
 #' @return phy object
 #' @rawNamespace useDynLib(enviDiv)
 #' @export
 sim_envidiv_tree <- function(params,
-                             crown_age) {
+                             crown_age,
+                             abc = FALSE) {
 
   seed = as.numeric(Sys.time())
 
@@ -16,22 +25,36 @@ sim_envidiv_tree <- function(params,
                                          crown_age)
 
   if(local_newick_string == "extinction") {
+    if(!abc) cat("Tree went extinct, returning NULL\n")
     return(NULL)
   }
 
   if(local_newick_string == "overflow") {
+    if(!abc) cat("Tree too big, returning NULL")
     return(NULL)
   }
 
   phy_tree <- phytools::read.newick(text = local_newick_string)
 
   valid_tree <- TRUE
-  if(is.null(phy_tree)) valid_tree <- FALSE
-  if(is.null(phy_tree$edge.length)) valid_tree <- FALSE
-  if (!"phylo" %in% class(phy_tree)) valid_tree <- FALSE
-  if(length(phy_tree$tip.label) == 2) valid_tree <- FALSE
+  if(is.null(phy_tree))  {
+    cat("phy tree is NULL")
+    return(NULL)
+  }
+  if(is.null(phy_tree$edge.length)) {
+    cat("phy_tree$edge.length == NULL")
+    return(NULL)
+  }
 
-  if(!valid_tree) return(NULL)
+  if (!"phylo" %in% class(phy_tree)) {
+    cat("phy is not of class phylo")
+    return(NULL)
+  }
+
+  if(length(phy_tree$tip.label) == 2) {
+    cat("tree has only two tips")
+    if(abc) return(NULL)
+  }
 
   if(!ape::is.binary(phy_tree)) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
@@ -52,6 +75,7 @@ sim_envidiv_tree <- function(params,
 #' @param water_model can be 1) no water level changes, 2) literature water level changes 3) literature water level changes + exponentially distributed water level changes
 #' @param maximum_time crown age
 #' @return vector of water level changes in [0, maximum_time], where 0 indicates the start of the tree (e.g. the root)
+#' @export
 generate_water <- function(water_model,
                            maximum_time) {
   if(water_model == 1) return(c(0, maximum_time * 2))

@@ -4,7 +4,7 @@
 \alias{calc_sum_stats}
 \title{calculate summary statistics for a focal tree. The following summary statistics are calculated: nLTT, gamma, mean branching times and number of lineages}
 \usage{
-calc_sum_stats(focal_tree, emp_tree)
+calc_sum_stats(focal_tree, emp_tree, params)
 }
 \arguments{
 \item{focal_tree}{input phylogenetic tree for which to calculate summary statistics.}
