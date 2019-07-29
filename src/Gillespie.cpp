@@ -19,6 +19,15 @@ std::string create_tree_cpp(std::vector<double> parameters,
                             double crown_age) {
   // read parameter values
   set_seed(seed);
+
+  Rcout << "Running simulation with:\n";
+  Rcout << "Extinction: " << parameters[0] << "\n";
+  Rcout << "Sym_high: " << parameters[1] << "\n";
+  Rcout << "Sym_low: " << parameters[2] << "\n";
+  Rcout << "Allo: " << parameters[3] << "\n";
+  Rcout << "Jiggle: " << parameters[4] << "\n";
+  Rcout << "Model: " << parameters[5] << "\n";
+
   std::string newick_tree = do_run_r(parameters,
                                      waterlevel_changes,
                                      crown_age);
@@ -44,23 +53,30 @@ std::string do_run_r(const std::vector< double >& parameters,
   double jiggle_amount = parameters[4];
 
   int idCount = 0;
-  run(parameters, waterlevel_changes,
-      idCount, s1,
-      maximum_time);
+  int error_code = run(parameters, waterlevel_changes,
+                       idCount, s1,
+                       maximum_time);
 
-  if(s1.size() == 0) {
+  if(error_code == 0) {
     return "extinction";
+  }
+
+  if(error_code == 1e6) {
+    return "overflow";
   }
 
   std::vector<species> s2;
 
-  run(parameters,
+  int error_code2 = run(parameters,
       waterlevel_changes,
       idCount, s2,
       maximum_time);
 
-  if(s1.size() == 0 || s2.size() == 0) {
+  if(error_code2 == 0) {
     return "extinction";
+  }
+  if(error_code2 == 1e6) {
+    return "overflow";
   }
 
   jiggle(s1, s2, maximum_time, jiggle_amount);
@@ -77,6 +93,7 @@ int drawEvent(double E, double S, double A) {
   double sum = E + S + A;
   double events[3] = {E/sum, S/sum, A/sum};
   double r = uniform();
+  //Rcout << events[0] << " " << events[1] << " " << events[2] << "\n";
   for(int i = 0; i < 3; ++i) {
     r -= events[i];
     if(r <= 0) return i;
@@ -108,7 +125,6 @@ void extinction(std::vector<species>& v,
                 std::vector<species>& extinct_species,
                 double time,
                 int wLevel) {
-
   int i = random_number((int)v.size());
 
   v[i].death_time = time;
@@ -314,7 +330,6 @@ int run(const std::vector<double>& parameters,
   int numberWlevelChanges = 0;
 
   std::vector<species> extinct_species;
-
   std::vector<allo_pair> pairs;
 
   while(time < maximum_time)  {
@@ -338,7 +353,7 @@ int run(const std::vector<double>& parameters,
 
     time += timestep;
 
-    if(time > maximum_time) break;
+
 
     if(time >= W[numberWlevelChanges] && (time-timestep) < W[numberWlevelChanges])
     {
@@ -346,6 +361,9 @@ int run(const std::vector<double>& parameters,
       numberWlevelChanges++;
       waterLevelChange(pop, waterLevel);
     } else {
+
+      if(time > maximum_time) break;
+
       int event_chosen = drawEvent(Pe, Ps, Pa);
       double time_of_previous_waterlevelchange = 0.0;
       if(numberWlevelChanges != 0) time_of_previous_waterlevelchange = W[numberWlevelChanges-1];
@@ -372,7 +390,7 @@ int run(const std::vector<double>& parameters,
 
     if(pop.size() > 300) //more than 300 species, unlikely to provide a good fit, but slows down the program considerably
     {
-      return 0;
+      return 1e6;
     }
 
   }

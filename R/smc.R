@@ -42,7 +42,7 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree, crown_age)
+      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree, crown_age, TRUE)
 
       if(length(found_trees) > 0) {
 

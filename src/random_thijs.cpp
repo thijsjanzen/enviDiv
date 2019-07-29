@@ -21,6 +21,7 @@ double Gamma(int k, double lambda)  {
 }
 
 double Expon(double lambda) {
+    if(lambda == 0.0) return 1e20;
     return std::exponential_distribution<double>(lambda)(rndgen);
 }
 
