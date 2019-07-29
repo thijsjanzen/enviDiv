@@ -5,19 +5,8 @@
 
 using namespace Rcpp;
 
-// square_number
-double square_number(double input);
-RcppExport SEXP _enviDiv_square_number(SEXP inputSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type input(inputSEXP);
-    rcpp_result_gen = Rcpp::wrap(square_number(input));
-    return rcpp_result_gen;
-END_RCPP
-}
 // create_tree_cpp
-std::string create_tree_cpp(std::vector<double> parameters, std::vector<double> waterlevel_changes, int seed, int crown_age);
+std::string create_tree_cpp(std::vector<double> parameters, std::vector<double> waterlevel_changes, int seed, double crown_age);
 RcppExport SEXP _enviDiv_create_tree_cpp(SEXP parametersSEXP, SEXP waterlevel_changesSEXP, SEXP seedSEXP, SEXP crown_ageSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -25,14 +14,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::vector<double> >::type parameters(parametersSEXP);
     Rcpp::traits::input_parameter< std::vector<double> >::type waterlevel_changes(waterlevel_changesSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    Rcpp::traits::input_parameter< int >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< double >::type crown_age(crown_ageSEXP);
     rcpp_result_gen = Rcpp::wrap(create_tree_cpp(parameters, waterlevel_changes, seed, crown_age));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_enviDiv_square_number", (DL_FUNC) &_enviDiv_square_number, 1},
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 4},
     {NULL, NULL, 0}
 };

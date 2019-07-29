@@ -46,7 +46,16 @@ infer_params <- function(number_of_particles,
 
       if(length(found_trees) > 0) {
 
-        stat_matrix <- t(sapply(found_trees, calc_sum_stats, emp_tree))
+        #stat_matrix <- t(sapply(found_trees, calc_sum_stats, emp_tree))
+        #stat_matrix <- t(mapply(found_trees, candidate_particles,
+        #                        calc_sum_stats, emp_tree))
+        stat_matrix <- matrix(NA, ncol = 4, nrow = length(found_trees))
+        for(i in 1:length(found_trees)) {
+          stat_matrix[i,] <- calc_sum_stats(found_trees[[i]], emp_tree, candidate_particles[i, ])
+        }
+
+
+
 
         results <- cbind(candidate_particles, stat_matrix)
         results <- results[!is.infinite(results[,8]), ]
