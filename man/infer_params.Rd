@@ -7,7 +7,8 @@
 infer_params(number_of_particles, max_iter, sd_params, emp_tree)
 }
 \arguments{
-\item{number_of_particles}{number of particles used per iteration of the SMC algorithm}
+\item{number_of_particles}{number of particles used per iteration of
+the SMC algorithm}
 
 \item{max_iter}{maximum number of iterations}
 

@@ -42,7 +42,7 @@ mutate_param <- function(params, local_sd) {
 #' @param emp_tree reference empirical tree, necessary to calculate the nLTT.
 #' @return vector of four summary statistics
 #' @export
-calc_sum_stats <- function(focal_tree, emp_tree, params) {
+calc_sum_stats <- function(focal_tree, emp_tree) {
   # trees that are extinct turn up as NULL:
   if(is.null(focal_tree)) {
     return(rep(Inf, 4))
@@ -57,7 +57,6 @@ calc_sum_stats <- function(focal_tree, emp_tree, params) {
 
   if(min(ape::branching.times(focal_tree), na.rm=T) < 0) {
     cat("ERROR, negative branch lengths!\n")
-    cat(params,"\n")
     return(rep(Inf, 4))
   }
   if(focal_tree$Nnode + 1 < 3) {

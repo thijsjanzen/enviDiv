@@ -18,6 +18,8 @@ sim_envidiv_tree(params, crown_age, abc = FALSE)
 }}
 
 \item{crown_age}{age of the crown of the tree}
+
+\item{abc}{(boolean) is the tree simulated in an ABC fitting scheme, or not? additional verbal output is provided if not.}
 }
 \value{
 phy object

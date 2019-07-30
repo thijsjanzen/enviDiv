@@ -20,13 +20,13 @@ std::string create_tree_cpp(std::vector<double> parameters,
   // read parameter values
   set_seed(seed);
 
-  Rcout << "Running simulation with:\n";
-  Rcout << "Extinction: " << parameters[0] << "\n";
-  Rcout << "Sym_high: " << parameters[1] << "\n";
-  Rcout << "Sym_low: " << parameters[2] << "\n";
-  Rcout << "Allo: " << parameters[3] << "\n";
-  Rcout << "Jiggle: " << parameters[4] << "\n";
-  Rcout << "Model: " << parameters[5] << "\n";
+ // Rcout << "Running simulation with:\n";
+ // Rcout << "Extinction: " << parameters[0] << "\n";
+//  Rcout << "Sym_high: " << parameters[1] << "\n";
+//  Rcout << "Sym_low: " << parameters[2] << "\n";
+//  Rcout << "Allo: " << parameters[3] << "\n";
+//  Rcout << "Jiggle: " << parameters[4] << "\n";
+//  Rcout << "Model: " << parameters[5] << "\n";
 
   std::string newick_tree = do_run_r(parameters,
                                      waterlevel_changes,
@@ -406,23 +406,6 @@ int run(const std::vector<double>& parameters,
   allSpecies =  merge_single_branches(allSpecies);
 
   return 1;
-}
-
-
-
-void progressBar(double percent)
-{
-  if(percent == 0) std::cout << "\n";
-
-  int number = (int)(1.0 * percent / 100 * 20);
-
-  std::cout << "\r"; //clear line
-  for(int i = 0; i <= number; ++i)
-  {
-    std::cout << char(219);
-  }
-  std::cout << " " << percent << "%";
-  return;
 }
 
 

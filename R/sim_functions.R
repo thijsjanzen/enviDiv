@@ -9,6 +9,7 @@
 #'   \item{water model}{Water model: 1) no water level changes, 2) literature water level change, 3) extrapolated water level changes}
 #' }
 #' @param crown_age age of the crown of the tree
+#' @param abc (boolean) is the tree simulated in an ABC fitting scheme, or not? additional verbal output is provided if not.
 #' @return phy object
 #' @rawNamespace useDynLib(enviDiv)
 #' @export

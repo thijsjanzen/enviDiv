@@ -1,5 +1,6 @@
 #' function to perform ABC-SMC
-#' @param number_of_particles number of particles used per iteration of the SMC algorithm
+#' @param number_of_particles number of particles used per iteration of
+#'                            the SMC algorithm
 #' @param max_iter maximum number of iterations
 #' @param sd_params standard deviation of the paramater perturbation kernel
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
@@ -36,13 +37,15 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- previous_par[candidate_indices, ]
 
-      candidate_particles <- t(apply(candidate_particles, 1, mutate_param, sd_params))
+      candidate_particles <- t(apply(candidate_particles, 1, mutate_param,
+                                     sd_params))
 
       is_within_prior <- apply(candidate_particles, 1, within_prior)
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree, crown_age, TRUE)
+      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
+                           crown_age, TRUE)
 
       if(length(found_trees) > 0) {
 
@@ -51,7 +54,7 @@ infer_params <- function(number_of_particles,
         #                        calc_sum_stats, emp_tree))
         stat_matrix <- matrix(NA, ncol = 4, nrow = length(found_trees))
         for(i in 1:length(found_trees)) {
-          stat_matrix[i,] <- calc_sum_stats(found_trees[[i]], emp_tree, candidate_particles[i, ])
+          stat_matrix[i,] <- calc_sum_stats(found_trees[[i]], emp_tree)
         }
 
 
