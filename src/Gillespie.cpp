@@ -711,7 +711,6 @@ std::vector<species> merge_single_branches(const std::vector<species>& all_speci
   std::vector<species> species_vector = all_species;
 
   for(int i = 0; i < species_vector.size(); ++i) {
-    int focal_id = species_vector[i].get_ID();
 
     std::vector<int> offspring = find_indices(species_vector,
                                               species_vector[i].get_ID());

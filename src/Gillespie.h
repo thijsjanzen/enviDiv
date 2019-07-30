@@ -13,98 +13,107 @@
 
 struct species
 {
-	species()
-	{
-		ID = -1;
-		death_time = -1;
-	}
-	species(int& id);
-	species(const species& parent_species,
-            int& id_count,
-            double b_time);
+  species()
+  {
+    ID = -1;
+    death_time = -1;
+  }
+  species(int& id);
+  species(const species& parent_species,
+          int& id_count,
+          double b_time);
 
-	species(const species& other): ID(other.ID),
-		parent(other.parent),
-		birth_time(other.birth_time),
-		death_time(other.death_time),
-		extant_offspring(other.extant_offspring),
-		checked(other.checked)
-	  {	}
+  species(const species& other):
+    birth_time(other.birth_time),
+    death_time(other.death_time),
+    extant_offspring(other.extant_offspring),
+    checked(other.checked),
+    ID(other.ID),
+    parent(other.parent)
+    {	}
 
-	double birth_time; //time of birth;
-	double death_time; //time of death;
+  double birth_time; //time of birth;
+  double death_time; //time of death;
 
-	bool extant_offspring;
-	bool checked;
+  bool extant_offspring;
+  bool checked;
 
+  void updateHistory(double t);
+  bool check_has_viable_offspring(std::vector<species>& v);
 
-	void updateHistory(double t);
-	bool check_has_viable_offspring(std::vector<species>& v);
+  bool operator< (const species& other) const {return       ID < other.ID; }
+  bool operator> (const species& other) const {return       ID > other.ID;}
+  bool operator<=(const species& other) const {return !operator> (other);}
+  bool operator>=(const species& other) const {return !operator< (other);}
 
-	bool operator< (const species& other) const {return       ID < other.ID; }
-	bool operator> (const species& other) const {return       ID > other.ID;}
-    bool operator<=(const species& other) const {return !operator> (other);}
-	bool operator>=(const species& other) const {return !operator< (other);}
+  bool operator==(const species& other) const { return ID == other.ID; }
+  bool operator!=(const species& other) const {return !((*this) == other);}
 
-	bool operator==(const species& other) const { return ID == other.ID; }
-	bool operator!=(const species& other) const {return !((*this) == other);}
+  species& operator=(const species& other);
 
-	species& operator=(const species& other);
-
-    void set_ID(int id_number) {
-        ID = id_number;
-    }
-    int get_ID() const {
-        return(ID);
-    }
-    void set_parent(int parent_number) {
-        parent = parent_number;
-    }
-    int get_parent() const {
-        return parent;
-    }
+  void set_ID(int id_number) {
+    ID = id_number;
+  }
+  int get_ID() const {
+    return(ID);
+  }
+  void set_parent(int parent_number) {
+    parent = parent_number;
+  }
+  int get_parent() const {
+    return parent;
+  }
 
 private:
-    int ID;
-    int parent;
+  int ID;
+  int parent;
 };
 
 struct sort_by_birthtime
 {
-	inline bool operator() (const species& struct1, const species& struct2)
-	{
-		return (struct1.birth_time < struct2.birth_time);
-	}
+  inline bool operator() (const species& struct1, const species& struct2)
+  {
+    return (struct1.birth_time < struct2.birth_time);
+  }
 };
 
 struct allo_pair
 {
-	int ID;
-	int index_a;
-	int index_b;
+  int ID;
+  int index_a;
+  int index_b;
 
-	allo_pair(int id, int index_A) : ID(id), index_a(index_A) {
-		index_b = -1;
-	}
+  allo_pair(int id, int index_A) : ID(id), index_a(index_A) {
+    index_b = -1;
+  }
 
-	allo_pair(int id, int index_A, int index_B) : ID(id),
-		index_a(index_A),
-		index_b(index_B)
-	{
-	}
+  allo_pair(int id, int index_A, int index_B) : ID(id),
+  index_a(index_A),
+  index_b(index_B)
+  {
+  }
 
 };
 
 int drawEvent(double E, double W, double S, double A);
 
-void extinction(std::vector<species>& v, std::vector<species>& extinct_species, double time, int wLevel);
-void extinction2(std::vector<species>& v, std::vector<species>& extinct_species, double time, int waterLevel);
+void extinction(std::vector<species>& v,
+                std::vector<species>& extinct_species,
+                double time, int wLevel);
+void extinction2(std::vector<species>& v,
+                 std::vector<species>& extinct_species,
+                 double time, int waterLevel);
 
 void waterLevelChange(std::vector<species>& v, int& wLevel);
-void symp(std::vector<species>& v, int i, std::vector<species>& e, int& id_count, double time);
+void symp(std::vector<species>& v, int i, std::vector<species>& e,
+          int& id_count, double time);
 
-void Symp_speciation(std::vector<species>& v, int& id_count, std::vector<species>& extinct_species,
-					 double time, double waterTime, std::vector<double>& specTimes, int wLevel);
+void Symp_speciation(std::vector<species>& v,
+                     int& id_count,
+                     std::vector<species>& extinct_species,
+                     double time, double waterTime,
+                     std::vector<double>& specTimes,
+                     int wLevel);
 void Allo_speciation(std::vector<species>& v,
                      int& id_count,
                      double time,
@@ -148,8 +157,8 @@ void sortit(std::vector<T>& v);
 bool file_exists(const std::string& name);
 
 std::string create_newick_string_r(const std::vector<species>& s1,
-                                  const std::vector<species>& s2,
-                                  double maximum_time);
+                                   const std::vector<species>& s2,
+                                   double maximum_time);
 
 std::string writeTREE_3(const std::vector<species> v,
                         double maximum_time);
