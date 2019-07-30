@@ -12,7 +12,7 @@ test_that("get_from_prior", {
   weight <- v1[7]
 
   testthat::expect_gt( max(v1), 0)
-  testthat::expect_true( enviDiv::within_prior(v1) )
+  testthat::expect_true( enviDiv::is_within_prior(v1) )
 
   testthat::expect_true( log10(extinct) >= -3)
   testthat::expect_true( log10(extinct) < 2)

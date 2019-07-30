@@ -37,10 +37,10 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- previous_par[candidate_indices, ]
 
-      candidate_particles <- t(apply(candidate_particles, 1, mutate_param,
+      candidate_particles <- t(apply(candidate_particles, 1, mutate_params,
                                      sd_params))
 
-      is_within_prior <- apply(candidate_particles, 1, within_prior)
+      is_within_prior <- apply(candidate_particles, 1, is_within_prior)
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 

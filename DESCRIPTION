@@ -20,4 +20,6 @@ Imports:
     phytools,
     readr,
     tibble,
-    testthat
+    testthat,
+    apTreeshape,
+    phyloTop
