@@ -6,7 +6,7 @@
 calc_fit <- function(sum_stats,
                      emp_stats) {
 
-  diff <- sum_stats  - emp_stats
+  diff <- sum_stats[1:4]  - emp_stats[1:4]
   diff <- diff * diff
   diff <- diff / c(0.25, 2, 0.8, 75)
   return(sum(diff))

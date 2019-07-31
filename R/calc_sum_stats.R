@@ -8,7 +8,8 @@
 #' @export
 calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   # trees that are extinct turn up as NULL:
-  if (is.null(focal_tree)) {
+  if (is.null(focal_tree) || class(focal_tree) != "phylo") {
+    warning("no tree found, returning infinite statistics")
     return(rep(Inf, 11))
   }
 
@@ -19,12 +20,13 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   # trees with only 2 tips turn up with an
   # empty edgelist (they are only a crown)
   if (is.null(focal_tree$edge.length)) {
+    warning("tree with only two tips, no statistics can be calculated")
     return(rep(Inf, 11))
   }
 
   focal_tree <- ape::multi2di(focal_tree)
 
-  if (min(ape::branching.times(focal_tree), na.rm = T) < 0) {
+  if (min(ape::branching.times(focal_tree), na.rm = TRUE) < 0) {
     cat("ERROR, negative branch lengths!\n")
     return(rep(Inf, 11))
   }
@@ -35,7 +37,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   output <- c()
   output[1] <- nLTT::nltt_diff_exact(focal_tree, emp_tree)
   output[2] <- ape::gammaStat(focal_tree) # gamma
-  output[3] <- mean(focal_tree$edge.length, na.rm = T) # mean branch length
+  output[3] <- mean(focal_tree$edge.length, na.rm = TRUE) # mean branch length
   output[4] <- focal_tree$Nnode + 1 # number of lineages
 
   beta_stat <- function(tree) {

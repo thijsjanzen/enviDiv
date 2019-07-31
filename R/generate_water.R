@@ -34,15 +34,15 @@ generate_water <- function(water_model,
   }
   if (water_model == 3) {
     output2 <- c()
-    water_level <- 1;
+    water_level <- 1
     time <- 0;
-    temp_time <- time;
+    temp_time <- time
     while (temp_time < (maximum_time - 1.1)) {
       temp_time <- temp_time + stats::rexp(1, 10)
-      if (temp_time > (maximum_time - 1.1)) break;
-      time <- temp_time;
+      if (temp_time > (maximum_time - 1.1)) break
+      time <- temp_time
       output2 <- c(output2, time)
-      water_level <- 1 - water_level;
+      water_level <- 1 - water_level
     }
     if (water_level == 0) {
       output2 <- output2[ -length(output2)] #water level has to be high

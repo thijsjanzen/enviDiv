@@ -249,18 +249,6 @@ void Allo_speciation(std::vector<species>& v,
   return;
 }
 
-
-int findinP(const std::vector<allo_pair>& p, int ID) {
-  int count = 0;
-  for(std::vector<allo_pair>::const_iterator it = p.begin(); it != p.end(); ++it) {
-    if((*it).ID == ID) return count;
-    count++;
-  }
-
-  return -1;
-}
-
-
 void updatePairs2(std::vector<species>& v, std::vector<allo_pair>& p) {
   p.clear();
   if(v.size() == 2) {
@@ -441,91 +429,6 @@ species::species(const species& parent_species, int& id_count, double b_time)
   checked = false;
 }
 
-int findParent(const std::vector<species>& v, int parent_id)
-{
-  int count = 0;
-
-  for(auto i = v.begin(); i != v.end(); ++i) {
-    if((*i).get_ID() == parent_id) return count;
-
-    count++;
-  }
-  return 0;
-}
-
-int countLin(const std::vector<species>& v, double time)
-{
-  int count = 0;
-  for(auto i = v.begin(); i != v.end(); ++i) {
-    if( (*i).birth_time <= time) {
-      if((*i).death_time == -1 || (*i).death_time > time) {
-        count++;
-      }
-    }
-  }
-
-  return count;
-}
-
-bool sortOnTime(const species& left, const species& right)
-{
-  return left.birth_time < right.birth_time;
-}
-
-
-int getIndex(int ID, const std::vector<species>& v)
-{
-  for(std::size_t i = 0; i < v.size(); ++i)
-  {
-    if(v[i].get_ID() == ID) return (int)i;
-  }
-
-  return -1;
-}
-
-int findYoungest(const std::vector<species>& v)
-{
-  double min = -1;
-  int index = -1;
-  int count = 0;
-
-
-  for(auto i = v.begin(); i != v.end(); ++i) {
-    if((*i).birth_time > min) {
-      min = (*i).birth_time;
-      index = count;
-    }
-    count++;
-  }
-  return index;
-}
-
-int find_parent( int ID, const std::vector<species>& v)
-{
-  for(std::size_t i = 0; i < v.size(); ++i)
-  {
-    if(v[i].get_ID() == ID) return (int)i;
-  }
-  return -1;
-}
-
-int findOther( int youngest, const std::vector<species>& v)
-{
-  int parent = v[youngest].get_parent();
-
-  for(int i = 0; i < (int)v.size(); ++i)
-  {
-    if(youngest != i)
-    {
-      if(v[i].get_parent() == parent)
-      {
-        if(v[i].birth_time == v[youngest].birth_time)
-          return i;
-      }
-    }
-  }
-  return -1;
-}
 
 std::vector<int> find_indices(const std::vector<species>& v, int ID)
 {
@@ -571,16 +474,6 @@ bool species::check_has_viable_offspring(std::vector<species>& v)
   checked = true;
 
   return extant_offspring;
-}
-
-int find_Allo(int i, const std::vector<species>& v)
-{
-  int ID = v[i].get_ID();
-  for(int j = 0; j < (int)v.size(); ++j)
-  {
-    if(v[j].get_ID() == ID && i != j) return j;
-  }
-  return -1;
 }
 
 std::vector<int> findOffspring(int ID, const std::vector<species>& v)

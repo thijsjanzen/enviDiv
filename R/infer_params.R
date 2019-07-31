@@ -19,6 +19,7 @@ infer_params <- function(number_of_particles,
 
   # generate from prior:
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
+  previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
 
   # now we start SMC
   for (iter in 2:max_iter) {
@@ -27,11 +28,12 @@ infer_params <- function(number_of_particles,
 
     next_par <- c()
 
+    cat("iteration\tremaining\tfound\taccept rate\n")
+
     remaining_particles <- number_of_particles - length(next_par[, 1])
     while (remaining_particles > 0) {
-      cat(remaining_particles, "\n")
       sample_size <- max(100, remaining_particles)
-      candidate_indices <- sample(1:length(previous_par[, 1]),
+      candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
                                   prob = previous_par[, 7])
 
@@ -50,8 +52,8 @@ infer_params <- function(number_of_particles,
       if (length(found_trees) > 0) {
 
         stat_matrix <- matrix(NA, ncol = 4, nrow = length(found_trees))
-        for (i in 1:length(found_trees)) {
-          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)
+        for (i in seq_along(found_trees)) {
+          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:4]
         }
 
         results <- cbind(candidate_particles, stat_matrix)
@@ -65,7 +67,7 @@ infer_params <- function(number_of_particles,
         next_par <- rbind(next_par, results)
         remaining_particles <- number_of_particles - length(next_par[, 1])
         if (!is.null(dim(results))) {
-          cat(iter, " ", remaining_particles, "\t",
+          cat(iter, "\t", remaining_particles, "\t",
               length(results[, 1]), "\t",
               round(length(results[, 1]) / remaining_particles, 2), "\n")
         }

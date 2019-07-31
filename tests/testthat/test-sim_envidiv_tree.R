@@ -8,6 +8,9 @@ test_that("usage", {
 
   t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE, seed = 1)
   testthat::expect_true(class(t1) == "phylo")
+
+  # without seed:
+  t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE)
 })
 
 test_that("other models",{
@@ -52,5 +55,8 @@ test_that("abuse", {
   testthat::expect_warning(
     t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE, seed = 1),
     "tree has only two tips"
+  )
+  testthat::expect_silent(
+    t1 <- sim_envidiv_tree(params, crown_age, abc = TRUE, seed = 1)
   )
 })
