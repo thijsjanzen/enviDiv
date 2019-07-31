@@ -22,4 +22,5 @@ Imports:
     tibble,
     testthat,
     apTreeshape,
-    phyloTop
+    phyloTop,
+    testit

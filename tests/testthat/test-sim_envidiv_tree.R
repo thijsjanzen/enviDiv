@@ -36,9 +36,7 @@ test_that("abuse", {
   params <- c(0, 0.1, 0, 0, 0, 1)
   crown_age <- 5
   testthat::expect_warning(
-    t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE),
+    t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE, seed = 1),
     "tree has only two tips"
   )
-
-
 })
