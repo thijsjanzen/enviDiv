@@ -20,7 +20,7 @@ infer_params <- function(number_of_particles,
   # generate from prior:
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
   previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
-
+  next_par <- c()
   # now we start SMC
   for (iter in 2:max_iter) {
     cat("iteration: ", iter, "\n")
@@ -90,4 +90,5 @@ infer_params <- function(number_of_particles,
     next_par <- tibble::as_tibble(next_par)
     readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
   }
+  return(next_par)
 }

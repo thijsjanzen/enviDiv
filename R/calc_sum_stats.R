@@ -40,6 +40,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   output[3] <- mean(focal_tree$edge.length, na.rm = TRUE) # mean branch length
   output[4] <- focal_tree$Nnode + 1 # number of lineages
 
+  if(1 == 2) {
   beta_stat <- function(tree) {
     if (!ape::is.rooted(tree)) return(NA)
     if (!ape::is.binary.tree(tree)) {
@@ -73,6 +74,6 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   output[9] <- phyloTop::cherries(focal_tree) # cherries
   output[10] <- phyloTop::ILnumber(focal_tree) # IL number
   output[11] <- phyloTop::pitchforks(focal_tree) # pitch forks
-
+  }
   return(output)
 }
