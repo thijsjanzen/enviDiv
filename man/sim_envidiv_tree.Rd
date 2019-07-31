@@ -4,7 +4,7 @@
 \alias{sim_envidiv_tree}
 \title{simulate a tree using the environmental diversification model}
 \usage{
-sim_envidiv_tree(params, crown_age, abc = FALSE)
+sim_envidiv_tree(params, crown_age, abc = FALSE, seed = NULL)
 }
 \arguments{
 \item{params}{parameters used to simulate:
@@ -25,6 +25,8 @@ sim_envidiv_tree(params, crown_age, abc = FALSE)
 
 \item{abc}{(boolean) is the tree simulated in an ABC fitting scheme,
 or not? additional verbal output is provided if not.}
+
+\item{seed}{random nmber seed}
 }
 \value{
 phy object

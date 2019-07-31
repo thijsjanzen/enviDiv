@@ -15,14 +15,22 @@
 #' @param crown_age age of the crown of the tree
 #' @param abc (boolean) is the tree simulated in an ABC fitting scheme,
 #'                      or not? additional verbal output is provided if not.
+#' @param seed random nmber seed
 #' @return phy object
 #' @rawNamespace useDynLib(enviDiv)
+#' @rawNamespace import(Rcpp)
 #' @export
 sim_envidiv_tree <- function(params,
                              crown_age,
-                             abc = FALSE) {
+                             abc = FALSE,
+                             seed = NULL) {
 
-  seed <- as.numeric(Sys.time())
+  if(crown_age < 0) {
+    warning("crown age should be larger than zero\n")
+    return(NULL)
+  }
+
+  if(is.null(seed)) seed <- as.numeric(Sys.time())
 
   water_changes <- generate_water(params[6], crown_age)
   local_newick_string <- create_tree_cpp(params,
@@ -31,39 +39,39 @@ sim_envidiv_tree <- function(params,
                                          crown_age)
 
   if (local_newick_string == "extinction") {
-    if (!abc) cat("Tree went extinct, returning NULL\n")
+    if (!abc) warning("Tree went extinct, returning NULL\n")
     return(NULL)
   }
 
   if (local_newick_string == "overflow") {
-    if (!abc) cat("Tree too big, returning NULL")
+    if (!abc) warning("Tree too big, returning NULL")
     return(NULL)
   }
 
   phy_tree <- phytools::read.newick(text = local_newick_string)
 
   if (is.null(phy_tree))  {
-    cat("phy tree is NULL")
+    warning("phy tree is NULL")
     return(NULL)
   }
   if (is.null(phy_tree$edge.length)) {
-    cat("phy_tree$edge.length == NULL")
+    warning("phy_tree$edge.length == NULL")
     return(NULL)
   }
 
   if (!"phylo" %in% class(phy_tree)) {
-    cat("phy is not of class phylo")
+    warning("phy is not of class phylo")
     return(NULL)
   }
 
   if (length(phy_tree$tip.label) == 2) {
-    if (!abc) cat("tree has only two tips\n")
+    if (!abc) warning("tree has only two tips\n")
     if (abc) return(NULL)
   }
 
-  if (!ape::is.binary(phy_tree)) {
+  if (length(ape::is.binary(phy_tree)) > 1) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
-    if (!ape::is.binary(new_phy_tree)) {
+    if (length(ape::is.binary(phy_tree)) > 1) {
       cat(params, "\n")
       cat(local_newick_string, "\n")
       cat("ERROR, could not generate binary tree\n")
