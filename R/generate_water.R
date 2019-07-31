@@ -9,7 +9,14 @@
 #' @export
 generate_water <- function(water_model,
                            maximum_time) {
+
+  if(maximum_time < 0) {
+    warning("maximum time has to be > 0")
+    return()
+  }
+
   if(water_model == 1) return(c(0, maximum_time * 2))
+
   if(water_model == 2) {
     output <- c()
     output[1] = (maximum_time - 1.1);			#0

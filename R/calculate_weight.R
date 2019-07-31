@@ -15,14 +15,22 @@ calculate_weight <- function(params,
                              weights,
                              sigma) {
   #only the numerical ones
-  diff <- log10(params[1:5]) - log10(other_params[,1:5])
-  vals <- weights * stats::dnorm(diff, mean = 0, sd = sigma)
+  focal_rates <- log10(params[1:5])
+  other_rates <- log10(other_params[, 1:5])
+  diff <- t(apply(other_rates, 1, function(x) x - focal_rates))
 
-  model_prob <- params[6] - other_params[,6]
+  testit::assert(sum(weights) == 1)
+
+
+  vals <- weights * stats::dnorm(diff, mean = 0, sd = sigma, log = FALSE)
+
+  # include weight of model
+  model_prob <- params[6] - other_params[, 6]
   model_prob[which(model_prob != 0)] <- 0.25
   model_prob[which(model_prob == 0)] <- 0.5
-  vals <- model_prob * vals
+
+  final_weight <- 1.0 / (sum(model_prob) * sum(vals) )
 
   # do something with model weights
-  return(1.0 / sum(vals) )
+  return(final_weight)
 }
