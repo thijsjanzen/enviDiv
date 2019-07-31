@@ -10,6 +10,20 @@ test_that("usage", {
   testthat::expect_true(class(t1) == "phylo")
 })
 
+test_that("other models",{
+  params <- c(0, 0.5, 1, 1, 0.1, 2)
+
+  crown_age <- 5
+
+  t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE, seed = 1)
+
+  params <- c(0, 0.5, 0.1, 0.1, 0.1, 3)
+
+  crown_age <- 5
+
+  t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE, seed = 1)
+})
+
 test_that("abuse", {
   params <- c(0, 0.5, 0, 0, 0, 1)
 

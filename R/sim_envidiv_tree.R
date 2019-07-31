@@ -25,12 +25,12 @@ sim_envidiv_tree <- function(params,
                              abc = FALSE,
                              seed = NULL) {
 
-  if(crown_age < 0) {
+  if (crown_age < 0) {
     warning("crown age should be larger than zero\n")
     return(NULL)
   }
 
-  if(is.null(seed)) seed <- as.numeric(Sys.time())
+  if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
   water_changes <- generate_water(params[6], crown_age)
   local_newick_string <- create_tree_cpp(params,

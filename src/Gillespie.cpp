@@ -20,28 +20,10 @@ std::string create_tree_cpp(std::vector<double> parameters,
   // read parameter values
   set_seed(seed);
 
- // Rcout << "Running simulation with:\n";
- // Rcout << "Extinction: " << parameters[0] << "\n";
-//  Rcout << "Sym_high: " << parameters[1] << "\n";
-//  Rcout << "Sym_low: " << parameters[2] << "\n";
-//  Rcout << "Allo: " << parameters[3] << "\n";
-//  Rcout << "Jiggle: " << parameters[4] << "\n";
-//  Rcout << "Model: " << parameters[5] << "\n";
-
   std::string newick_tree = do_run_r(parameters,
                                      waterlevel_changes,
                                      crown_age);
   return newick_tree;
-}
-
-// Gillespie.cpp : Defines the entry point for the console application.
-//
-
-std::string to_string_local( double d ) {
-
-  std::ostringstream stm ;
-  stm << std::setprecision(std::numeric_limits<double>::digits10) << d ;
-  return stm.str() ;
 }
 
 std::string do_run_r(const std::vector< double >& parameters,
@@ -612,19 +594,6 @@ std::vector<int> findOffspring(int ID, const std::vector<species>& v)
   }
 
   return output;
-}
-
-
-bool file_exists(const std::string& name)
-{
-  std::ifstream f(name.c_str());
-  if (f.good()) {
-    f.close();
-    return true;
-  } else {
-    f.close();
-    return false;
-  }
 }
 
 std::string acquire_offspring_strings(const std::vector<species>& v,

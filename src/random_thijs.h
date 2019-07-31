@@ -5,9 +5,8 @@
 
 int random_number(int n);
 double uniform();
-double normal(double m, double s);
-double Gamma(int k, double lambda);
 double Expon(double lambda);
+double normal(double m, double s);
 double trunc_normal(double m, double s, double t);
 
 void set_seed(unsigned seed);

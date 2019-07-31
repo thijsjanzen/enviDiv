@@ -12,7 +12,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
     return(rep(Inf, 11))
   }
 
-  if(is.null(emp_tree)) {
+  if (is.null(emp_tree)) {
     emp_tree <- focal_tree
   }
 

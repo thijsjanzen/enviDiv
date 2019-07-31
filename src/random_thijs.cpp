@@ -12,17 +12,13 @@ double uniform()    {
 	return std::uniform_real_distribution<>(0, 1.0)(rndgen);
 }
 
-double normal(double m, double s)   {
-    return std::normal_distribution<>(m, s)(rndgen);
-}
-
-double Gamma(int k, double lambda)  {
-    return std::gamma_distribution<double>(k, lambda)(rndgen);
-}
-
 double Expon(double lambda) {
     if(lambda == 0.0) return 1e20;
     return std::exponential_distribution<double>(lambda)(rndgen);
+}
+
+double normal(double m, double s)   {
+  return std::normal_distribution<>(m, s)(rndgen);
 }
 
 double trunc_normal(double m, double s, double t) {
