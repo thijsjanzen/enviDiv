@@ -22,7 +22,7 @@ sim_envidiv_tree <- function(params,
                              crown_age,
                              abc = FALSE) {
 
-  seed = as.numeric(Sys.time())
+  seed <- as.numeric(Sys.time())
 
   water_changes <- generate_water(params[6], crown_age)
   local_newick_string <- create_tree_cpp(params,
@@ -30,23 +30,23 @@ sim_envidiv_tree <- function(params,
                                          seed,
                                          crown_age)
 
-  if(local_newick_string == "extinction") {
-    if(!abc) cat("Tree went extinct, returning NULL\n")
+  if (local_newick_string == "extinction") {
+    if (!abc) cat("Tree went extinct, returning NULL\n")
     return(NULL)
   }
 
-  if(local_newick_string == "overflow") {
-    if(!abc) cat("Tree too big, returning NULL")
+  if (local_newick_string == "overflow") {
+    if (!abc) cat("Tree too big, returning NULL")
     return(NULL)
   }
 
   phy_tree <- phytools::read.newick(text = local_newick_string)
 
-  if(is.null(phy_tree))  {
+  if (is.null(phy_tree))  {
     cat("phy tree is NULL")
     return(NULL)
   }
-  if(is.null(phy_tree$edge.length)) {
+  if (is.null(phy_tree$edge.length)) {
     cat("phy_tree$edge.length == NULL")
     return(NULL)
   }
@@ -56,32 +56,31 @@ sim_envidiv_tree <- function(params,
     return(NULL)
   }
 
-  if(length(phy_tree$tip.label) == 2) {
-    if(!abc) cat("tree has only two tips\n")
-    if(abc) return(NULL)
+  if (length(phy_tree$tip.label) == 2) {
+    if (!abc) cat("tree has only two tips\n")
+    if (abc) return(NULL)
   }
 
-  if(!ape::is.binary(phy_tree)) {
+  if (!ape::is.binary(phy_tree)) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
-    if(!ape::is.binary(new_phy_tree)) {
-      cat(params,"\n")
-      cat(local_newick_string,"\n")
+    if (!ape::is.binary(new_phy_tree)) {
+      cat(params, "\n")
+      cat(local_newick_string, "\n")
       cat("ERROR, could not generate binary tree\n")
       stop()
-      #return(NULL)
     }
     phy_tree <- new_phy_tree
   }
 
-  if(length(ape::branching.times(phy_tree)) != (-1 + length(phy_tree$tip.label))) {
+  if (length(ape::branching.times(phy_tree)) !=
+     (-1 + length(phy_tree$tip.label))) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
-    if(length(ape::branching.times(new_phy_tree)) !=
+    if (length(ape::branching.times(new_phy_tree)) !=
        (-1 + length(new_phy_tree$tip.label))) {
-      cat(params,"\n")
-      cat(local_newick_string,"\n")
+      cat(params, "\n")
+      cat(local_newick_string, "\n")
       cat("ERROR, could not generate tree without singles\n")
       stop()
-      #return(NULL)
     }
     phy_tree <- new_phy_tree
   }

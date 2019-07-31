@@ -12,22 +12,22 @@ test_that("get_from_prior", {
   weight <- v1[7]
 
   testthat::expect_gt( max(v1), 0)
-  testthat::expect_true( enviDiv::is_within_prior(v1) )
+  testthat::expect_true(enviDiv::is_within_prior(v1))
 
-  testthat::expect_true( log10(extinct) >= -3)
-  testthat::expect_true( log10(extinct) < 2)
+  testthat::expect_true(log10(extinct) >= -3)
+  testthat::expect_true(log10(extinct) < 2)
 
-  testthat::expect_true( log10(sym_high) >= -3)
-  testthat::expect_true( log10(sym_high) < 2)
+  testthat::expect_true(log10(sym_high) >= -3)
+  testthat::expect_true(log10(sym_high) < 2)
 
-  testthat::expect_true( log10(sym_low) >= -3)
-  testthat::expect_true( log10(sym_low) < 2)
+  testthat::expect_true(log10(sym_low) >= -3)
+  testthat::expect_true(log10(sym_low) < 2)
 
-  testthat::expect_true( log10(allo) >= -3)
-  testthat::expect_true( log10(allo) < 2)
+  testthat::expect_true(log10(allo) >= -3)
+  testthat::expect_true(log10(allo) < 2)
 
-  testthat::expect_true( log10(jiggle) >= -3)
-  testthat::expect_true( log10(jiggle) < 0)
+  testthat::expect_true(log10(jiggle) >= -3)
+  testthat::expect_true(log10(jiggle) < 0)
 
   testthat::expect_true(model %in% 1:3)
 
