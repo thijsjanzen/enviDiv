@@ -4,12 +4,14 @@
 #' @param max_iter maximum number of iterations
 #' @param sd_params standard deviation of the paramater perturbation kernel
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
-#' @return nothing
+#' @param write_to_file (boolean) if true, intermediate output is written to file
+#' @return a tibble containing the results
 #' @export
 infer_params <- function(number_of_particles,
                          max_iter,
                          sd_params,
-                         emp_tree) {
+                         emp_tree,
+                         write_to_file = TRUE) {
 
   param_matrix <- matrix(NA, nrow = number_of_particles,
                          ncol = 7)  #6 parameters
@@ -88,7 +90,9 @@ infer_params <- function(number_of_particles,
             "nltt", "gamma", "mbr", "num_lin",
             "fit")
     next_par <- tibble::as_tibble(next_par)
-    readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
+    if(write_to_file == TRUE) {
+      readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
+    }
   }
   return(next_par)
 }
