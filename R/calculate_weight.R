@@ -19,13 +19,10 @@ calculate_weight <- function(params,
   other_rates <- log10(other_params[, 1:5])
   diff <- t(apply(other_rates, 1, function(x) x - focal_rates))
 
-  if(sum(weights) != 1) {
-    #cat(sum(weights), "\n")
-    cat("weights normalized because sum was ", sum(weights), "\n")
+  if (sum(weights) != 1) {
+    #cat("weights normalized because sum was ", sum(weights), "\n")
     weights <- weights / sum(weights)
   }
-  #testit::assert(sum(weights) == 1)
-
 
   vals <- weights * stats::dnorm(diff, mean = 0, sd = sigma, log = FALSE)
 

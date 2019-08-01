@@ -13,7 +13,7 @@ test_that("usage", {
   t1 <- sim_envidiv_tree(params, crown_age, abc = FALSE)
 })
 
-test_that("other models",{
+test_that("other models", {
   params <- c(0, 0.5, 1, 1, 0.1, 2)
 
   crown_age <- 5

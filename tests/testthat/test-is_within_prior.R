@@ -16,13 +16,13 @@ test_that("use", {
   test_params[6] <- 0
   testthat::expect_false(is_within_prior(test_params))
 
-  for(i in 5:1) {
+  for (i in 5:1) {
     test_params <- params
-    test_params[i] <- 10^-4
+    test_params[i] <- 10 ^ -4
     testthat::expect_false(is_within_prior(test_params))
 
     test_params <- params
-    test_params[i] <- 10^3
+    test_params[i] <- 10 ^ 3
     testthat::expect_false(is_within_prior(test_params))
   }
 })

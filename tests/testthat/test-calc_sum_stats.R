@@ -19,7 +19,7 @@ test_that("usage", {
   testthat::expect_true(a == 1)
 })
 
-test_that("abuse",{
+test_that("abuse", {
   params <- c(0, 0.5, 0, 0, 0, 1)
   phy <- NULL
   testthat::expect_warning(calc_sum_stats(phy))

@@ -90,7 +90,7 @@ infer_params <- function(number_of_particles,
             "nltt", "gamma", "mbr", "num_lin",
             "fit")
     next_par <- tibble::as_tibble(next_par)
-    if(write_to_file == TRUE) {
+    if (write_to_file == TRUE) {
       readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
     }
   }

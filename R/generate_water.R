@@ -35,7 +35,7 @@ generate_water <- function(water_model,
   if (water_model == 3) {
     output2 <- c()
     water_level <- 1
-    time <- 0;
+    time <- 0
     temp_time <- time
     while (temp_time < (maximum_time - 1.1)) {
       temp_time <- temp_time + stats::rexp(1, 10)
