@@ -26,11 +26,11 @@ infer_params <- function(number_of_particles,
   # now we start SMC
   for (iter in 2:max_iter) {
     cat("iteration: ", iter, "\n")
-    local_eps <- 500 * exp(-0.5 * iter)
+    local_eps <- 500 * exp(-0.5 * (iter-2))
 
     next_par <- c()
 
-    cat("iteration\tremaining\tfound\taccept rate\n")
+    cat("iteration\tremaining\tfound\taccept rate\tmeanfit\n")
 
     remaining_particles <- number_of_particles - length(next_par[, 1])
     while (remaining_particles > 0) {
@@ -55,8 +55,9 @@ infer_params <- function(number_of_particles,
 
         stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
         for (i in seq_along(found_trees)) {
-          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:4]
+          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:8]
         }
+
 
         results <- cbind(candidate_particles, stat_matrix)
 
@@ -68,13 +69,15 @@ infer_params <- function(number_of_particles,
         results <- cbind(results, local_fit)
 
         results <- results[local_fit < local_eps, ]
+        selected_fits <- local_fit[local_fit < local_eps]
 
         next_par <- rbind(next_par, results)
         remaining_particles <- number_of_particles - length(next_par[, 1])
         if (!is.null(dim(results))) {
           cat(iter, "\t", remaining_particles, "\t",
               length(results[, 1]), "\t",
-              round(length(results[, 1]) / remaining_particles, 2), "\n")
+              round(length(results[, 1]) / remaining_particles, 2),
+              mean(selected_fits), "\n")
         }
       }
     }

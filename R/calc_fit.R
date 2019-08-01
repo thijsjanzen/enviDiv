@@ -6,12 +6,16 @@
 calc_fit <- function(sum_stats,
                      emp_stats) {
 
-  diff <- sum_stats[1:8]  - emp_stats[1:8]
+  diff <- (sum_stats[1:8]  - emp_stats[1:8])
+  nltt_diff <- diff[1]
   diff <- diff * diff
+  diff <- diff / abs(emp_stats)
+  diff[1] <- nltt_diff
+  #diff <- diff * diff
 
   #                      nltt   gamma mean_br tips beta coll sack ladder
-  standard_deviations <- c(0.05, 2.66, 0.173, 40, 3.5, 191, 408, 0.646)
+  #standard_deviations <- c(0.05, 2.66, 0.173, 40, 3.5, 191, 408, 0.646)
 
-  diff <- diff / standard_deviations
+  #diff <- diff / standard_deviations
   return(sum(diff))
 }

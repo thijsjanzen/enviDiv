@@ -7,7 +7,11 @@ test_that("usage", {
   while (is.null(emp_tree))
     emp_tree <- sim_envidiv_tree(params, crown_age = 5)
 
+  #temp_tree <-  sim_envidiv_tree(params, crown_age = 5)
+
+
   v1 <- calc_sum_stats(emp_tree, emp_tree)
+ # v2 <- calc_sum_stats(temp_tree, emp_tree)
 
   focal_fit <- calc_fit(v1[1:8], v1[1:8])
   testthat::expect_equal(focal_fit, 0)

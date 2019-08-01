@@ -7,8 +7,8 @@ test_that("usage", {
 
   emp_tree <- sim_envidiv_tree(params, crown_age = 5, seed = 5)
 
-  do_smc <- infer_params(number_of_particles = 1000,
-                                  max_iter = 10,
+  do_smc <- infer_params(number_of_particles = 100,
+                                  max_iter = 3,
                                   sd_params = 0.01,
                                   emp_tree,
                                   write_to_file = FALSE)
