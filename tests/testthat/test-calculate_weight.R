@@ -23,10 +23,6 @@ test_that("abuse", {
   bogus_previous_params <- rbind(param1, param1)
   new_params1 <- mutate_params(param1, local_sd = 0.5)
 
-  testthat::expect_error(
-    new_weight1 <- calculate_weight(new_params1, bogus_previous_params,
-                                  c(1, 1), sigma = 0.1)
-  )
 
   new_weight1 <- calculate_weight(new_params1, bogus_previous_params,
                                   c(1, 1) / 2, sigma = 0.0)
