@@ -26,7 +26,7 @@ infer_params <- function(number_of_particles,
   # now we start SMC
   for (iter in 2:max_iter) {
     cat("iteration: ", iter, "\n")
-    local_eps <- 300 * exp(-0.5 * iter)
+    local_eps <- 500 * exp(-0.5 * iter)
 
     next_par <- c()
 
@@ -53,18 +53,21 @@ infer_params <- function(number_of_particles,
 
       if (length(found_trees) > 0) {
 
-        stat_matrix <- matrix(NA, ncol = 4, nrow = length(found_trees))
+        stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
         for (i in seq_along(found_trees)) {
           stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:4]
         }
 
         results <- cbind(candidate_particles, stat_matrix)
+
+        stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
         results <- results[!is.infinite(results[, 8]), ]
 
-        local_fit <- apply(results[, 8:11], 1, calc_fit, emp_stats)
+
+        local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
         results <- cbind(results, local_fit)
 
-        results <- results[results[, 12] < local_eps, ]
+        results <- results[local_fit < local_eps, ]
 
         next_par <- rbind(next_par, results)
         remaining_particles <- number_of_particles - length(next_par[, 1])
@@ -88,6 +91,7 @@ infer_params <- function(number_of_particles,
         c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
             "weight",
             "nltt", "gamma", "mbr", "num_lin",
+            "beta", "colless", "sackin", "ladder",
             "fit")
     next_par <- tibble::as_tibble(next_par)
     if (write_to_file == TRUE) {
