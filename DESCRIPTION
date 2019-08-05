@@ -23,4 +23,6 @@ Imports:
     testthat,
     apTreeshape,
     phyloTop,
-    testit
+    testit,
+    future,
+    future.apply

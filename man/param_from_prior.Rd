@@ -4,10 +4,10 @@
 \alias{param_from_prior}
 \title{draw parameter combinations from the prior}
 \usage{
-param_from_prior(empty_input)
+param_from_prior(model = NULL)
 }
 \arguments{
-\item{empty_input}{empty vector, used to facilitate usage of apply}
+\item{model}{requested water model}
 }
 \value{
 vector with 7 entries: extinction, sympatric speciation at high water, sympatric speciation at low water, allopatric speciation, amount of jiggle and the chosen water model

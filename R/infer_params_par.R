@@ -4,14 +4,18 @@
 #' @param max_iter maximum number of iterations
 #' @param sd_params standard deviation of the paramater perturbation kernel
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
-#' @param write_to_file (boolean) if true, intermediate output is written to file
+#' @param write_to_file (boolean) if true, intermediate output is written to
+#'                      file
 #' @return a tibble containing the results
 #' @export
-infer_params <- function(number_of_particles,
+infer_params_par <- function(number_of_particles,
                          max_iter,
                          sd_params,
                          emp_tree,
                          write_to_file = TRUE) {
+
+  oplan <- future::plan()
+  on.exit(future::plan(oplan), add = TRUE)
 
   param_matrix <- matrix(NA, nrow = number_of_particles,
                          ncol = 7)  #6 parameters
@@ -34,7 +38,8 @@ infer_params <- function(number_of_particles,
 
     remaining_particles <- number_of_particles - length(next_par[, 1])
     while (remaining_particles > 0) {
-      sample_size <- max(100, remaining_particles)
+      sample_size <- max(10000, remaining_particles)
+
       candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
                                   prob = previous_par[, 7])
@@ -48,38 +53,38 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
-                           crown_age, TRUE)
+      calc_tree_stats <- function(x) {
+        found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
+        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)[1:8]
+        return(stats)
 
-      if (length(found_trees) > 0) {
-
-        stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
-        for (i in seq_along(found_trees)) {
-          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:8]
-        }
-
-
-        results <- cbind(candidate_particles, stat_matrix)
-
-        stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
-        results <- results[!is.infinite(results[, 8]), ]
-
-
-        local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
-        results <- cbind(results, local_fit)
-
-        results <- results[local_fit < local_eps, ]
-        selected_fits <- local_fit[local_fit < local_eps]
-
-        next_par <- rbind(next_par, results)
-        remaining_particles <- number_of_particles - length(next_par[, 1])
-        if (!is.null(dim(results))) {
-          cat(iter, "\t", remaining_particles, "\t",
-              length(results[, 1]), "\t",
-              round(length(results[, 1]) / remaining_particles, 2),
-              mean(selected_fits), mean(local_fit), "\n")
-        }
       }
+
+      stat_matrix <- future.apply::future_apply(candidate_particles,
+                                                1,
+                                                calc_tree_stats)
+
+      results <- cbind(candidate_particles, stat_matrix)
+
+      stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
+      results <- results[!is.infinite(results[, 8]), ]
+
+
+      local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
+      results <- cbind(results, local_fit)
+
+      results <- results[local_fit < local_eps, ]
+      selected_fits <- local_fit[local_fit < local_eps]
+
+      next_par <- rbind(next_par, results)
+      remaining_particles <- number_of_particles - length(next_par[, 1])
+      if (!is.null(dim(results))) {
+        cat(iter, "\t", remaining_particles, "\t",
+            length(results[, 1]), "\t",
+            round(length(results[, 1]) / remaining_particles, 2),
+            mean(selected_fits), mean(local_fit), "\n")
+      }
+
     }
 
     next_par <- next_par[1:number_of_particles, ]
@@ -91,15 +96,16 @@ infer_params <- function(number_of_particles,
     previous_par <- next_par
     # write next par to file
     colnames(next_par) <-
-        c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-            "weight",
-            "nltt", "gamma", "mbr", "num_lin",
-            "beta", "colless", "sackin", "ladder",
-            "fit")
+      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+        "weight",
+        "nltt", "gamma", "mbr", "num_lin",
+        "beta", "colless", "sackin", "ladder",
+        "fit")
     next_par <- tibble::as_tibble(next_par)
     if (write_to_file == TRUE) {
       readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
     }
   }
+
   return(next_par)
 }
