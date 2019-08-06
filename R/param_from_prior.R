@@ -9,7 +9,10 @@ param_from_prior <- function(model = NULL) {
   output[3] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #symp spec low
   output[4] <- 10 ^ (-3 + 5 * stats::runif(1, 0, 1))  #allo spec
   output[5] <- 10 ^ (-3 + 3 * stats::runif(1, 0, 1))  #jiggle
-  if(is.null(model)) output[6] <- sample(1:3, 1) # model
+  output[6] <- model
+  if(is.null(output[6])) {
+    output[6] <- sample(1:3, 1)
+  }
   output[7] <- 1
 
   return(output)
