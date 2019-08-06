@@ -27,7 +27,7 @@ generate_naive <- function(number_of_particles,
 
   while (remaining_particles > 0) {
     cat(remaining_particles, "\n")
-    sample_size <- max(10000, remaining_particles)
+    sample_size <- min(10000, remaining_particles)
 
     param_matrix <- matrix(NA, nrow = sample_size,
                            ncol = 7)  #6 parameters
