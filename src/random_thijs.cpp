@@ -14,7 +14,7 @@ double uniform()    {
 
 double Expon(double lambda) {
     if(lambda == 0.0) return 1e20;
-    return std::exponential_distribution<double>(lambda)(rndgen);
+    return std::exponential_distribution<double>(1.0 / lambda)(rndgen);
 }
 
 double normal(double m, double s)   {
