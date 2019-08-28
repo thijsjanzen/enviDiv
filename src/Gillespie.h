@@ -21,7 +21,7 @@ struct species
   species(int& id);
   species(const species& parent_species,
           int& id_count,
-          double b_time);
+          float b_time);
 
   species(const species& other):
     birth_time(other.birth_time),
@@ -32,13 +32,13 @@ struct species
     parent(other.parent)
     {	}
 
-  double birth_time; //time of birth;
-  double death_time; //time of death;
+  float birth_time; //time of birth;
+  float death_time; //time of death;
 
   bool extant_offspring;
   bool checked;
 
-  void updateHistory(double t);
+  void updateHistory(float t);
   bool check_has_viable_offspring(std::vector<species>& v);
 
   bool operator< (const species& other) const {return       ID < other.ID; }
@@ -95,43 +95,43 @@ struct allo_pair
 
 };
 
-int drawEvent(double E, double W, double S, double A);
+int drawEvent(float E, float W, float S, float A);
 
 void extinction(std::vector<species>& v,
                 std::vector<species>& extinct_species,
-                double time, int wLevel);
+                float time, int wLevel);
 void extinction2(std::vector<species>& v,
                  std::vector<species>& extinct_species,
-                 double time, int waterLevel);
+                 float time, int waterLevel);
 
 void waterLevelChange(std::vector<species>& v, int& wLevel);
 void symp(std::vector<species>& v, int i, std::vector<species>& e,
-          int& id_count, double time);
+          int& id_count, float time);
 
 void Symp_speciation(std::vector<species>& v,
                      int& id_count,
                      std::vector<species>& extinct_species,
-                     double time, double waterTime,
-                     std::vector<double>& specTimes,
+                     float time, float waterTime,
+                     std::vector<float>& specTimes,
                      int wLevel);
 void Allo_speciation(std::vector<species>& v,
                      int& id_count,
-                     double time,
-                     double water_time,
+                     float time,
+                     float water_time,
                      const std::vector<allo_pair>& p,
-                     std::vector<double>& specTimes,
+                     std::vector<float>& specTimes,
                      std::vector<species>& extinct_species);
 
 void updateEpsilonVectors();
 std::string generateFileName(int i);
-void progressBar(double percent);
+void progressBar(float percent);
 
 template<typename T>
 void removeDuplicates(std::vector<T>& vec);
 
-double get_min_time();
+float get_min_time();
 
-std::vector<double> writeMean(const std::vector< std::vector< int > >& outcomes);
+std::vector<float> writeMean(const std::vector< std::vector< int > >& outcomes);
 void writeAll(const std::vector< std::vector< int > >& outcomes);
 
 void writeWater(const std::vector<std::vector< int> >& W);
@@ -140,12 +140,12 @@ template<typename Iterator>
 void bubbleSort(Iterator first, Iterator last);
 
 template<typename T>
-double calcMean(const std::vector<T> v);
+float calcMean(const std::vector<T> v);
 
 bool sortOnTime(const species& left, const species& right);
 
 
-std::vector<double> generateWaterLevelChanges(int model);
+std::vector<float> generateWaterLevelChanges(int model);
 int find_parent( int ID, const std::vector<species>& v);
 
 int find_Allo(int i, const std::vector<species>& v);
@@ -158,32 +158,32 @@ bool file_exists(const std::string& name);
 
 std::string create_newick_string_r(const std::vector<species>& s1,
                                    const std::vector<species>& s2,
-                                   double maximum_time);
+                                   float maximum_time);
 
 std::string writeTREE_3(const std::vector<species> v,
-                        double maximum_time);
+                        float maximum_time);
 std::string acquire_offspring_strings(const std::vector<species>& v,
                                       const species& focal,
-                                      double maximum_time);
+                                      float maximum_time);
 
 void remove_extinct_branches(std::vector<species>& all_species);
 std::vector<species> merge_single_branches(const std::vector<species>& all_species);
 
 
 // new R functions update
-std::string do_run_r(const std::vector< double >& params,
-                     const std::vector< double >& waterlevel_changes,
-                     double maximum_time);
+std::string do_run_r(const std::vector< float >& params,
+                     const std::vector< float >& waterlevel_changes,
+                     float maximum_time);
 
-int run(const std::vector<double>& parameters,
-        const std::vector<double>& W,
+int run(const std::vector<float>& parameters,
+        const std::vector<float>& W,
         int& id_count,
         std::vector<species>& allSpecies,
-        double maximum_time);
+        float maximum_time);
 
 void jiggle(std::vector< species > & s1,
             std::vector< species > & s2,
-            double maximum_time,
-            double jiggle_amount);
+            float maximum_time,
+            float jiggle_amount);
 
 #endif

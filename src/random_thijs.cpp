@@ -8,21 +8,21 @@ int random_number(int n)    {
 	return std::uniform_int_distribution<> (0, n-1)(rndgen);
 }
 
-double uniform()    {
+float uniform()    {
 	return std::uniform_real_distribution<>(0, 1.0)(rndgen);
 }
 
-double Expon(double lambda) {
+float Expon(float lambda) {
     if(lambda == 0.0) return 1e20;
-    return std::exponential_distribution<double>(1.0 / lambda)(rndgen);
+    return std::exponential_distribution<float>(lambda)(rndgen);
 }
 
-double normal(double m, double s)   {
+float normal(float m, float s)   {
   return std::normal_distribution<>(m, s)(rndgen);
 }
 
-double trunc_normal(double m, double s, double t) {
-  double output = normal(m, s);
+float trunc_normal(float m, float s, float t) {
+  float output = normal(m, s);
   while(output >= t || output <= -t) {
     output = normal(m, s);
   }

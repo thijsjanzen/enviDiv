@@ -4,10 +4,10 @@
 #include <random>
 
 int random_number(int n);
-double uniform();
-double Expon(double lambda);
-double normal(double m, double s);
-double trunc_normal(double m, double s, double t);
+float uniform();
+float Expon(float lambda);
+float normal(float m, float s);
+float trunc_normal(float m, float s, float t);
 
 void set_seed(unsigned seed);
 
