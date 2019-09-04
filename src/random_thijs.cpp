@@ -4,12 +4,14 @@
 std::random_device rd;
 std::mt19937 rndgen(rd());  //< The one and only random number generator
 
+std::uniform_real_distribution<> unif = std::uniform_real_distribution<>(0.0, 1.0);
+
 int random_number(int n)    {
 	return std::uniform_int_distribution<> (0, n-1)(rndgen);
 }
 
 float uniform()    {
-	return std::uniform_real_distribution<>(0, 1.0)(rndgen);
+	return unif(rndgen);
 }
 
 float Expon(float lambda) {
