@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <vector>
-
+#include "Rcpp.h"
 
 struct species
 {
@@ -167,14 +167,14 @@ std::string acquire_offspring_strings(const std::vector<species>& v,
                                       float maximum_time);
 
 void remove_extinct_branches(std::vector<species>& all_species);
-std::vector<species> merge_single_branches(const std::vector<species>& all_species);
+void merge_single_branches(std::vector<species>& all_species);
 
 
 // new R functions update
 std::string do_run_r(const std::vector< float >& parameters,
                      const std::vector< float >& waterlevel_changes,
                      float maximum_time,
-                     std::vector< std::vector< float > >& l_table);
+                     Rcpp::NumericMatrix& l_table);
 
 int run(const std::vector<float>& parameters,
         const std::vector<float>& W,
@@ -187,8 +187,11 @@ void jiggle(std::vector< species > & s1,
             float maximum_time,
             float jiggle_amount);
 
-std::vector< std::vector< float > > create_l_table(
-    const std::vector< species > & s1,
-    const std::vector< species > & s2);
+//std::vector< std::vector< float > > create_l_table(
+//    const std::vector< species > & s1,
+//    const std::vector< species > & s2);
+
+Rcpp::NumericMatrix create_l_table( const std::vector< species > & s1,
+                              const std::vector< species > & s2);
 
 #endif

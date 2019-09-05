@@ -2,7 +2,7 @@ context("sim envidiv tree ")
 
 test_that("usage", {
 
-  params <- c(0, 1, 0, 0, 0, 1)
+  params <- c(0, 0.1, 0, 0, 0, 1)
 
   crown_age <- 5
 
