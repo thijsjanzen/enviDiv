@@ -33,22 +33,32 @@ sim_envidiv_tree <- function(params,
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
   water_changes <- generate_water(params[6], crown_age)
-  local_newick_string <- create_tree_cpp(params,
+  sim_result <- create_tree_cpp(params,
                                          water_changes,
                                          seed,
                                          crown_age)
 
-  if (local_newick_string == "extinction") {
+  error_code <- sim_result$code
+
+  if (error_code == "extinction") {
     if (!abc) warning("Tree went extinct, returning NULL\n")
     return(NULL)
   }
 
-  if (local_newick_string == "overflow") {
+  if (error_code == "overflow") {
     if (!abc) warning("Tree too big, returning NULL")
     return(NULL)
   }
 
-  phy_tree <- phytools::read.newick(text = local_newick_string)
+  local_l_table <- sim_result$Ltable
+  local_l_table[ ,1] <- crown_age - local_l_table[ ,1]
+  local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
+  local_l_table[1, 2] <- 0
+  parent_id <- local_l_table[1, 3]
+  local_l_table[which(local_l_table[, 2] == -1), 2] <- parent_id
+
+  phy_tree <- DDD::L2phylo(local_l_table)
+
 
   if (is.null(phy_tree))  {
     warning("phy tree is NULL")

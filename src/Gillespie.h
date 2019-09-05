@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <sstream>
 #include <vector>
-
+#include "Rcpp.h"
 
 struct species
 {
@@ -111,15 +111,15 @@ void symp(std::vector<species>& v, int i, std::vector<species>& e,
 void Symp_speciation(std::vector<species>& v,
                      int& id_count,
                      std::vector<species>& extinct_species,
-                     float time, float waterTime,
-                     std::vector<float>& specTimes,
+                     float time,
+                     float waterTime,
                      int wLevel);
+
 void Allo_speciation(std::vector<species>& v,
                      int& id_count,
                      float time,
                      float water_time,
                      const std::vector<allo_pair>& p,
-                     std::vector<float>& specTimes,
                      std::vector<species>& extinct_species);
 
 void updateEpsilonVectors();
@@ -167,13 +167,14 @@ std::string acquire_offspring_strings(const std::vector<species>& v,
                                       float maximum_time);
 
 void remove_extinct_branches(std::vector<species>& all_species);
-std::vector<species> merge_single_branches(const std::vector<species>& all_species);
+void merge_single_branches(std::vector<species>& all_species);
 
 
 // new R functions update
-std::string do_run_r(const std::vector< float >& params,
+std::string do_run_r(const std::vector< float >& parameters,
                      const std::vector< float >& waterlevel_changes,
-                     float maximum_time);
+                     float maximum_time,
+                     Rcpp::NumericMatrix& l_table);
 
 int run(const std::vector<float>& parameters,
         const std::vector<float>& W,
@@ -185,5 +186,12 @@ void jiggle(std::vector< species > & s1,
             std::vector< species > & s2,
             float maximum_time,
             float jiggle_amount);
+
+//std::vector< std::vector< float > > create_l_table(
+//    const std::vector< species > & s1,
+//    const std::vector< species > & s2);
+
+Rcpp::NumericMatrix create_l_table( const std::vector< species > & s1,
+                              const std::vector< species > & s2);
 
 #endif
