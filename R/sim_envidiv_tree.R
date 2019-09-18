@@ -53,12 +53,20 @@ sim_envidiv_tree <- function(params,
   local_l_table <- sim_result$Ltable
   local_l_table[ ,1] <- crown_age - local_l_table[ ,1]
   local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
+
   local_l_table[1, 2] <- 0
-  parent_id <- local_l_table[1, 3]
-  local_l_table[which(local_l_table[, 2] == -1), 2] <- parent_id
+
+  a <- subset(local_l_table, local_l_table[,1] == crown_age)
+  connected <- FALSE
+  if(a[2, 3] == a[1, 2]) connected <- TRUE
+  if(a[1, 3] == a[2, 2]) connected <- TRUE
+
+  if(connected == FALSE) {
+    parent_id <- local_l_table[1, 3]
+    local_l_table[which(local_l_table[, 2] == -1), 2] <- parent_id
+  }
 
   phy_tree <- DDD::L2phylo(local_l_table)
-
 
   if (is.null(phy_tree))  {
     warning("phy tree is NULL")
@@ -83,9 +91,7 @@ sim_envidiv_tree <- function(params,
     new_phy_tree <- ape::collapse.singles(phy_tree)
     if (length(ape::is.binary(new_phy_tree)) > 1) {
       cat(params, "\n")
-      cat(local_newick_string, "\n")
-      cat("ERROR, could not generate binary tree\n")
-      stop()
+      stop("could not generate binary tree\n")
     }
     phy_tree <- new_phy_tree
   }
@@ -96,9 +102,7 @@ sim_envidiv_tree <- function(params,
     if (length(ape::branching.times(new_phy_tree)) !=
        (-1 + length(new_phy_tree$tip.label))) {
       cat(params, "\n")
-      cat(local_newick_string, "\n")
-      cat("ERROR, could not generate tree without singles\n")
-      stop()
+      stop("could not generate tree without singles\n")
     }
     phy_tree <- new_phy_tree
   }

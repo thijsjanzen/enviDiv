@@ -10,6 +10,7 @@
 #include <sstream>
 #include <vector>
 #include "Rcpp.h"
+#include "random_thijs.h"
 
 struct species
 {
@@ -174,17 +175,20 @@ void merge_single_branches(std::vector<species>& all_species);
 std::string do_run_r(const std::vector< float >& parameters,
                      const std::vector< float >& waterlevel_changes,
                      float maximum_time,
-                     Rcpp::NumericMatrix& l_table);
+                     Rcpp::NumericMatrix& l_table,
+                     rnd_t& rndgen);
 
 int run(const std::vector<float>& parameters,
         const std::vector<float>& W,
         std::vector<species>& allSpecies,
-        float maximum_time);
+        float maximum_time,
+        rnd_t& rndgen);
 
 void jiggle(std::vector< species > & s1,
             std::vector< species > & s2,
             float maximum_time,
-            float jiggle_amount);
+            float jiggle_amount,
+            rnd_t& rndgen);
 
 Rcpp::NumericMatrix create_l_table( const std::vector< species > & s1,
                               const std::vector< species > & s2);

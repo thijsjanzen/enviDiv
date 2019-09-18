@@ -18,18 +18,22 @@ using namespace Rcpp;
 //' @export
 // [[Rcpp::export]]
 List create_tree_cpp(std::vector<float> parameters,
-                            std::vector<float> waterlevel_changes,
-                            int seed,
-                            float crown_age) {
+                     std::vector<float> waterlevel_changes,
+                     int seed,
+                     float crown_age) {
   // read parameter values
-  set_seed(seed);
+
+  rnd_t rndgen;
+  rndgen.set_seed(seed);
+
 
   NumericMatrix l_table;
 
   std::string code = do_run_r(parameters,
-           waterlevel_changes,
-           crown_age,
-           l_table);
+                              waterlevel_changes,
+                              crown_age,
+                              l_table,
+                              rndgen);
 
   return List::create( Named("code") = code,
                        Named("Ltable") = l_table);
@@ -38,16 +42,19 @@ List create_tree_cpp(std::vector<float> parameters,
 std::string do_run_r(const std::vector< float >& parameters,
                      const std::vector< float >& waterlevel_changes,
                      float maximum_time,
-                     NumericMatrix& l_table)
+                     NumericMatrix& l_table,
+                     rnd_t& rndgen)
 {
   std::vector< species > s1;
 
   float jiggle_amount = parameters[4];
+  rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
   //int idCount = 0;
   std::vector < std::vector < float > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
-                        s1, maximum_time);
+                        s1, maximum_time,
+                        rndgen);
 
   if (error_code == 0) {
     return "extinction";
@@ -61,7 +68,8 @@ std::string do_run_r(const std::vector< float >& parameters,
 
   int error_code2 = run(parameters,
       waterlevel_changes,
-      s2, maximum_time);
+      s2, maximum_time,
+      rndgen);
 
   if (error_code2 == 0) {
     return "extinction";
@@ -70,7 +78,7 @@ std::string do_run_r(const std::vector< float >& parameters,
     return "overflow";
   }
 
-  jiggle(s1, s2, maximum_time, jiggle_amount);
+  jiggle(s1, s2, maximum_time, jiggle_amount, rndgen);
 
   l_table = create_l_table(s1, s2);
 
@@ -78,12 +86,12 @@ std::string do_run_r(const std::vector< float >& parameters,
   return output;
 }
 
-int drawEvent(float E, float S, float A) {
+int drawEvent(float E, float S, float A, rnd_t& rndgen) {
   // this is a rather naive implementation
   // but for such a low number of events it suffices.
   float sum = E + S + A;
   float events[3] = {E/sum, S/sum, A/sum};
-  float r = uniform();
+  float r = rndgen.uniform();
   for (int i = 0; i < 3; ++i) {
     r -= events[i];
     if(r <= 0) return i;
@@ -114,8 +122,9 @@ bool onlyInstance(const std::vector<species>& v,
 void extinction(std::vector<species>& v,
                 std::vector<species>& extinct_species,
                 float time,
-                int wLevel) {
-  int i = random_number((int)v.size());
+                int wLevel,
+                rnd_t& rndgen) {
+  int i = rndgen.random_number((int)v.size());
 
   v[i].death_time = time;
 
@@ -140,12 +149,13 @@ void Symp_speciation(std::vector<species>& v,
                      std::vector<species>& extinct_species,
                      float time,
                      float waterTime,
-                     int wLevel)  {
+                     int wLevel,
+                     rnd_t& rndgen)  {
   if (wLevel == 1) {
     // high water level, this should be easy, just a split
     // pick random parent
     verify_consistency(v, extinct_species, "sym_spec_high_water_before");
-    int i = random_number((int)v.size());
+    int i = rndgen.random_number((int)v.size());
     species offspring1 = species(v[i], id_count, time);
     species offspring2 = species(v[i], id_count, time);
 
@@ -164,7 +174,7 @@ void Symp_speciation(std::vector<species>& v,
   }
 
   if (wLevel == 0) {
-    int i = random_number((int)v.size());
+    int i = rndgen.random_number((int)v.size());
     std::vector< int > pair_indices;
 
     bool only_instance = onlyInstance(v, i, pair_indices);
@@ -246,8 +256,9 @@ void Allo_speciation(std::vector<species>& v,
                      float time,
                      float water_time,
                      const std::vector<allo_pair>& p,
-                     std::vector<species>& extinct_species) {
-  int i = random_number( (int)p.size());
+                     std::vector<species>& extinct_species,
+                     rnd_t& rndgen) {
+  int i = rndgen.random_number( (int)p.size());
   allo_pair focal_pair = p[i];
 
   //allright, we have a pair and they are branching:
@@ -339,7 +350,8 @@ bool verify_consistency(const std::vector<species>& pop,
 int run(const std::vector<float>& parameters,
         const std::vector<float>& W,
         std::vector<species>& allSpecies,
-        float maximum_time) {
+        float maximum_time,
+        rnd_t& rndgen) {
 
   float extinction_rate      = parameters[0];
   float sympatric_high_water = parameters[1];
@@ -380,7 +392,7 @@ int run(const std::vector<float>& parameters,
 
     float rate = Pe + Ps + Pa;
 
-    float timestep = Expon(rate);
+    float timestep = rndgen.Expon(rate);
 
     time += timestep;
 
@@ -395,24 +407,24 @@ int run(const std::vector<float>& parameters,
 
       if (time > maximum_time) break;
 
-      int event_chosen = drawEvent(Pe, Ps, Pa);
+      int event_chosen = drawEvent(Pe, Ps, Pa, rndgen);
       float time_of_previous_waterlevelchange = 0.0;
       if(numberWlevelChanges != 0) time_of_previous_waterlevelchange = W[numberWlevelChanges-1];
 
       switch(event_chosen)
       {
         case 0:
-          extinction(pop, extinct_species, time, waterLevel);
+          extinction(pop, extinct_species, time, waterLevel, rndgen);
           numberExtinctions++;
 
           verify_consistency(pop, extinct_species, "extinction");
           break;
         case 1:
-          Symp_speciation(pop, id_count, extinct_species, time, time_of_previous_waterlevelchange, waterLevel);
+          Symp_speciation(pop, id_count, extinct_species, time, time_of_previous_waterlevelchange, waterLevel, rndgen);
           verify_consistency(pop, extinct_species, "symp_spec");
           break;
         case 2:
-          Allo_speciation(pop, id_count,time, time_of_previous_waterlevelchange,pairs, extinct_species);
+          Allo_speciation(pop, id_count,time, time_of_previous_waterlevelchange,pairs, extinct_species, rndgen);
           verify_consistency(pop, extinct_species, "allo_spec");
           break;
         }
@@ -578,7 +590,8 @@ bool species::check_has_viable_offspring(std::vector<species>& v) {
 void jiggle_species_vector( std::vector< species > & s,
                             float focal_time,
                             float maximum_time,
-                            float jiggle_amount) {
+                            float jiggle_amount,
+                            rnd_t& rndgen) {
 
   for (auto brother = s.begin(); brother != s.end(); ++brother) {
     if ((*brother).birth_time == focal_time ) {
@@ -624,7 +637,7 @@ void jiggle_species_vector( std::vector< species > & s,
       float trunc = dist_to_lower;
       if(dist_to_upper < dist_to_lower) trunc = dist_to_upper;
 
-      float new_birth_time = focal_time + trunc_normal(0.0, jiggle_amount, trunc);
+      float new_birth_time = focal_time + rndgen.trunc_norm_predif(trunc); //trunc_normal(0.0, jiggle_amount, trunc);
       (*brother).birth_time = new_birth_time;
       (*sister).birth_time = new_birth_time;
 
@@ -642,13 +655,12 @@ void jiggle_species_vector( std::vector< species > & s,
   return;
 }
 
-
-
 //new version
 void jiggle(std::vector< species > & s1,
             std::vector< species > & s2,
             float maximum_time,
-            float jiggle_amount) {
+            float jiggle_amount,
+            rnd_t& rndgen) {
   //we have to identify all multiples
 
   std::vector<float> b_times;
@@ -679,8 +691,8 @@ void jiggle(std::vector< species > & s1,
       float focal_time = focal_times[i];
 
       if (focal_time > 0) {
-        jiggle_species_vector(s1, focal_time, maximum_time, jiggle_amount); //jiggle all species with that time
-        jiggle_species_vector(s2, focal_time, maximum_time, jiggle_amount);
+        jiggle_species_vector(s1, focal_time, maximum_time, jiggle_amount, rndgen); //jiggle all species with that time
+        jiggle_species_vector(s2, focal_time, maximum_time, jiggle_amount, rndgen);
       }
     }
   }
