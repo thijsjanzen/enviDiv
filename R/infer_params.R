@@ -60,7 +60,7 @@ infer_params <- function(number_of_particles,
         return(sim_envidiv_tree(candidate_particle, crown_age, TRUE, rand_seed))
       }
 
-      seeds <- seq_along(candidate_particles[, 1]) + sample(1e15, 1)
+      seeds <- seq_along(candidate_particles[, 1]) + sample(1e9, 1) + iter + remaining_particles
       found_trees <- apply(cbind(candidate_particles, seeds), 1, generate_tree)
 
       if (length(found_trees) > 0) {
