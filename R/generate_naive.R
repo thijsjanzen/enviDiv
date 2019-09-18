@@ -15,10 +15,10 @@ generate_naive <- function(number_of_particles,
                            emp_tree,
                            file_name) {
 
-  oplan <- future::plan()
-  on.exit(future::plan(oplan), add = TRUE)
+#  oplan <- future::plan()
+#  on.exit(future::plan(oplan), add = TRUE)
 
-  future::plan(future::multiprocess)
+#  future::plan(future::multiprocess)
 
   crown_age <- max(ape::branching.times(emp_tree))
 
