@@ -5,6 +5,7 @@
 #' @param sd_params standard deviation of the paramater perturbation kernel
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
 #' @param write_to_file (boolean) if true, intermediate output is written to file
+#' @param seed seed of the pseudo random-number generator
 #' @return a tibble containing the results
 #' @export
 infer_params <- function(number_of_particles,
