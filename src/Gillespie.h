@@ -178,7 +178,6 @@ std::string do_run_r(const std::vector< float >& parameters,
 
 int run(const std::vector<float>& parameters,
         const std::vector<float>& W,
-        int& id_count,
         std::vector<species>& allSpecies,
         float maximum_time);
 
@@ -187,11 +186,14 @@ void jiggle(std::vector< species > & s1,
             float maximum_time,
             float jiggle_amount);
 
-//std::vector< std::vector< float > > create_l_table(
-//    const std::vector< species > & s1,
-//    const std::vector< species > & s2);
-
 Rcpp::NumericMatrix create_l_table( const std::vector< species > & s1,
                               const std::vector< species > & s2);
+
+int find_index_in_species_vector(const std::vector<species>& v,
+                                 int id);
+
+bool verify_consistency(const std::vector<species>& pop,
+                        const std::vector<species>& extinct_species,
+                        const std::string stage);
 
 #endif
