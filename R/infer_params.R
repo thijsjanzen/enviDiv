@@ -4,7 +4,8 @@
 #' @param max_iter maximum number of iterations
 #' @param sd_params standard deviation of the paramater perturbation kernel
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
-#' @param write_to_file (boolean) if true, intermediate output is written to file
+#' @param write_to_file (boolean) if true,
+#'                      intermediate output is written to file
 #' @param seed seed of the pseudo random-number generator
 #' @return a tibble containing the results
 #' @export
@@ -22,7 +23,6 @@ infer_params <- function(number_of_particles,
                          ncol = 7)  #6 parameters
 
   emp_stats <- calc_sum_stats(emp_tree, emp_tree)
-  crown_age <- max(ape::branching.times(emp_tree))
 
   # generate from prior:
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
@@ -56,11 +56,12 @@ infer_params <- function(number_of_particles,
 
       generate_tree <- function(v) {
         candidate_particle <- v[seq_along(candidate_particles[1, ])]
-        rand_seed <- seed + v[1 + length(candidate_particles[1,])]
+        rand_seed <- seed + v[1 + length(candidate_particles[1, ])]
         return(sim_envidiv_tree(candidate_particle, crown_age, TRUE, rand_seed))
       }
 
-      seeds <- seq_along(candidate_particles[, 1]) + sample(1e9, 1) + iter + remaining_particles
+      seeds <- seq_along(candidate_particles[, 1]) + sample(1e9, 1) +
+               iter + remaining_particles
       found_trees <- apply(cbind(candidate_particles, seeds), 1, generate_tree)
 
       if (length(found_trees) > 0) {

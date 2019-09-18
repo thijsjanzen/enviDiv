@@ -1,5 +1,4 @@
-#' function to generate many trees from the prior, dependent on limits of
-#' the number of tips
+#' function to perform ABC-SMC
 #' @param number_of_particles number of particles used per iteration of
 #'                            the SMC algorithm
 #' @param min_tips minimum number of tips
@@ -15,6 +14,11 @@ generate_naive <- function(number_of_particles,
                            model,
                            emp_tree,
                            file_name) {
+
+  oplan <- future::plan()
+  on.exit(future::plan(oplan), add = TRUE)
+
+  future::plan(future::multiprocess)
 
   crown_age <- max(ape::branching.times(emp_tree))
 
@@ -46,11 +50,14 @@ generate_naive <- function(number_of_particles,
       return(stats)
     }
 
-   # stat_matrix <- t(future.apply::future_apply(candidate_particles,
-  #                                            1,
-  #                                            calc_tree_stats))
+    stat_matrix <- t(future.apply::future_apply(candidate_particles,
+                                              1,
+                                              calc_tree_stats))
 
-    stat_matrix <- t(apply(candidate_particles, 1,calc_tree_stats))
+    #stat_matrix <- t(apply(candidate_particles,
+    #                     1,
+    #                     calc_tree_stats))
+
 
     results <- cbind(candidate_particles, stat_matrix)
 

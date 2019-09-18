@@ -45,7 +45,7 @@ generate_water <- function(water_model,
       water_level <- 1 - water_level
     }
     if (water_level == 0) {
-      output2 <- output2[ -length(output2)] #water level has to be high
+      output2 <- output2[-length(output2)] #water level has to be high
     }
 
     output <- c()

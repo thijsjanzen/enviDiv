@@ -17,7 +17,8 @@ the SMC algorithm}
 
 \item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
 
-\item{write_to_file}{(boolean) if true, intermediate output is written to file}
+\item{write_to_file}{(boolean) if true,
+intermediate output is written to file}
 
 \item{seed}{seed of the pseudo random-number generator}
 }

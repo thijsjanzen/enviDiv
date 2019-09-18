@@ -45,11 +45,11 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
     if (!ape::is.binary.tree(tree)) {
       dichotomousphylogeny <- ape::multi2di(tree, random = TRUE)
       b <- apTreeshape::maxlik.betasplit(dichotomousphylogeny)$max_lik
-      return (b)
+      return(b)
     }
 
     b <- apTreeshape::maxlik.betasplit(tree)$max_lik
-    return (b)
+    return(b)
   }
 
   colless_stat <- function(tree)  {

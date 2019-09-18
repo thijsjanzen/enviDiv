@@ -30,7 +30,7 @@ calculate_weight <- function(params,
   model_prob[which(model_prob != 0)] <- 0.25
   model_prob[which(model_prob == 0)] <- 0.5
 
-  final_weight <- 1.0 / (sum(model_prob) * sum(vals) )
+  final_weight <- 1.0 / (sum(model_prob) * sum(vals))
 
   # do something with model weights
   return(final_weight)

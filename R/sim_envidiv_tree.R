@@ -88,7 +88,7 @@ sim_envidiv_tree <- function(params,
     if (abc) return(NULL)
   }
 
-  if ( length(ape::is.binary(phy_tree)) > 1) {
+  if (length(ape::is.binary(phy_tree)) > 1) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
     if (length(ape::is.binary(new_phy_tree)) > 1) {
       cat(params, "\n")

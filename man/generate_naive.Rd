@@ -2,8 +2,7 @@
 % Please edit documentation in R/generate_naive.R
 \name{generate_naive}
 \alias{generate_naive}
-\title{function to generate many trees from the prior, dependent on limits of
-the number of tips}
+\title{function to perform ABC-SMC}
 \usage{
 generate_naive(number_of_particles, min_tips, max_tips, model, emp_tree,
   file_name)
@@ -26,6 +25,5 @@ the SMC algorithm}
 a tibble containing the results
 }
 \description{
-function to generate many trees from the prior, dependent on limits of
-the number of tips
+function to perform ABC-SMC
 }

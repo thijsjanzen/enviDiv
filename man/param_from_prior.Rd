@@ -10,7 +10,9 @@ param_from_prior(empty_input)
 \item{empty_input}{empty vector, used to facilitate usage of apply}
 }
 \value{
-vector with 7 entries: extinction, sympatric speciation at high water, sympatric speciation at low water, allopatric speciation, amount of perturbation, the chosen water model and the abc-weight
+vector with 7 entries: extinction, sympatric speciation at high
+water, sympatric speciation at low water, allopatric speciation, amount of
+perturbation, the chosen water model and the abc-weight
 }
 \description{
 draw parameter combinations from the prior
