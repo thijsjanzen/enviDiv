@@ -52,17 +52,17 @@ sim_envidiv_tree <- function(params,
   }
 
   local_l_table <- sim_result$Ltable
-  local_l_table[ ,1] <- crown_age - local_l_table[ ,1]
+  local_l_table[, 1] <- crown_age - local_l_table[, 1]
   local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
 
   local_l_table[1, 2] <- 0
 
-  a <- subset(local_l_table, local_l_table[,1] == crown_age)
+  a <- subset(local_l_table, local_l_table[, 1] == crown_age)
   connected <- FALSE
-  if(a[2, 3] == a[1, 2]) connected <- TRUE
-  if(a[1, 3] == a[2, 2]) connected <- TRUE
+  if (a[2, 3] == a[1, 2]) connected <- TRUE
+  if (a[1, 3] == a[2, 2]) connected <- TRUE
 
-  if(connected == FALSE) {
+  if (connected == FALSE) {
     parent_id <- local_l_table[1, 3]
     local_l_table[which(local_l_table[, 2] == -1), 2] <- parent_id
   }

@@ -1,7 +1,6 @@
 context("infer_params")
 
 test_that("usage", {
-  #skip_on_cran()
 
   params <- c(0, 0.5, 0, 0, 0, 1)
 

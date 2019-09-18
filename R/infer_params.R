@@ -30,7 +30,7 @@ infer_params <- function(number_of_particles,
   # now we start SMC
   for (iter in 2:max_iter) {
     cat("iteration: ", iter, "\n")
-    local_eps <- 500 * exp(-0.5 * (iter-2))
+    local_eps <- 500 * exp(-0.5 * (iter - 2))
 
     next_par <- c()
 
@@ -54,20 +54,15 @@ infer_params <- function(number_of_particles,
 
 
       generate_tree <- function(v) {
-        candidate_particle <- v[1:length(candidate_particles[1,])]
+        candidate_particle <- v[seq_along(candidate_particles[1, ])]
         rand_seed <- seed + v[1 + length(candidate_particles[1,])]
         return(sim_envidiv_tree(candidate_particle, crown_age, TRUE, rand_seed))
       }
 
-
-      #found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
-      #                     crown_age, TRUE)
-      seeds <- 1:length(candidate_particles[,1]) + seed + iter + sample(1e6,1)
+      seeds <- seq_along(candidate_particles[, 1]) + sample(1e15, 1)
       found_trees <- apply(cbind(candidate_particles, seeds), 1, generate_tree)
 
-
       if (length(found_trees) > 0) {
-
         stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
         for (i in seq_along(found_trees)) {
           stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:8]

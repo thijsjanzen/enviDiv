@@ -20,7 +20,6 @@ calculate_weight <- function(params,
   diff <- t(apply(other_rates, 1, function(x) x - focal_rates))
 
   if (sum(weights) != 1) {
-    #cat("weights normalized because sum was ", sum(weights), "\n")
     weights <- weights / sum(weights)
   }
 
