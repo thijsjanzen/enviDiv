@@ -32,6 +32,7 @@ sim_envidiv_tree <- function(params,
 
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
+
   water_changes <- generate_water(params[6], crown_age)
   sim_result <- create_tree_cpp(params,
                                          water_changes,

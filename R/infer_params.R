@@ -11,7 +11,11 @@ infer_params <- function(number_of_particles,
                          max_iter,
                          sd_params,
                          emp_tree,
-                         write_to_file = TRUE) {
+                         write_to_file = TRUE,
+                         seed = NULL) {
+
+  if (is.null(seed)) seed <- as.numeric(Sys.time())
+  set.seed(seed)
 
   param_matrix <- matrix(NA, nrow = number_of_particles,
                          ncol = 7)  #6 parameters
@@ -48,8 +52,19 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
-                           crown_age, TRUE)
+
+      generate_tree <- function(v) {
+        candidate_particle <- v[1:length(candidate_particles[1,])]
+        rand_seed <- seed + v[1 + length(candidate_particles[1,])]
+        return(sim_envidiv_tree(candidate_particle, crown_age, TRUE, rand_seed))
+      }
+
+
+      #found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
+      #                     crown_age, TRUE)
+      seeds <- 1:length(candidate_particles[,1]) + seed + iter + sample(1e6,1)
+      found_trees <- apply(cbind(candidate_particles, seeds), 1, generate_tree)
+
 
       if (length(found_trees) > 0) {
 
