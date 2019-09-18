@@ -619,87 +619,6 @@ void jiggle(std::vector< species > & s1,
 
 
 
-float max_l_table(const  NumericMatrix& v) {
-  float max = -1.f;
-  for(int i = 0; i < v.size(); ++i) {
-    if(v(i, 2) > max) max = v(i, 2);
-  }
-  return max;
-}
-
-float min_l_table(const  NumericMatrix& v) {
-  float min = 1e6f;
-  for(int i = 0; i < v.size(); ++i) {
-    if(v(i, 2) < min) min = v(i, 2);
-  }
-  return min;
-}
-
-int which_min_l_table(const  NumericMatrix& v) {
-  float min = min_l_table(v);
-  for(int i = 0; i < v.size(); ++i) {
-    if(v(i, 2) == min) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-int which_max_l_table(const  NumericMatrix& v) {
-  float max = max_l_table(v);
-  for(int i = 0; i < v.size(); ++i) {
-    if(v(i, 2) == max) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-int which_l_table(const  NumericMatrix& v,
-                  float x) {
-  for(int i = 0; i < v.size(); ++i) {
-    if(v(i, 2) == x) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-
-bool verify_l_table(const NumericMatrix& l_table) {
-  // follow the trail
-  int focal_index = which_max_l_table(l_table);
-  int parent = l_table(focal_index, 1);
-  while(parent > 1) {
-    focal_index = which_l_table(l_table, parent);
-    if(focal_index < 0) {
-      Rcout << "l_table positive broken!\n";
-      return false;
-    }
- //   Rcout << l_table(focal_index, 0) << " " << l_table(focal_index, 1) << " " << l_table(focal_index, 2) << " " <<
-//      l_table(focal_index, 3) << "\n";
-    parent = l_table(focal_index, 1);
-  }
-  return true;
-}
-
-bool verify_l_table2(const NumericMatrix& l_table) {
-  // follow the trail
-  int focal_index = which_max_l_table(l_table);
-  int parent = l_table(focal_index, 1);
-  while(parent < 0) {
-    focal_index = which_l_table(l_table, parent);
-    if(focal_index < -1) {
-      Rcout << "l_table negative broken!\n";
-      return false;
-    }
- //   Rcout << l_table(focal_index, 0) << " " << l_table(focal_index, 1) << " " << l_table(focal_index, 2) << " " <<
-//      l_table(focal_index, 3) << "\n";
-    parent = l_table(focal_index, 1);
-  }
-  return true;
-}
-
 NumericMatrix create_l_table( const std::vector< species > & s1,
                               const std::vector< species > & s2)
 {
@@ -718,7 +637,7 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
   }
 
   // verify l_table
-  verify_l_table(temp);
+  //verify_l_table(temp);
 
 
   NumericMatrix temp2(s2.size(), 4);
@@ -731,7 +650,94 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
     temp2(i - s1.size(), _) = output(i, _);
   }
 
-  verify_l_table2(temp2);
+  //verify_l_table2(temp2);
 
   return output;
 }
+
+
+/*  old debug code */
+
+/*
+
+ float max_l_table(const  NumericMatrix& v) {
+ float max = -1.f;
+ for(int i = 0; i < v.size(); ++i) {
+ if(v(i, 2) > max) max = v(i, 2);
+ }
+ return max;
+ }
+
+ float min_l_table(const  NumericMatrix& v) {
+ float min = 1e6f;
+ for(int i = 0; i < v.size(); ++i) {
+ if(v(i, 2) < min) min = v(i, 2);
+ }
+ return min;
+ }
+
+ int which_min_l_table(const  NumericMatrix& v) {
+ float min = min_l_table(v);
+ for(int i = 0; i < v.size(); ++i) {
+ if(v(i, 2) == min) {
+ return i;
+ }
+ }
+ return -1;
+ }
+
+ int which_max_l_table(const  NumericMatrix& v) {
+ float max = max_l_table(v);
+ for(int i = 0; i < v.size(); ++i) {
+ if(v(i, 2) == max) {
+ return i;
+ }
+ }
+ return -1;
+ }
+
+ int which_l_table(const  NumericMatrix& v,
+ float x) {
+ for(int i = 0; i < v.size(); ++i) {
+ if(v(i, 2) == x) {
+ return i;
+ }
+ }
+ return -1;
+ }
+
+
+ bool verify_l_table(const NumericMatrix& l_table) {
+ // follow the trail
+ int focal_index = which_max_l_table(l_table);
+ int parent = l_table(focal_index, 1);
+ while(parent > 1) {
+ focal_index = which_l_table(l_table, parent);
+ if(focal_index < 0) {
+ Rcout << "l_table positive broken!\n";
+ return false;
+ }
+ //   Rcout << l_table(focal_index, 0) << " " << l_table(focal_index, 1) << " " << l_table(focal_index, 2) << " " <<
+ //      l_table(focal_index, 3) << "\n";
+ parent = l_table(focal_index, 1);
+ }
+ return true;
+ }
+
+ bool verify_l_table2(const NumericMatrix& l_table) {
+ // follow the trail
+ int focal_index = which_max_l_table(l_table);
+ int parent = l_table(focal_index, 1);
+ while(parent < 0) {
+ focal_index = which_l_table(l_table, parent);
+ if(focal_index < -1) {
+ Rcout << "l_table negative broken!\n";
+ return false;
+ }
+ //   Rcout << l_table(focal_index, 0) << " " << l_table(focal_index, 1) << " " << l_table(focal_index, 2) << " " <<
+ //      l_table(focal_index, 3) << "\n";
+ parent = l_table(focal_index, 1);
+ }
+ return true;
+ }
+*/
