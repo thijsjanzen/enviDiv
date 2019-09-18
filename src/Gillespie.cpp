@@ -457,58 +457,6 @@ int run(const std::vector<float>& parameters,
   return 1;
 }
 
-void remove_extinct_branches(std::vector<species>& all_species) {
-
-  std::vector< species > selected_species;
-  for (auto it = all_species.begin(); it != all_species.end(); ++it) {
-
-    (*it).check_has_viable_offspring(all_species);
-    if ((*it).extant_offspring == true) {
-      selected_species.push_back((*it));
-    }
-  }
-  all_species = selected_species;
-  return;
-}
-
-std::vector<int> find_indices(const std::vector<species>& v, int ID) {
-  std::vector<int> indices;
-  int count = 0;
-
-  for (auto i = v.begin(); i != v.end(); ++i) {
-    if((*i).get_parent() == ID) indices.push_back(count);
-    count++;
-  }
-
-  return indices;
-}
-
-void merge_single_branches(std::vector<species>& all_species) {
-  std::vector<species> species_vector = all_species;
-
-  for (int i = 0; i < species_vector.size(); ++i) {
-    std::vector<int> offspring = find_indices(species_vector,
-                                              species_vector[i].get_ID());
-
-    if (offspring.size() == 1) {
-      // we have to do a merge
-      species parent = species_vector[i];
-      species daughter = species_vector[  offspring[0] ];
-
-      species new_daughter = daughter;
-      new_daughter.set_parent( parent.get_parent());
-      new_daughter.birth_time = parent.birth_time;
-
-      species_vector[i] = new_daughter;
-      species_vector[ offspring[0]] = species_vector.back();
-      species_vector.pop_back();
-
-      i = 0;
-      // and restart
-    }
-  }
-  all_species = species_vector;
-}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //////////////////////// MEMBER FUNCTIONS /////////////////////////////////////////
@@ -556,36 +504,6 @@ species::species(const species& parent_species, int& id_count, float b_time) {
   checked = false;
 }
 
-
-bool species::check_has_viable_offspring(std::vector<species>& v) {
-  if (checked == true) return extant_offspring;
-  if (death_time == -1) {
-    extant_offspring = true;
-    checked = true;
-    return extant_offspring;
-  }
-
-  std::vector<int> offspring = find_indices(v, ID); //find the positions of the offspring;
-  extant_offspring = false;
-
-
-  for (std::size_t i = 0; i < offspring.size(); ++i) {//ofspring is of size 2 (or 1), so using iterators is useless here
-    int index = offspring[i];
-
-    if (v[index].death_time == -1) extant_offspring  = true;  //the offspring is extant
-    else   //the offspring has died, but might have given birth to other species that have survived
-    {
-      if (v[index].checked == true) extant_offspring  = v[index].extant_offspring;
-      else extant_offspring = v[index].check_has_viable_offspring(v);
-    }
-
-    if (extant_offspring == true) break;
-  }
-
-  checked = true;
-
-  return extant_offspring;
-}
 
 void jiggle_species_vector( std::vector< species > & s,
                             float focal_time,
@@ -817,40 +735,3 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
 
   return output;
 }
-
-
-
-
-/*
-std::vector< std::vector< float > > create_l_table(
-    const std::vector< species > & s1,
-    const std::vector< species > & s2)
-{
-  std::vector< std::array<float, 4 > > output(s1.size() + s2.size());
-  std::array<float, 4 > to_add;
-  int i = 0;
-  for(auto it = s1.begin(); it != s1.end(); ++it, ++i) {
-    to_add[0] = (*it).birth_time;
-    to_add[1] = 2 + (*it).get_parent();
-    to_add[2] = 2 + (*it).get_ID();
-    to_add[3] = (*it).death_time;
-
-    output[i] = to_add;
-  }
-  for(auto it = s2.begin(); it != s2.end(); ++it, ++i) {
-    to_add[0] = (*it).birth_time;
-
-    int parent = 2 + (*it).get_parent();
-    if(parent > 0) parent *= -1.0;
-    to_add[1] = parent;
-
-    int id = 2 + (*it).get_ID();
-    if(id > 0) id *= -1.0;
-    to_add[2] = id;
-    to_add[3] = (*it).death_time;
-
-    output[i] = to_add;
-  }
-
-  return output;
-}*/

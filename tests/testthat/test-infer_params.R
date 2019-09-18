@@ -13,9 +13,9 @@ test_that("usage", {
                                   emp_tree,
                                   write_to_file = FALSE)
 
-  #v <- mean(do_smc$sym_high)
-  #v2 <- table(do_smc$model)
-  #testthat::expect_true(which.max(v2) == 1)
-  #q1 <- quantile(do_smc$sym_high, c(0.025, 0.975))
-  #testthat::expect_true(q1[[1]] < 0.5 && q1[[2]] > 0.5)
+  v <- mean(do_smc$sym_high)
+  v2 <- table(do_smc$model)
+  testthat::expect_true(which.max(v2) == 1)
+  q1 <- quantile(do_smc$sym_high, c(0.025, 0.975))
+  testthat::expect_true(q1[[1]] < 0.5 && q1[[2]] > 0.5)
 })
