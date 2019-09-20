@@ -55,16 +55,7 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-
-      generate_tree <- function(v) {
-        candidate_particle <- v[seq_along(candidate_particles[1, ])]
-        rand_seed <- seed + v[1 + length(candidate_particles[1, ])]
-        return(sim_envidiv_tree(candidate_particle, crown_age, TRUE, rand_seed))
-      }
-
-      seeds <- seq_along(candidate_particles[, 1]) + sample(1e9, 1) +
-               iter + remaining_particles
-      found_trees <- apply(cbind(candidate_particles, seeds), 1, generate_tree)
+      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree, crown_age, TRUE)
 
       if (length(found_trees) > 0) {
         stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
