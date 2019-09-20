@@ -19,6 +19,8 @@ infer_params <- function(number_of_particles,
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
 
+  crown_age <- max(ape::branching.times(emp_tree))
+
   param_matrix <- matrix(NA, nrow = number_of_particles,
                          ncol = 7)  #6 parameters
 
