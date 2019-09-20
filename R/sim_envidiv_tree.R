@@ -29,8 +29,9 @@ sim_envidiv_tree <- function(params,
     warning("crown age should be larger than zero\n")
     return(NULL)
   }
+  seed <- round(as.numeric(seed))
+  if (is.null(seed) || is.na(seed)) seed <- as.numeric(Sys.time())
 
-  if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(round(as.numeric(seed)))
 
   water_changes <- generate_water(params[6], crown_age)
