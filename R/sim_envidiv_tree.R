@@ -30,7 +30,7 @@ sim_envidiv_tree <- function(params,
     return(NULL)
   }
   seed <- round(as.numeric(seed))
-  if (is.null(seed) || is.na(seed)) seed <- as.numeric(Sys.time())
+  if (is.null(seed) || is.na(seed) || length(seed) == 0) seed <- as.numeric(Sys.time())
 
   set.seed(round(as.numeric(seed)))
 
