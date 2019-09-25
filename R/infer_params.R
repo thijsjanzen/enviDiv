@@ -7,6 +7,8 @@
 #' @param write_to_file (boolean) if true,
 #'                      intermediate output is written to file
 #' @param seed seed of the pseudo random-number generator
+#' @param continue_from_file (boolean) if true, continues a simulation existing
+#'                           in the same folder
 #' @return a tibble containing the results
 #' @export
 infer_params <- function(number_of_particles,
@@ -14,7 +16,8 @@ infer_params <- function(number_of_particles,
                          sd_params,
                          emp_tree,
                          write_to_file = TRUE,
-                         seed = NULL) {
+                         seed = NULL,
+                         continue_from_file = FALSE) {
 
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
@@ -30,8 +33,22 @@ infer_params <- function(number_of_particles,
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
   previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
   next_par <- c()
+
+  start_iter <- 2
+
+  if(continue_from_file == TRUE) {
+    for(i in max_iter:0) {
+      file_name <- paste0("iter_", i, ".txt")
+      if(file.exists(file_name) ) {
+        previous_par <- readr::read_tsv(file = file_name)
+        start_iter <- i
+        break
+      }
+    }
+  }
+
   # now we start SMC
-  for (iter in 2:max_iter) {
+  for (iter in start_iter:max_iter) {
     cat("iteration: ", iter, "\n")
     local_eps <- 500 * exp(-0.5 * (iter - 2))
 
@@ -96,11 +113,11 @@ infer_params <- function(number_of_particles,
     previous_par <- next_par
     # write next par to file
     colnames(next_par) <-
-        c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-            "weight",
-            "nltt", "gamma", "mbr", "num_lin",
-            "beta", "colless", "sackin", "ladder",
-            "fit")
+      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+        "weight",
+        "nltt", "gamma", "mbr", "num_lin",
+        "beta", "colless", "sackin", "ladder",
+        "fit")
     next_par <- tibble::as_tibble(next_par)
     if (write_to_file == TRUE) {
       readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))

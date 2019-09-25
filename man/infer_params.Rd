@@ -5,7 +5,7 @@
 \title{function to perform ABC-SMC}
 \usage{
 infer_params(number_of_particles, max_iter, sd_params, emp_tree,
-  write_to_file = TRUE, seed = NULL)
+  write_to_file = TRUE, seed = NULL, continue_from_file = FALSE)
 }
 \arguments{
 \item{number_of_particles}{number of particles used per iteration of
@@ -21,6 +21,9 @@ the SMC algorithm}
 intermediate output is written to file}
 
 \item{seed}{seed of the pseudo random-number generator}
+
+\item{continue_from_file}{(boolean) if true, continues a simulation existing
+in the same folder}
 }
 \value{
 a tibble containing the results
