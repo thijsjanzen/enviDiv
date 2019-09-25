@@ -49,7 +49,12 @@ infer_params <- function(number_of_particles,
 
     emp_tree <- ape::read.nexus("tree.newick")
     emp_stats <- calc_sum_stats(emp_tree, emp_tree)
+
+    cat("read previous particles from iteration: ", i, "\n")
   }
+
+
+
 
   # now we start SMC
   for (iter in start_iter:max_iter) {
