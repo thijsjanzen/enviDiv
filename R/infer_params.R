@@ -41,10 +41,14 @@ infer_params <- function(number_of_particles,
       file_name <- paste0("iter_", i, ".txt")
       if(file.exists(file_name) ) {
         previous_par <- readr::read_tsv(file = file_name)
+        previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
         start_iter <- i
         break
       }
     }
+
+    emp_tree <- ape::read.nexus("tree.newick")
+    emp_stats <- calc_sum_stats(emp_tree, emp_tree)
   }
 
   # now we start SMC
@@ -61,7 +65,7 @@ infer_params <- function(number_of_particles,
       sample_size <- max(100, remaining_particles)
       candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
-                                  prob = previous_par[, 7])
+                                  prob = previous_par[, 7], replace = F)
 
       candidate_particles <- previous_par[candidate_indices, ]
 
