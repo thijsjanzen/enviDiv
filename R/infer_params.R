@@ -119,7 +119,8 @@ infer_params <- function(number_of_particles,
           stats <- BiocParallel::bplapply(found_trees,
                                           calc_sum_stats,
                                           emp_tree,
-                                          manager.hostname="127.0.0.1")
+                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores))
+                                        #  manager.hostname="127.0.0.1")
         }
 
         stat_matrix <- matrix(unlist(stats, use.names = FALSE),
