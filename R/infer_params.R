@@ -55,8 +55,8 @@ infer_params <- function(number_of_particles,
       }
     }
 
-    emp_tree <- ape::read.nexus("tree.newick")
-    emp_stats <- calc_sum_stats(emp_tree, emp_tree)
+    #emp_tree <- ape::read.nexus("tree.newick")
+    #emp_stats <- calc_sum_stats(emp_tree, emp_tree)
 
     cat("read previous particles from iteration: ", i, "\n")
   }
@@ -72,11 +72,16 @@ infer_params <- function(number_of_particles,
     cat("iteration\tremaining\tfound\taccept rate\tmeanfit\n")
 
     remaining_particles <- number_of_particles - length(next_par[, 1])
+    accept_rate <- 0
     while (remaining_particles > 0) {
       sample_size <- max(100, remaining_particles)
+      if (accept_rate != 0) {
+        sample_size <- remaining_particles * 1 / accept_rate
+      }
+
       candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
-                                  prob = previous_par[, 7], replace = F)
+                                  prob = previous_par[, 7], replace = T)
 
       candidate_particles <- previous_par[candidate_indices, ]
 
@@ -99,7 +104,8 @@ infer_params <- function(number_of_particles,
 
         found_trees <- BiocParallel::bplapply(input,
                                               sim_envidiv_tree,
-                                              crown_age, TRUE)
+                                              crown_age, TRUE,
+                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores))
       }
 
       if (length(found_trees) > 0) {
@@ -132,10 +138,11 @@ infer_params <- function(number_of_particles,
 
           next_par <- rbind(next_par, results)
           remaining_particles <- number_of_particles - length(next_par[, 1])
+          accept_rate <- round(length(results[, 1]) / remaining_particles, 2)
           if (!is.null(dim(results))) {
             cat(iter, "\t", remaining_particles, "\t",
                 length(results[, 1]), "\t",
-                round(length(results[, 1]) / remaining_particles, 2),
+                accept_rate,
                 mean(selected_fits), mean(local_fit), "\n")
           }
         }
