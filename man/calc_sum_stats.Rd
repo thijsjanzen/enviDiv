@@ -15,7 +15,7 @@ summary statistics.}
 \item{emp_tree}{reference empirical tree, only used to calculate the nLTT.}
 }
 \value{
-vector of 11 summary statistics
+vector of 8 summary statistics
 }
 \description{
 calculate summary statistics for a focal tree. The following summary

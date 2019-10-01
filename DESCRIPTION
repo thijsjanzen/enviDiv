@@ -24,6 +24,5 @@ Imports:
     apTreeshape,
     phyloTop,
     testit,
-    future,
-    future.apply,
-    DDD
+    DDD,
+    BiocParallel

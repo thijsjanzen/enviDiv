@@ -8,17 +8,12 @@
 #' @param file_name file name
 #' @return a tibble containing the results
 #' @export
-generate_naive <- function(number_of_particles,
-                           min_tips,
-                           max_tips,
-                           model,
+generate_naive <- function(number_of_particles = 1000,
+                           min_tips = 50,
+                           max_tips = 150,
+                           model = 1,
                            emp_tree,
                            file_name) {
-
-#  oplan <- future::plan()
-#  on.exit(future::plan(oplan), add = TRUE)
-
-#  future::plan(future::multiprocess)
 
   crown_age <- max(ape::branching.times(emp_tree))
 
@@ -50,14 +45,12 @@ generate_naive <- function(number_of_particles,
       return(stats)
     }
 
-    stat_matrix <- t(future.apply::future_apply(candidate_particles,
-                                              1,
-                                              calc_tree_stats))
+    input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
+    stats <- BiocParallel::bplapply(input, calc_tree_stats)
 
-    #stat_matrix <- t(apply(candidate_particles,
-    #                     1,
-    #                     calc_tree_stats))
-
+    stat_matrix <- matrix(unlist(stats, use.names = FALSE),
+                          ncol = 8,
+                          byrow = TRUE)
 
     results <- cbind(candidate_particles, stat_matrix)
 

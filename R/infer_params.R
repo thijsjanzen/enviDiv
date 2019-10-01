@@ -9,6 +9,9 @@
 #' @param seed seed of the pseudo random-number generator
 #' @param continue_from_file (boolean) if true, continues a simulation existing
 #'                           in the same folder
+#' @param fix_model if -1, the model is fitted, if in [1, 2, 3] it is fitted to
+#'                  the specified model (e.g. in 1, 2 or 3)
+#' @param num_cores number of cores used, support > 1 not available for windows
 #' @return a tibble containing the results
 #' @export
 infer_params <- function(number_of_particles,
@@ -17,7 +20,9 @@ infer_params <- function(number_of_particles,
                          emp_tree,
                          write_to_file = TRUE,
                          seed = NULL,
-                         continue_from_file = FALSE) {
+                         continue_from_file = FALSE,
+                         fix_model = -1,
+                         num_cores = 1) {
 
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
@@ -31,6 +36,9 @@ infer_params <- function(number_of_particles,
 
   # generate from prior:
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
+
+  if(fix_model != -1) previous_par[, 6] <- fix_model
+
   previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
   next_par <- c()
 
@@ -52,8 +60,6 @@ infer_params <- function(number_of_particles,
 
     cat("read previous particles from iteration: ", i, "\n")
   }
-
-
 
 
   # now we start SMC
@@ -81,34 +87,57 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      found_trees <- apply(candidate_particles, 1, sim_envidiv_tree, crown_age, TRUE)
+      if(fix_model != -1) candidate_particles[, 6] <- fix_model
+
+      found_trees <- c()
+      if (num_cores == 1) {
+        found_trees <- apply(candidate_particles, 1, sim_envidiv_tree,
+                             crown_age, TRUE)
+      } else {
+
+        input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
+
+        found_trees <- BiocParallel::bplapply(input,
+                                              sim_envidiv_tree,
+                                              crown_age, TRUE)
+      }
 
       if (length(found_trees) > 0) {
-        stat_matrix <- matrix(NA, ncol = 8, nrow = length(found_trees))
-        for (i in seq_along(found_trees)) {
-          stat_matrix[i, ] <- calc_sum_stats(found_trees[[i]], emp_tree)[1:8]
+        stats <- list()
+        if(num_cores == 1) {
+          stats <- lapply(found_trees, calc_sum_stats, emp_tree)
+        } else {
+          stats <- BiocParallel::bplapply(found_trees,
+                                          calc_sum_stats,
+                                          emp_tree)
         }
 
+        stat_matrix <- matrix(unlist(stats, use.names = FALSE),
+                              ncol = 8,
+                              byrow = TRUE)
 
         results <- cbind(candidate_particles, stat_matrix)
 
         stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
         results <- results[!is.infinite(results[, 8]), ]
 
+        if(length(stat_matrix) > 0) {
 
-        local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
-        results <- cbind(results, local_fit)
+          local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
 
-        results <- results[local_fit < local_eps, ]
-        selected_fits <- local_fit[local_fit < local_eps]
+          results <- cbind(results, local_fit)
 
-        next_par <- rbind(next_par, results)
-        remaining_particles <- number_of_particles - length(next_par[, 1])
-        if (!is.null(dim(results))) {
-          cat(iter, "\t", remaining_particles, "\t",
-              length(results[, 1]), "\t",
-              round(length(results[, 1]) / remaining_particles, 2),
-              mean(selected_fits), mean(local_fit), "\n")
+          results <- results[local_fit < local_eps, ]
+          selected_fits <- local_fit[local_fit < local_eps]
+
+          next_par <- rbind(next_par, results)
+          remaining_particles <- number_of_particles - length(next_par[, 1])
+          if (!is.null(dim(results))) {
+            cat(iter, "\t", remaining_particles, "\t",
+                length(results[, 1]), "\t",
+                round(length(results[, 1]) / remaining_particles, 2),
+                mean(selected_fits), mean(local_fit), "\n")
+          }
         }
       }
     }

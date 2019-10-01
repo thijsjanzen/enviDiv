@@ -4,8 +4,8 @@
 \alias{generate_naive}
 \title{function to perform ABC-SMC}
 \usage{
-generate_naive(number_of_particles, min_tips, max_tips, model, emp_tree,
-  file_name)
+generate_naive(number_of_particles = 1000, min_tips = 50,
+  max_tips = 150, model = 1, emp_tree, file_name)
 }
 \arguments{
 \item{number_of_particles}{number of particles used per iteration of

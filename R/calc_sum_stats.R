@@ -4,13 +4,13 @@
 #' @param focal_tree input phylogenetic tree for which to calculate
 #'                   summary statistics.
 #' @param emp_tree reference empirical tree, only used to calculate the nLTT.
-#' @return vector of 11 summary statistics
+#' @return vector of 8 summary statistics
 #' @export
 calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   # trees that are extinct turn up as NULL:
   if (is.null(focal_tree) || class(focal_tree) != "phylo") {
     warning("no tree found, returning infinite statistics")
-    return(rep(Inf, 11))
+    return(rep(Inf, 8))
   }
 
   if (is.null(emp_tree)) {
@@ -21,17 +21,18 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   # empty edgelist (they are only a crown)
   if (is.null(focal_tree$edge.length)) {
     warning("tree with only two tips, no statistics can be calculated")
-    return(rep(Inf, 11))
+    return(rep(Inf, 8))
   }
 
   focal_tree <- ape::multi2di(focal_tree)
 
   if (min(ape::branching.times(focal_tree), na.rm = TRUE) < 0) {
     cat("ERROR, negative branch lengths!\n")
-    return(rep(Inf, 11))
+    ape::write.tree(focal_tree, file = paste0("error_tree.txt"), append = T)
+    return(rep(Inf, 8))
   }
   if (focal_tree$Nnode + 1 < 3) {
-    return(rep(Inf, 11))
+    return(rep(Inf, 8))
   }
 
   output <- c()

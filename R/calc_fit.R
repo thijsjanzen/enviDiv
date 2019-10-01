@@ -7,7 +7,7 @@ calc_fit <- function(sum_stats,
                      emp_stats) {
 
   diff <- (sum_stats[1:8]  - emp_stats[1:8])
-  nltt_diff <- diff[1]
+  nltt_diff <- diff[1] # store nltt_diff, this one can not be normalized
   diff <- diff * diff
   diff <- diff / abs(emp_stats)
   diff[1] <- nltt_diff
