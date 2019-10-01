@@ -108,7 +108,8 @@ infer_params <- function(number_of_particles,
         found_trees <- BiocParallel::bplapply(input,
                                               sim_envidiv_tree,
                                               crown_age, TRUE,
-                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores))
+                                              BPPARAM = BiocParallel::MulticoreParam(workers = num_cores,
+                                                                                     manager.hostname="127.0.0.1"))
       }
 
       if (length(found_trees) > 0) {
@@ -119,8 +120,8 @@ infer_params <- function(number_of_particles,
           stats <- BiocParallel::bplapply(found_trees,
                                           calc_sum_stats,
                                           emp_tree,
-                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores))
-                                        #  manager.hostname="127.0.0.1")
+                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores,
+                                          manager.hostname="127.0.0.1"))
         }
 
         stat_matrix <- matrix(unlist(stats, use.names = FALSE),
