@@ -69,11 +69,14 @@ infer_params <- function(number_of_particles,
 
     next_par <- c()
 
-    cat("iteration\tremaining\tfound\taccept rate\tmeanfit\n")
+    cat("iteration\tremaining\tfound\taccept rate\tmeanfit\ttime_taken\n")
 
     remaining_particles <- number_of_particles - length(next_par[, 1])
     accept_rate <- 0
     while (remaining_particles > 0) {
+
+      start_time <- Sys.time()
+
       sample_size <- max(100, remaining_particles)
       if (accept_rate != 0) {
         sample_size <- remaining_particles * 1 / accept_rate
@@ -140,10 +143,14 @@ infer_params <- function(number_of_particles,
           remaining_particles <- number_of_particles - length(next_par[, 1])
           accept_rate <- round(length(results[, 1]) / remaining_particles, 2)
           if (!is.null(dim(results))) {
+            end_time <- Sys.time()
+            diff_time <- (end_time - start_time)[[1]]
+
+
             cat(iter, "\t", remaining_particles, "\t",
                 length(results[, 1]), "\t",
-                accept_rate,
-                mean(selected_fits), mean(local_fit), "\n")
+                accept_rate, "\t",
+                mean(selected_fits), "\t", mean(local_fit), "\t", diff_time, "\n")
           }
         }
       }
