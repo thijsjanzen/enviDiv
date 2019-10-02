@@ -11,7 +11,6 @@
 #'                           in the same folder
 #' @param fix_model if -1, the model is fitted, if in [1, 2, 3] it is fitted to
 #'                  the specified model (e.g. in 1, 2 or 3)
-#' @param num_cores number of cores used, support > 1 not available for windows
 #' @return a tibble containing the results
 #' @export
 infer_params <- function(number_of_particles,
@@ -21,8 +20,7 @@ infer_params <- function(number_of_particles,
                          write_to_file = TRUE,
                          seed = NULL,
                          continue_from_file = FALSE,
-                         fix_model = -1,
-                         num_cores = 1) {
+                         fix_model = -1) {
 
   if (is.null(seed)) seed <- as.numeric(Sys.time())
   set.seed(seed)
@@ -105,11 +103,9 @@ infer_params <- function(number_of_particles,
 
         input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
 
-        found_trees <- BiocParallel::bplapply(input,
-                                              sim_envidiv_tree,
-                                              crown_age, TRUE,
-                                              BPPARAM = BiocParallel::MulticoreParam(workers = num_cores,
-                                                                                     manager.hostname="127.0.0.1"))
+        found_trees <- future.apply::future_lapply(input,
+                                                   sim_envidiv_tree,
+                                                   crown_age, TRUE)
       }
 
       if (length(found_trees) > 0) {
@@ -117,11 +113,10 @@ infer_params <- function(number_of_particles,
         if(num_cores == 1) {
           stats <- lapply(found_trees, calc_sum_stats, emp_tree)
         } else {
-          stats <- BiocParallel::bplapply(found_trees,
-                                          calc_sum_stats,
-                                          emp_tree,
-                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores,
-                                          manager.hostname="127.0.0.1"))
+
+          stats <- future.apply::future_lapply(found_trees,
+                                               calc_sum_stats,
+                                               emp_tree)
         }
 
         stat_matrix <- matrix(unlist(stats, use.names = FALSE),

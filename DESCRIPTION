@@ -25,4 +25,5 @@ Imports:
     phyloTop,
     testit,
     DDD,
-    BiocParallel
+    future.apply,
+    future

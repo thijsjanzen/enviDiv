@@ -46,8 +46,8 @@ generate_naive <- function(number_of_particles = 1000,
     }
 
     input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
-    stats <- BiocParallel::bplapply(input, calc_tree_stats,
-                  BPPARAM = BiocParallel::MulticoreParam(workers = num_cores))
+
+    stats <- future.apply::future_lapply(input, calc_tree_stats)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
                           ncol = 8,
