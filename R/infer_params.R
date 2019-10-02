@@ -119,7 +119,7 @@ infer_params <- function(number_of_particles,
       stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
       results <- results[!is.infinite(results[, 8]), ]
 
-      if(length(stat_matrix) > 0) {
+      if (length(stat_matrix) > 0) {
 
         local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
 
@@ -128,13 +128,13 @@ infer_params <- function(number_of_particles,
         results <- results[local_fit < local_eps, ]
         selected_fits <- local_fit[local_fit < local_eps]
 
-        next_par <- rbind(next_par, results)
-        remaining_particles <- number_of_particles - length(next_par[, 1])
-        accept_rate <- round(length(results[, 1]) / remaining_particles, 2)
-        if (!is.null(dim(results))) {
+        if (length(results) > 0) {
+
+          next_par <- rbind(next_par, results)
+          remaining_particles <- number_of_particles - length(next_par[, 1])
+          accept_rate <- round(length(results[, 1]) / remaining_particles, 2)
           end_time <- Sys.time()
           diff_time <- (end_time - start_time)[[1]]
-
 
           cat(iter, "\t", remaining_particles, "\t",
               length(results[, 1]), "\t",
