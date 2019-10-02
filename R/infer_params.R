@@ -79,7 +79,7 @@ infer_params <- function(number_of_particles,
 
       sample_size <- max(100, remaining_particles)
       if (accept_rate != 0) {
-        sample_size <- remaining_particles * 1 / accept_rate
+        sample_size <- 0.25 *  remaining_particles * 1 / accept_rate
       }
 
       candidate_indices <- sample(seq_along(previous_par[, 1]),
