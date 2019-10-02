@@ -76,6 +76,13 @@ infer_params <- function(number_of_particles,
       start_time <- Sys.time()
 
       sample_size <- max(100, remaining_particles)
+      cat(accept_rate, "\n")
+      if (is.null(accept_rate) ||
+          is.na(accept_rate)   ||
+          length(accept_rate) == 0) {
+        accept_rate <- 0
+      }
+
       if (accept_rate != 0) {
         sample_size <- 0.25 *  remaining_particles * 1 / accept_rate
       }
@@ -129,15 +136,22 @@ infer_params <- function(number_of_particles,
         selected_fits <- local_fit[local_fit < local_eps]
 
         if (length(results) > 0) {
+          rows_before <- nrow(next_par)
 
           next_par <- rbind(next_par, results)
-          remaining_particles <- number_of_particles - length(next_par[, 1])
-          accept_rate <- round(length(results[, 1]) / remaining_particles, 2)
+
+          num_added_particles <- nrow(next_par) - rows_before
+          if(is.null(nrow(next_par))) num_added_particles <- 0
+          if(is.null(num_added_particles)) num_added_particles <- 0
+
+          remaining_particles <- number_of_particles - nrow(next_par)
+
+          accept_rate <- round(num_added_particles / remaining_particles, 2)
           end_time <- Sys.time()
           diff_time <- (end_time - start_time)[[1]]
 
           cat(iter, "\t", remaining_particles, "\t",
-              length(results[, 1]), "\t",
+              num_added_particles, "\t",
               accept_rate, "\t",
               mean(selected_fits), "\t", mean(local_fit), "\t", diff_time, "\n")
         }
