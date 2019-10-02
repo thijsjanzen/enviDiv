@@ -76,7 +76,6 @@ infer_params <- function(number_of_particles,
       start_time <- Sys.time()
 
       sample_size <- max(100, remaining_particles)
-      cat(accept_rate, "\n")
       if (is.null(accept_rate) ||
           is.na(accept_rate)   ||
           length(accept_rate) == 0) {
@@ -84,7 +83,7 @@ infer_params <- function(number_of_particles,
       }
 
       if (accept_rate != 0) {
-        sample_size <- 0.25 *  remaining_particles * 1 / accept_rate
+        sample_size <- remaining_particles * 1 / accept_rate
       }
 
       candidate_indices <- sample(seq_along(previous_par[, 1]),
