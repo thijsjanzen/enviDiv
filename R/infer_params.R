@@ -86,6 +86,8 @@ infer_params <- function(number_of_particles,
         sample_size <- remaining_particles * 1 / accept_rate
       }
 
+      sample_size <- max(sample_size, 2) # always need 2, otherwise apply doesn't work
+
       candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
                                   prob = previous_par[, 7], replace = T)
@@ -157,7 +159,7 @@ infer_params <- function(number_of_particles,
 
           remaining_particles <- number_of_particles - nrow(next_par)
 
-          accept_rate <- round(num_added_particles / remaining_particles, 2)
+          accept_rate <- round(num_added_particles / sample_size, 2)
           end_time <- Sys.time()
           diff_time <- (end_time - start_time)[[1]]
 
