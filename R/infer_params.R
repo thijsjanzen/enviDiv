@@ -126,7 +126,7 @@ infer_params <- function(number_of_particles,
       if (length(stat_matrix) > 0) {
 
         local_fit <- c()
-        if(length(stat_matrix) > 8) {
+        if( !is.null(nrow(stat_matrix))) {
           local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
         } else {
           local_fit <- calc_fit(stat_matrix, emp_stats)
