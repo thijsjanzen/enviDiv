@@ -99,10 +99,9 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
+      if(is.null(nrow(candidate_particles))) next
+
       if(fix_model != -1) candidate_particles[, 6] <- fix_model
-
-      found_trees <- c()
-
 
       input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
 
@@ -119,9 +118,11 @@ infer_params <- function(number_of_particles,
                             byrow = TRUE)
 
       results <- cbind(candidate_particles, stat_matrix)
+      results_old <- results
 
       stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
       results <- results[!is.infinite(results[, 8]), ]
+
 
       if (length(stat_matrix) > 0) {
 
@@ -132,10 +133,18 @@ infer_params <- function(number_of_particles,
           local_fit <- calc_fit(stat_matrix, emp_stats)
         }
 
-        results <- cbind(results, local_fit)
+        selected_fits <- c()
+        if(!is.null(nrow(stat_matrix))) {
+          results <- cbind(results, local_fit)
 
-        results <- results[local_fit < local_eps, ]
-        selected_fits <- local_fit[local_fit < local_eps]
+          results <- results[local_fit < local_eps, ]
+          selected_fits <- local_fit[local_fit < local_eps]
+        } else {
+          if(local_fit < local_eps) {
+            results <- c(results, local_fit)
+            selected_fits <- local_fit
+          }
+        }
 
         if (length(results) > 0) {
           rows_before <- nrow(next_par)
