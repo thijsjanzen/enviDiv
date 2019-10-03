@@ -110,8 +110,6 @@ infer_params <- function(number_of_particles,
                                                  sim_envidiv_tree,
                                                  crown_age, TRUE)
 
-
-
       stats <- future.apply::future_lapply(found_trees,
                                            calc_sum_stats,
                                            emp_tree)
@@ -127,7 +125,12 @@ infer_params <- function(number_of_particles,
 
       if (length(stat_matrix) > 0) {
 
-        local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
+        local_fit <- c()
+        if(length(stat_matrix) > 8) {
+          local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
+        } else {
+          local_fit <- calc_fit(stat_matrix, emp_stats)
+        }
 
         results <- cbind(results, local_fit)
 
