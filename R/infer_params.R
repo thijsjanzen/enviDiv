@@ -170,26 +170,27 @@ infer_params <- function(number_of_particles,
         }
       }
     }
+
+    next_par <- next_par[1:number_of_particles, ]
+    # calculate weights
+    new_weights <- apply(next_par[, 1:6], 1, calculate_weight,
+                         previous_par[, 1:6], previous_par[, 7], sd_params)
+    new_weights <- new_weights / sum(new_weights)
+    next_par[, 7] <- new_weights
+    previous_par <- next_par
+    # write next par to file
+    colnames(next_par) <-
+      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+        "weight",
+        "nltt", "gamma", "mbr", "num_lin",
+        "beta", "colless", "sackin", "ladder",
+        "fit")
+    next_par <- tibble::as_tibble(next_par)
+    if (write_to_file == TRUE) {
+      readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
+      #write.table(next_par, file = paste0("iter_", iter, ".txt"), row.names = F, col.names = T, quote = F)
+    }
   }
 
-  next_par <- next_par[1:number_of_particles, ]
-  # calculate weights
-  new_weights <- apply(next_par[, 1:6], 1, calculate_weight,
-                       previous_par[, 1:6], previous_par[, 7], sd_params)
-  new_weights <- new_weights / sum(new_weights)
-  next_par[, 7] <- new_weights
-  previous_par <- next_par
-  # write next par to file
-  colnames(next_par) <-
-    c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-      "weight",
-      "nltt", "gamma", "mbr", "num_lin",
-      "beta", "colless", "sackin", "ladder",
-      "fit")
-  next_par <- tibble::as_tibble(next_par)
-  if (write_to_file == TRUE) {
-    # readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
-    write.table(next_par, file = paste0("iter_", iter, ".txt"), row.names = F, col.names = T, quote = F)
-  }
   return(next_par)
 }
