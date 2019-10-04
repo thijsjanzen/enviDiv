@@ -188,7 +188,8 @@ infer_params <- function(number_of_particles,
       "fit")
   next_par <- tibble::as_tibble(next_par)
   if (write_to_file == TRUE) {
-    readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
+    # readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
+    write.table(next_par, file = paste0("iter_", iter, ".txt"), row.names = F, col.names = T, quote = F)
   }
   return(next_par)
 }
