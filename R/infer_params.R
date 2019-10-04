@@ -35,26 +35,23 @@ infer_params <- function(number_of_particles,
   # generate from prior:
   previous_par <- t(apply(param_matrix, 1, param_from_prior))
 
-  if(fix_model != -1) previous_par[, 6] <- fix_model
+  if (fix_model != -1) previous_par[, 6] <- fix_model
 
   previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
   next_par <- c()
 
   start_iter <- 2
 
-  if(continue_from_file == TRUE) {
-    for(i in max_iter:0) {
+  if (continue_from_file == TRUE) {
+    for (i in max_iter:0) {
       file_name <- paste0("iter_", i, ".txt")
-      if(file.exists(file_name) ) {
+      if (file.exists(file_name) ) {
         previous_par <- readr::read_tsv(file = file_name)
         previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
         start_iter <- i
         break
       }
     }
-
-    #emp_tree <- ape::read.nexus("tree.newick")
-    #emp_stats <- calc_sum_stats(emp_tree, emp_tree)
 
     cat("read previous particles from iteration: ", i, "\n")
   }
@@ -86,7 +83,8 @@ infer_params <- function(number_of_particles,
         sample_size <- remaining_particles * 1 / accept_rate
       }
 
-      sample_size <- max(sample_size, 2) # always need 2, otherwise apply doesn't work
+      # always need 2, otherwise apply doesn't work
+      sample_size <- max(sample_size, 2)
 
       candidate_indices <- sample(seq_along(previous_par[, 1]),
                                   sample_size,
@@ -105,7 +103,8 @@ infer_params <- function(number_of_particles,
 
       if(fix_model != -1) candidate_particles[, 6] <- fix_model
 
-      input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
+      input <- lapply(1:nrow(candidate_particles),
+                      function(i) candidate_particles[i,])
 
       found_trees <- future.apply::future_lapply(input,
                                                  sim_envidiv_tree,
@@ -120,7 +119,6 @@ infer_params <- function(number_of_particles,
                             byrow = TRUE)
 
       results <- cbind(candidate_particles, stat_matrix)
-      results_old <- results
 
       stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
       results <- results[!is.infinite(results[, 8]), ]
@@ -129,20 +127,20 @@ infer_params <- function(number_of_particles,
       if (length(stat_matrix) > 0) {
 
         local_fit <- c()
-        if( !is.null(nrow(stat_matrix))) {
+        if ( !is.null(nrow(stat_matrix))) {
           local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
         } else {
           local_fit <- calc_fit(stat_matrix, emp_stats)
         }
 
         selected_fits <- c()
-        if(!is.null(nrow(stat_matrix))) {
+        if (!is.null(nrow(stat_matrix))) {
           results <- cbind(results, local_fit)
 
           results <- results[local_fit < local_eps, ]
           selected_fits <- local_fit[local_fit < local_eps]
         } else {
-          if(local_fit < local_eps) {
+          if (local_fit < local_eps) {
             results <- c(results, local_fit)
             selected_fits <- local_fit
           }
@@ -188,7 +186,6 @@ infer_params <- function(number_of_particles,
     next_par <- tibble::as_tibble(next_par)
     if (write_to_file == TRUE) {
       readr::write_tsv(next_par, path = paste0("iter_", iter, ".txt"))
-      #write.table(next_par, file = paste0("iter_", iter, ".txt"), row.names = F, col.names = T, quote = F)
     }
   }
 

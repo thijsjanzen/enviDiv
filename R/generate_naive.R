@@ -33,19 +33,20 @@ generate_naive <- function(number_of_particles = 1000,
     calc_tree_stats <- function(x) {
       stats <- rep(Inf, 8)
       found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
-      if(is.null(found_tree)) {
+      if (is.null(found_tree)) {
         return(stats)
       }
 
-      num_tips = found_tree$Nnode + 1
+      num_tips <- found_tree$Nnode + 1
 
-      if(num_tips >= min_tips && num_tips <= max_tips) {
+      if (num_tips >= min_tips && num_tips <= max_tips) {
         stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)[1:8]
       }
       return(stats)
     }
 
-    input <- lapply(1:nrow(candidate_particles), function(i) candidate_particles[i,])
+    input <- lapply(1:nrow(candidate_particles),
+                    function(i) candidate_particles[i, ])
 
     stats <- future.apply::future_lapply(input, calc_tree_stats)
 
@@ -70,4 +71,3 @@ generate_naive <- function(number_of_particles = 1000,
   }
 
 }
-
