@@ -45,7 +45,7 @@ generate_naive <- function(number_of_particles = 1000,
       return(stats)
     }
 
-    input <- lapply(1:nrow(candidate_particles),
+    input <- lapply(seq_len(nrow(candidate_particles)),
                     function(i) candidate_particles[i, ])
 
     stats <- future.apply::future_lapply(input, calc_tree_stats)

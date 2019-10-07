@@ -45,7 +45,7 @@ infer_params <- function(number_of_particles,
   if (continue_from_file == TRUE) {
     for (i in max_iter:0) {
       file_name <- paste0("iter_", i, ".txt")
-      if (file.exists(file_name) ) {
+      if (file.exists(file_name)) {
         previous_par <- readr::read_tsv(file = file_name)
         previous_par[, 7] <- previous_par[, 7] / sum(previous_par[, 7])
         start_iter <- i
@@ -100,12 +100,12 @@ infer_params <- function(number_of_particles,
 
       candidate_particles <- candidate_particles[is_within_prior, ]
 
-      if(is.null(nrow(candidate_particles))) next
+      if (is.null(nrow(candidate_particles))) next
 
-      if(fix_model != -1) candidate_particles[, 6] <- fix_model
+      if (fix_model != -1) candidate_particles[, 6] <- fix_model
 
-      input <- lapply(1:nrow(candidate_particles),
-                      function(i) candidate_particles[i,])
+      input <- lapply(seq_len(nrow(candidate_particles)),
+                      function(i) candidate_particles[i, ])
 
       found_trees <- future.apply::future_lapply(input,
                                                  sim_envidiv_tree,
@@ -128,7 +128,7 @@ infer_params <- function(number_of_particles,
       if (length(stat_matrix) > 0) {
 
         local_fit <- c()
-        if ( !is.null(nrow(stat_matrix))) {
+        if (!is.null(nrow(stat_matrix))) {
           local_fit <- apply(stat_matrix, 1, calc_fit, emp_stats)
         } else {
           local_fit <- calc_fit(stat_matrix, emp_stats)
@@ -153,8 +153,8 @@ infer_params <- function(number_of_particles,
           next_par <- rbind(next_par, results)
 
           num_added_particles <- nrow(next_par) - rows_before
-          if(is.null(nrow(next_par))) num_added_particles <- 0
-          if(is.null(num_added_particles)) num_added_particles <- 0
+          if (is.null(nrow(next_par))) num_added_particles <- 0
+          if (is.null(num_added_particles)) num_added_particles <- 0
 
           remaining_particles <- number_of_particles - nrow(next_par)
 

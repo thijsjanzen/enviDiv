@@ -1,3 +1,32 @@
+#' @keywords internal
+beta_stat <- function(tree) {
+  if (!ape::is.rooted(tree)) return(NA)
+  if (!ape::is.binary.tree(tree)) {
+    dichotomousphylogeny <- ape::multi2di(tree, random = TRUE)
+    b <- apTreeshape::maxlik.betasplit(dichotomousphylogeny)$max_lik
+    return(b)
+  }
+
+  b <- apTreeshape::maxlik.betasplit(tree)$max_lik
+  return(b)
+}
+
+#' @keywords internal
+colless_stat <- function(tree)  {
+  if (!ape::is.rooted(tree)) return(NA)
+  tree <- ape::multi2di(tree)
+  x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
+  return(x)
+}
+
+#' @keywords internal
+sackin_stat <- function(tree)  {
+  if (!ape::is.rooted(tree)) return(NA)
+  tree <- ape::multi2di(tree)
+  x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
+  return(x)
+}
+
 #' calculate summary statistics for a focal tree. The following summary
 #'   statistics are calculated:
 #'   nLTT, gamma, mean branching times and number of lineages
@@ -40,33 +69,6 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   output[2] <- ape::gammaStat(focal_tree) # gamma
   output[3] <- mean(focal_tree$edge.length, na.rm = TRUE) # mean branch length
   output[4] <- focal_tree$Nnode + 1 # number of lineages
-
-  beta_stat <- function(tree) {
-    if (!ape::is.rooted(tree)) return(NA)
-    if (!ape::is.binary.tree(tree)) {
-      dichotomousphylogeny <- ape::multi2di(tree, random = TRUE)
-      b <- apTreeshape::maxlik.betasplit(dichotomousphylogeny)$max_lik
-      return(b)
-    }
-
-    b <- apTreeshape::maxlik.betasplit(tree)$max_lik
-    return(b)
-  }
-
-  colless_stat <- function(tree)  {
-    if (!ape::is.rooted(tree)) return(NA)
-    tree <- ape::multi2di(tree)
-    x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
-    return(x)
-  }
-
-  sackin_stat <- function(tree)  {
-    if (!ape::is.rooted(tree)) return(NA)
-    tree <- ape::multi2di(tree)
-    x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
-    return(x)
-  }
-
   output[5] <- beta_stat(focal_tree) # beta
   output[6] <- colless_stat(focal_tree) # colless
   output[7] <- sackin_stat(focal_tree) # sackin
