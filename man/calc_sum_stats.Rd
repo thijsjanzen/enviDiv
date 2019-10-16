@@ -6,15 +6,13 @@
   statistics are calculated:
   nLTT, gamma, mean branching times and number of lineages}
 \usage{
-calc_sum_stats(focal_tree, emp_tree = NULL, params = NULL)
+calc_sum_stats(focal_tree, emp_tree = NULL)
 }
 \arguments{
 \item{focal_tree}{input phylogenetic tree for which to calculate
 summary statistics.}
 
 \item{emp_tree}{reference empirical tree, only used to calculate the nLTT.}
-
-\item{params}{parameters}
 }
 \value{
 vector of 8 summary statistics
