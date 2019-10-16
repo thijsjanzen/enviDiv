@@ -58,6 +58,7 @@ sim_envidiv_tree <- function(params,
   local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
 
   local_l_table[1, 2] <- 0
+  local_l_table[which(local_l_table[,1] < 0), 1] <- 0
 
   a <- subset(local_l_table, local_l_table[, 1] == crown_age)
   connected <- FALSE

@@ -56,9 +56,12 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   focal_tree <- ape::multi2di(focal_tree)
 
   if (min(ape::branching.times(focal_tree), na.rm = TRUE) < 0) {
-    cat("ERROR, negative branch lengths!\n")
-    ape::write.tree(focal_tree, file = paste0("error_tree.txt"), append = T)
-    return(rep(Inf, 8))
+    deviation <- min(ape::branching.times(focal_tree))
+    warning("the root was < 0, error made was: ", deviation, " probably a rounding error\n")
+    if(abs(deviation) > 0.01) {
+      warning("The error was huge, no attempt tried to correct, aborting this tree\n")
+      return(rep(Inf, 8))
+    }
   }
   if (focal_tree$Nnode + 1 < 3) {
     return(rep(Inf, 8))
