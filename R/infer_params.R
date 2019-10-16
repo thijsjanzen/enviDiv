@@ -115,6 +115,11 @@ infer_params <- function(number_of_particles,
                                            calc_sum_stats,
                                            emp_tree)
 
+      #stats <- list()
+      #for(i in 1:length(found_trees)) {
+      #  stats[[i]] <- calc_sum_stats(found_trees[[i]], emp_tree, candidate_particles[i, ])
+      #}
+
       stat_matrix <- matrix(unlist(stats, use.names = FALSE),
                             ncol = 8,
                             byrow = TRUE)
@@ -160,12 +165,12 @@ infer_params <- function(number_of_particles,
 
           accept_rate <- round(num_added_particles / sample_size, 2)
           end_time <- Sys.time()
-          diff_time <- (end_time - start_time)[[1]]
+          diff_time <- difftime(start_time, end_time, units = "secs")
 
           cat(iter, "\t", remaining_particles, "\t",
               num_added_particles, "\t",
               accept_rate, "\t",
-              mean(selected_fits), "\t", mean(local_fit), "\t", diff_time, "\n")
+              mean(selected_fits), "\t", mean(local_fit), "\t", round(diff_time,1), "\n")
         }
       }
     }
