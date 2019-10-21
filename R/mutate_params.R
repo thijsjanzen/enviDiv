@@ -9,12 +9,9 @@ mutate_params <- function(params, local_sd) {
     output[i] <- 10 ^ (stats::rnorm(1, log10(params[i]), local_sd))
   }
 
-  output[6] <- params[6]
-  r <- sample(1:4, 1)
-  if (r == 0) output[6] <- params[6] + 1
-  if (r == 1) output[6] <- params[6] - 1
-  if (output[6] > 2) output[6] <- output[6] - 3
-  if (output[6] < 1) output[6] <- output[6] + 3
+  probs <- rep(0.25, 3)
+  probs[params[6]] <- 0.5
+  output[6] <- sample(1:3, 1, prob = probs)
 
   output[7] <- params[7]
   return(output)

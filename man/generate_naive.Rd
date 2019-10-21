@@ -5,7 +5,8 @@
 \title{function to perform ABC-SMC}
 \usage{
 generate_naive(number_of_particles = 1000, min_tips = 50,
-  max_tips = 150, model = 1, emp_tree, file_name)
+  max_tips = 150, model = 1, emp_tree, write_to_file = FALSE,
+  file_name)
 }
 \arguments{
 \item{number_of_particles}{number of particles used per iteration of
@@ -18,6 +19,8 @@ the SMC algorithm}
 \item{model}{used water model}
 
 \item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
+
+\item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}
 }

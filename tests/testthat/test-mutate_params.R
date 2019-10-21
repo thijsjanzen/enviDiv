@@ -17,4 +17,24 @@ test_that("use", {
   for (r in 1:100) {
     new_params <- mutate_params(new_params, local_sd = 0.1)
   }
+
+  param_table <- matrix(nrow = 1e4, ncol = 7)
+  for(i in 1:1e4) param_table[i, ] <- param_from_prior()
+
+
+  for(model in 1:3) {
+      param_table[, 6] <- model
+      param_table2 <- matrix(nrow = 1e4, ncol = 7)
+      for(i in 1:1e4) param_table2[i, ] <- mutate_params(param_table[i, ], local_sd = 0.1)
+      vx <- table(param_table2[, 6])
+      vx <- vx / sum(vx)
+      a <- vx[[model]]
+      b <- vx[[-model]]
+
+      testthat::expect_equal(a[[1]], 0.5, tolerance = 0.1)
+      testthat::expect_equal(b[[1]], 0.25, tolerance = 0.1)
+      testthat::expect_equal(b[[2]], 0.25, tolerance = 0.1)
+  }
+
+
 })

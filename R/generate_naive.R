@@ -5,6 +5,7 @@
 #' @param max_tips maximum number of tips
 #' @param model used water model
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
+#' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
 #' @return a tibble containing the results
 #' @export
@@ -13,6 +14,7 @@ generate_naive <- function(number_of_particles = 1000,
                            max_tips = 150,
                            model = 1,
                            emp_tree,
+                           write_to_file = FALSE,
                            file_name) {
 
   crown_age <- max(ape::branching.times(emp_tree))
@@ -20,9 +22,11 @@ generate_naive <- function(number_of_particles = 1000,
   number_accepted <- 0
   remaining_particles <- number_of_particles - number_accepted
 
+  all_results <- c()
+
   while (remaining_particles > 0) {
     cat(remaining_particles, "\n")
-    sample_size <- min(10000, remaining_particles)
+    sample_size <- max(1000, remaining_particles)
 
     param_matrix <- matrix(NA, nrow = sample_size,
                            ncol = 7)  #6 parameters
@@ -66,8 +70,14 @@ generate_naive <- function(number_of_particles = 1000,
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder")
     results <- tibble::as_tibble(results)
-    readr::write_tsv(results, path = file_name,
+    if(write_to_file) {
+      readr::write_tsv(results, path = file_name,
                      append = TRUE)
-  }
+    } else {
+      all_results <- rbind(all_results, results)
+    }
 
+
+  }
+  return(all_results)
 }
