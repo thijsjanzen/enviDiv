@@ -17,8 +17,6 @@ generate_naive <- function(number_of_particles = 1000,
                            write_to_file = FALSE,
                            file_name) {
 
-  crown_age <- max(ape::branching.times(emp_tree))
-
   number_accepted <- 0
   remaining_particles <- number_of_particles - number_accepted
 
@@ -70,7 +68,7 @@ generate_naive <- function(number_of_particles = 1000,
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder")
     results <- tibble::as_tibble(results)
-    if(write_to_file) {
+    if (write_to_file) {
       readr::write_tsv(results, path = file_name,
                      append = TRUE)
     } else {

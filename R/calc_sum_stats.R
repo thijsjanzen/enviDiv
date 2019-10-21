@@ -57,9 +57,11 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
 
   if (min(ape::branching.times(focal_tree), na.rm = TRUE) < 0) {
     deviation <- min(ape::branching.times(focal_tree))
-    warning("the root was < 0, error made was: ", deviation, " probably a rounding error\n")
-    if(abs(deviation) > 0.01) {
-      warning("The error was huge, no attempt tried to correct, aborting this tree\n")
+    warning("the root was < 0, error made was: ", deviation,
+            " probably a rounding error\n")
+    if (abs(deviation) > 0.01) {
+      warning("The error was huge, no attempt tried to correct,
+              aborting this tree\n")
       return(rep(Inf, 8))
     }
   }
