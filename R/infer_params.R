@@ -104,8 +104,7 @@ get_next_par <- function(number_of_particles = 1000,
                          emp_tree = NULL,
                          emp_stats = NULL,
                          local_eps = Inf,
-                         iter = 0)
-{
+                         iter = 0) {
   next_par <- c()
   remaining_particles <- number_of_particles
   accept_rate <- 0
