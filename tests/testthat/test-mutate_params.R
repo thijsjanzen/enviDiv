@@ -19,7 +19,7 @@ test_that("use", {
   }
 
   param_table <- matrix(nrow = 1e4, ncol = 7)
-  for(i in 1:1e4) param_table[i, ] <- param_from_prior()
+  for (i in 1:1e4) param_table[i, ] <- param_from_prior()
 
 
   for (model in 1:3) {

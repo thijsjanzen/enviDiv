@@ -1,9 +1,6 @@
 #' @keywords internal
 beta_stat <- function(tree) {
   if (!ape::is.rooted(tree)) return(Inf)
-  if (!ape::is.binary.tree(tree)) {
-    tree <- ape::multi2di(tree, random = TRUE)
-  }
 
   b <- apTreeshape::maxlik.betasplit(tree)$max_lik
   return(b)
@@ -13,20 +10,16 @@ beta_stat <- function(tree) {
 colless_stat <- function(tree)  {
   if (!ape::is.rooted(tree)) return(Inf)
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
-  if (!ape::is.binary.tree(tree)) {
-    tree <- ape::multi2di(tree, random = TRUE)
-  }
+
   x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
   return(x)
 }
 
 #' @keywords internal
 sackin_stat <- function(tree)  {
-  if (!ape::is.rooted(tree)) return(NA)
+  if (!ape::is.rooted(tree)) return(Inf)
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
-  if (!ape::is.binary.tree(tree)) {
-    tree <- ape::multi2di(tree, random = TRUE)
-  }
+
   x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
   return(x)
 }
@@ -56,11 +49,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
     deviation <- min(ape::branching.times(focal_tree))
     warning("the root was < 0, error made was: ", deviation,
             " probably a rounding error\n")
-    if (abs(deviation) > 0.01) {
-      warning("The error was huge, no attempt tried to correct,
-              aborting this tree\n")
-      return(rep(Inf, 8))
-    }
+    return(rep(Inf, 8))
   }
 
   output <- c()
