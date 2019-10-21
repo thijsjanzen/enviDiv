@@ -2,7 +2,8 @@ language: r
 cache: packages
 
 os: 
-  - osx
+  # disabled osx, because of openmp dependency
+  # - osx
   - linux
 
 before_install:
