@@ -17,6 +17,8 @@ generate_naive <- function(number_of_particles = 1000,
                            write_to_file = FALSE,
                            file_name) {
 
+  crown_age <- max(ape::branching.times(emp_tree))
+
   number_accepted <- 0
   remaining_particles <- number_of_particles - number_accepted
 
