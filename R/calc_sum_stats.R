@@ -1,10 +1,8 @@
 #' @keywords internal
 beta_stat <- function(tree) {
-  if (!ape::is.rooted(tree)) return(NA)
+  if (!ape::is.rooted(tree)) return(Inf)
   if (!ape::is.binary.tree(tree)) {
-    dichotomousphylogeny <- ape::multi2di(tree, random = TRUE)
-    b <- apTreeshape::maxlik.betasplit(dichotomousphylogeny)$max_lik
-    return(b)
+    tree <- ape::multi2di(tree, random = TRUE)
   }
 
   b <- apTreeshape::maxlik.betasplit(tree)$max_lik
@@ -13,8 +11,11 @@ beta_stat <- function(tree) {
 
 #' @keywords internal
 colless_stat <- function(tree)  {
-  if (!ape::is.rooted(tree)) return(NA)
-  tree <- ape::multi2di(tree)
+  if (!ape::is.rooted(tree)) return(Inf)
+  if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
+  if (!ape::is.binary.tree(tree)) {
+    tree <- ape::multi2di(tree, random = TRUE)
+  }
   x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
   return(x)
 }
@@ -22,7 +23,10 @@ colless_stat <- function(tree)  {
 #' @keywords internal
 sackin_stat <- function(tree)  {
   if (!ape::is.rooted(tree)) return(NA)
-  tree <- ape::multi2di(tree)
+  if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
+  if (!ape::is.binary.tree(tree)) {
+    tree <- ape::multi2di(tree, random = TRUE)
+  }
   x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
   return(x)
 }
@@ -46,13 +50,6 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
     emp_tree <- focal_tree
   }
 
-  # trees with only 2 tips turn up with an
-  # empty edgelist (they are only a crown)
-  if (is.null(focal_tree$edge.length)) {
-    warning("tree with only two tips, no statistics can be calculated")
-    return(rep(Inf, 8))
-  }
-
   focal_tree <- ape::multi2di(focal_tree)
 
   if (min(ape::branching.times(focal_tree), na.rm = TRUE) < 0) {
@@ -64,9 +61,6 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
               aborting this tree\n")
       return(rep(Inf, 8))
     }
-  }
-  if (focal_tree$Nnode + 1 < 3) {
-    return(rep(Inf, 8))
   }
 
   output <- c()
