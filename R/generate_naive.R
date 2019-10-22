@@ -12,7 +12,7 @@
 generate_naive <- function(number_of_particles = 1000,
                            min_tips = 50,
                            max_tips = 150,
-                           model = 1,
+                           model = -1,
                            emp_tree,
                            write_to_file = FALSE,
                            file_name) {
@@ -32,7 +32,7 @@ generate_naive <- function(number_of_particles = 1000,
                            ncol = 7)  #6 parameters
 
     candidate_particles <- t(apply(param_matrix, 1, enviDiv::param_from_prior))
-    candidate_particles[, 6] <- model
+    if(model != -1) candidate_particles[, 6] <- model
 
     calc_tree_stats <- function(x) {
       stats <- rep(Inf, 8)
@@ -60,24 +60,31 @@ generate_naive <- function(number_of_particles = 1000,
 
     results <- cbind(candidate_particles, stat_matrix)
 
+    stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
     results <- results[!is.infinite(results[, 8]), ]
 
-    number_accepted <- number_accepted + length(results[, 1])
-    remaining_particles <- number_of_particles - number_accepted
-    colnames(results) <-
-      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-        "weight",
-        "nltt", "gamma", "mbr", "num_lin",
-        "beta", "colless", "sackin", "ladder")
-    results <- tibble::as_tibble(results)
-    if (write_to_file) {
-      readr::write_tsv(results, path = file_name,
-                     append = TRUE)
-    } else {
-      all_results <- rbind(all_results, results)
+    if (length(stat_matrix) > 0) {
+
+      num_local_accepted <- nrow(results)
+      if(!is.null(num_local_accepted))
+      {
+        number_accepted <- number_accepted + num_local_accepted
+
+        remaining_particles <- number_of_particles - number_accepted
+        colnames(results) <-
+          c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+            "weight",
+            "nltt", "gamma", "mbr", "num_lin",
+            "beta", "colless", "sackin", "ladder")
+        results <- tibble::as_tibble(results)
+        if (write_to_file) {
+          readr::write_tsv(results, path = file_name,
+                         append = TRUE)
+        } else {
+          all_results <- rbind(all_results, results)
+        }
+      }
     }
-
-
   }
   return(all_results)
 }
