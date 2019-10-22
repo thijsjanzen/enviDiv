@@ -1,14 +1,11 @@
 #' @keywords internal
 beta_stat <- function(tree) {
-  if (!ape::is.rooted(tree)) return(Inf)
-
   b <- apTreeshape::maxlik.betasplit(tree)$max_lik
   return(b)
 }
 
 #' @keywords internal
 colless_stat <- function(tree)  {
-  if (!ape::is.rooted(tree)) return(Inf)
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
 
   x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
@@ -17,7 +14,6 @@ colless_stat <- function(tree)  {
 
 #' @keywords internal
 sackin_stat <- function(tree)  {
-  if (!ape::is.rooted(tree)) return(Inf)
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
 
   x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
@@ -41,6 +37,11 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
 
   if (is.null(emp_tree)) {
     emp_tree <- focal_tree
+  }
+
+  if (!ape::is.rooted(focal_tree)) {
+    warning("tree was not rooted, returning infinite statistics")
+    return(rep(Inf, 8))
   }
 
   focal_tree <- ape::multi2di(focal_tree)

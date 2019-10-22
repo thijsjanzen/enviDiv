@@ -202,7 +202,7 @@ get_next_par <- function(number_of_particles = 1000,
 
         accept_rate <- round(num_added_particles / sample_size, 2)
         end_time <- Sys.time()
-        diff_time <- difftime(start_time, end_time, units = "secs")
+        diff_time <- difftime(end_time, start_time, units = "secs")
 
         cat(iter, "\t",
             remaining_particles, "\t",
