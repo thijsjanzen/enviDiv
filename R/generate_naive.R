@@ -32,7 +32,7 @@ generate_naive <- function(number_of_particles = 1000,
                            ncol = 7)  #6 parameters
 
     candidate_particles <- t(apply(param_matrix, 1, enviDiv::param_from_prior))
-    if(model != -1) candidate_particles[, 6] <- model
+    if (model != -1) candidate_particles[, 6] <- model
 
     calc_tree_stats <- function(x) {
       stats <- rep(Inf, 8)
@@ -66,8 +66,7 @@ generate_naive <- function(number_of_particles = 1000,
     if (length(stat_matrix) > 0) {
 
       num_local_accepted <- nrow(results)
-      if(!is.null(num_local_accepted))
-      {
+      if (!is.null(num_local_accepted)) {
         number_accepted <- number_accepted + num_local_accepted
 
         remaining_particles <- number_of_particles - number_accepted
