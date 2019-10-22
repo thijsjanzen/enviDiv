@@ -32,9 +32,9 @@ test_that("use", {
       a <- vx[model]
       b <- vx[-model]
 
-      testthat::expect_equal(a[[1]], 0.5, tolerance = 0.1)
-      testthat::expect_equal(b[[1]], 0.25, tolerance = 0.1)
-      testthat::expect_equal(b[[2]], 0.25, tolerance = 0.1)
+      testthat::expect_equal(a[[1]], 0.9, tolerance = 0.1)
+      testthat::expect_equal(b[[1]], 0.05, tolerance = 0.1)
+      testthat::expect_equal(b[[2]], 0.05, tolerance = 0.1)
   }
 
 
