@@ -13,11 +13,17 @@ generate_naive <- function(number_of_particles = 1000,
                            min_tips = 50,
                            max_tips = 150,
                            model = -1,
-                           emp_tree,
+                           emp_tree = NULL,
+                           crown_age = NULL,
                            write_to_file = FALSE,
                            file_name) {
 
-  crown_age <- max(ape::branching.times(emp_tree))
+  if(!is.null(emp_tree)) {
+    crown_age <- max(ape::branching.times(emp_tree))
+  }
+  if(is.null(crown_age)) {
+    stop("Please either provide a reference tree, or provide the crown age")
+  }
 
   number_accepted <- 0
   remaining_particles <- number_of_particles - number_accepted
