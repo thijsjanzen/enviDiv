@@ -5,7 +5,7 @@
 \title{function to perform ABC-SMC}
 \usage{
 generate_naive(number_of_particles = 1000, min_tips = 50,
-  max_tips = 150, model = 1, emp_tree, write_to_file = FALSE,
+  max_tips = 150, model = -1, emp_tree, write_to_file = FALSE,
   file_name)
 }
 \arguments{

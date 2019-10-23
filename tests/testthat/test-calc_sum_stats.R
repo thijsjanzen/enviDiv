@@ -26,10 +26,8 @@ test_that("abuse", {
   testthat::expect_warning(calc_sum_stats(phy))
   testthat::expect_warning(calc_sum_stats(5))
 
-
-  set.seed(1)
   params <- c(0, 0.01, 0, 0, 0, 1)
-  emp_tree <- sim_envidiv_tree(params, crown_age = 5)
+  emp_tree <- sim_envidiv_tree(params, crown_age = 5, seed = 1)
   vx <- calc_sum_stats(emp_tree)
   testthat::expect_true(is.nan(vx[2]))
   testthat::expect_true(is.infinite(vx[6]))
