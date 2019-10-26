@@ -32,7 +32,7 @@ generate_naive <- function(number_of_particles = 1000,
 
   while (remaining_particles > 0) {
     cat(remaining_particles, "\n")
-    sample_size <- min(10000, remaining_particles)
+    sample_size <- min(100, remaining_particles) #increase if not testing
 
     param_matrix <- matrix(NA, nrow = sample_size,
                            ncol = 7)  #6 parameters

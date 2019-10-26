@@ -6,9 +6,12 @@
 \usage{
 create_reference_table(simulations_per_model = 1000, min_tips = 50,
   max_tips = 150, model = NULL, emp_tree = NULL, crown_age = NULL,
-  write_to_file = FALSE, file_name)
+  write_to_file = FALSE, file_name, exp_prior = FALSE)
 }
 \arguments{
+\item{simulations_per_model}{number of particles used per iteration of
+the SMC algorithm}
+
 \item{min_tips}{minimum number of tips}
 
 \item{max_tips}{maximum number of tips}
@@ -17,12 +20,13 @@ create_reference_table(simulations_per_model = 1000, min_tips = 50,
 
 \item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
 
+\item{crown_age}{crown age}
+
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}
 
-\item{number_of_particles}{number of particles used per iteration of
-the SMC algorithm}
+\item{exp_prior}{use exponential or uniform prior}
 }
 \value{
 a tibble containing the results
