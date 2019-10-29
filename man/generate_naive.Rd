@@ -20,6 +20,8 @@ the SMC algorithm}
 
 \item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
 
+\item{crown_age}{crown age}
+
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}

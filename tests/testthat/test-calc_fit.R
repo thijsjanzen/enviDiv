@@ -9,6 +9,6 @@ test_that("usage", {
 
   v1 <- calc_sum_stats(emp_tree, emp_tree)
 
-  focal_fit <- calc_fit(v1[1:8], v1[1:8])
+  focal_fit <- calc_fit(v1, v1)
   testthat::expect_equal(focal_fit, 0)
 })

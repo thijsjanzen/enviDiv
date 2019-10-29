@@ -84,7 +84,9 @@ infer_params <- function(number_of_particles,
       c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
         "weight",
         "nltt", "gamma", "mbr", "num_lin",
-        "beta", "colless", "sackin", "ladder",
+        "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
+        "pitchforks", "stairs",
+        "spectr_eigen", "spectr_asymmetry", "spectr_peakedness",
         "fit")
     next_par <- tibble::as_tibble(next_par)
     if (write_to_file == TRUE) {
@@ -158,7 +160,7 @@ get_next_par <- function(number_of_particles = 1000,
                                          emp_tree)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                          ncol = 8,
+                          ncol = 15,
                           byrow = TRUE)
 
     results <- cbind(candidate_particles, stat_matrix)

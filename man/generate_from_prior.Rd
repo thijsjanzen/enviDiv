@@ -5,7 +5,7 @@
 \title{function to perform ABC-SMC}
 \usage{
 generate_from_prior(number_of_particles = 1000, min_tips = 50,
-  max_tips = 150, model = -1, emp_tree = NULL, crown_age = NULL,
+  max_tips = 150, model = NULL, emp_tree = NULL, crown_age = NULL,
   write_to_file = FALSE, file_name, exp_prior = FALSE)
 }
 \arguments{
@@ -19,6 +19,8 @@ the SMC algorithm}
 \item{model}{used water model}
 
 \item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
+
+\item{crown_age}{crown age}
 
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 

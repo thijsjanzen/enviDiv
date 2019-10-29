@@ -5,6 +5,7 @@
 #' @param max_tips maximum number of tips
 #' @param model used water model
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
+#' @param crown_age crown age
 #' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
 #' @param exp_prior use an exponential prior or not.
@@ -13,7 +14,7 @@
 generate_from_prior <- function(number_of_particles = 1000,
                            min_tips = 50,
                            max_tips = 150,
-                           model = -1,
+                           model = NULL,
                            emp_tree = NULL,
                            crown_age = NULL,
                            write_to_file = FALSE,
@@ -48,10 +49,10 @@ generate_from_prior <- function(number_of_particles = 1000,
                                      enviDiv::param_from_prior))
     }
 
-    if (model != -1) candidate_particles[, 6] <- model
+    if (!is.null(model)) candidate_particles[, 6] <- model
 
     calc_tree_stats <- function(x) {
-      stats <- rep(Inf, 8)
+      stats <- rep(Inf, 15)
       found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
       if (is.null(found_tree)) {
         return(stats)
@@ -60,7 +61,7 @@ generate_from_prior <- function(number_of_particles = 1000,
       num_tips <- found_tree$Nnode + 1
 
       if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)[1:8]
+        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)
       }
       return(stats)
     }
@@ -71,7 +72,7 @@ generate_from_prior <- function(number_of_particles = 1000,
     stats <- future.apply::future_lapply(input, calc_tree_stats)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                          ncol = 8,
+                          ncol = 15,
                           byrow = TRUE)
 
     results <- cbind(candidate_particles, stat_matrix)

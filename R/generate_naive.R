@@ -5,6 +5,7 @@
 #' @param max_tips maximum number of tips
 #' @param model used water model
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on
+#' @param crown_age crown age
 #' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
 #' @return a tibble containing the results

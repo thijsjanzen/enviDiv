@@ -435,7 +435,7 @@ int run(const std::vector<float>& parameters,
       return 0;
     }
 
-    if (pop.size() > 300) //more than 300 species, unlikely to provide a good fit, but slows down the program considerably
+    if (pop.size() > 500) //more than 300 species, unlikely to provide a good fit, but slows down the program considerably
     {
       return 1e6;
     }
