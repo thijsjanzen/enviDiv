@@ -91,7 +91,9 @@ generate_from_prior <- function(number_of_particles = 1000,
           c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
             "weight",
             "nltt", "gamma", "mbr", "num_lin",
-            "beta", "colless", "sackin", "ladder")
+            "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
+            "pitchforks", "stairs",
+            "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
         results <- tibble::as_tibble(results)
         if (write_to_file) {
           readr::write_tsv(results, path = file_name,
