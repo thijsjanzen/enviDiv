@@ -49,11 +49,14 @@ generate_stack <- function(number_of_replicates = 1000,
     calc_tree_stats <- function(x) {
       stats <- rep(Inf, 15)
 
+      found_tree <- c()
       if(x[6] == 4) {
         found_tree <- TreeSim::sim.bd.age(age = crown_age, numbsim = 1, lambda = x[2], mu = x[1], complete = FALSE)[[1]]
+        while(is.numeric(found_tree)) {
+          found_tree <- TreeSim::sim.bd.age(age = crown_age, numbsim = 1, lambda = x[2], mu = x[1], complete = FALSE)[[1]]
+        }
       } else {
         found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
-
       }
 
       if (is.null(found_tree)) {
