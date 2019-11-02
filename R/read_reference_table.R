@@ -16,6 +16,7 @@ read_reference_table <- function(path) {
         "pitchforks", "stairs",
         "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
 
+
     reference_table <- rbind(reference_table, vy)
   }
 
@@ -26,5 +27,5 @@ read_reference_table <- function(path) {
                                          "pitchforks", "stairs",
                                          "spectr_eigen", "spectr_asymmetry", "spectr_peakedness"))
 
-  return(ref_table)
+  return(cbind(focal_models, ref_table))
 }
