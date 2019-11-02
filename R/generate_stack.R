@@ -1,5 +1,5 @@
 #' function to perform ABC-SMC
-#' @param number_of_particles number of particles used per iteration of
+#' @param number_of_replicates number of particles used per iteration of
 #'                            the SMC algorithm
 #' @param min_tips minimum number of tips
 #' @param max_tips maximum number of tips
@@ -17,7 +17,7 @@ generate_stack <- function(number_of_replicates = 1000,
                            emp_tree = NULL,
                            crown_age = NULL,
                            write_to_file = FALSE,
-                           file_name) {
+                           file_name = NULL) {
 
   if(!is.null(emp_tree)) {
     crown_age <- max(ape::branching.times(emp_tree))
@@ -31,20 +31,23 @@ generate_stack <- function(number_of_replicates = 1000,
   }
 
   number_accepted <- 0
-  remaining_particles <- number_of_particles - number_accepted
+  remaining_particles <- number_of_replicates - number_accepted
 
   all_results <- c()
 
   while (remaining_particles > 0) {
     cat(remaining_particles, "\n")
-    sample_size <- min(100, remaining_particles) #increase if not testing
+    sample_size <- max(1000, remaining_particles) #increase if not testing
 
     param_matrix <- matrix(parameters,
                            nrow = sample_size,
-                           ncol = 7)  #6 parameters
+                           ncol = 7, byrow = T)  #6 parameters
+
+    candidate_particles <- param_matrix
+
 
     calc_tree_stats <- function(x) {
-      stats <- rep(Inf, 8)
+      stats <- rep(Inf, 15)
       found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
       if (is.null(found_tree)) {
         return(stats)
@@ -53,7 +56,7 @@ generate_stack <- function(number_of_replicates = 1000,
       num_tips <- found_tree$Nnode + 1
 
       if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)[1:8]
+        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)
       }
       return(stats)
     }
@@ -64,7 +67,7 @@ generate_stack <- function(number_of_replicates = 1000,
     stats <- future.apply::future_lapply(input, calc_tree_stats)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                          ncol = 8,
+                          ncol = 15,
                           byrow = TRUE)
 
     results <- cbind(candidate_particles, stat_matrix)
@@ -78,7 +81,7 @@ generate_stack <- function(number_of_replicates = 1000,
       if (!is.null(num_local_accepted)) {
         number_accepted <- number_accepted + num_local_accepted
 
-        remaining_particles <- number_of_particles - number_accepted
+        remaining_particles <- number_of_replicates - number_accepted
         colnames(results) <-
           c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
             "weight",

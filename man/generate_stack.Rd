@@ -6,9 +6,12 @@
 \usage{
 generate_stack(number_of_replicates = 1000, parameters = NULL,
   min_tips = 50, max_tips = 150, emp_tree = NULL, crown_age = NULL,
-  write_to_file = FALSE, file_name)
+  write_to_file = FALSE, file_name = NULL)
 }
 \arguments{
+\item{number_of_replicates}{number of particles used per iteration of
+the SMC algorithm}
+
 \item{min_tips}{minimum number of tips}
 
 \item{max_tips}{maximum number of tips}
@@ -20,9 +23,6 @@ generate_stack(number_of_replicates = 1000, parameters = NULL,
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}
-
-\item{number_of_particles}{number of particles used per iteration of
-the SMC algorithm}
 
 \item{model}{used water model}
 }

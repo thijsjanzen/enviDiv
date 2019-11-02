@@ -4,10 +4,12 @@
 \alias{read_reference_table}
 \title{collect reference table based on previously generated reference tables for each model}
 \usage{
-read_reference_table(path)
+read_reference_table(path, return_full_table = FALSE)
 }
 \arguments{
 \item{path}{path of directory where each subdirectory [1, 2, 3] is located}
+
+\item{return_full_table}{should the function only return summary stats, or also parameters?}
 }
 \value{
 reference table
