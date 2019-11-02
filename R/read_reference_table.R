@@ -6,7 +6,7 @@ read_reference_table <- function(path) {
 
   reference_table <- c()
   for(i in 1:3) {
-    file_name <- paste0("./", i, "/reference_table.txt")
+    file_name <- paste0(path, i, "/reference_table.txt")
     vy <- readr::read_tsv(file_name, col_names = F)
     colnames(vy)  <-
       c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
