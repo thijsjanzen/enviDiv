@@ -65,7 +65,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   output[9] <- phyloTop::cherries(focal_tree) # cherries
   output[10] <- phyloTop::ILnumber(focal_tree) # number of internal nodes with a single child
   output[11] <- phyloTop::pitchforks(focal_tree) #pitchforks
-  output[12] <- phyloTop::stairs(focal_tree) # stair casedness
+  output[12] <- phyloTop::stairs(focal_tree)[[1]] # stair casedness
 
   spectral <- RPANDA::spectR(focal_tree)
   output[13] <- spectral$principal_eigenvalue
