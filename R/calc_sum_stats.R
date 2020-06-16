@@ -20,9 +20,6 @@ sackin_stat <- function(tree)  {
   return(x)
 }
 
-
-
-
 #' calculate summary statistics for a focal tree. The following summary
 #'   statistics are calculated:
 #'   nLTT, gamma, mean branching times and number of lineages

@@ -4,9 +4,17 @@
 \alias{create_reference_table}
 \title{function to perform ABC-SMC}
 \usage{
-create_reference_table(simulations_per_model = 1000, min_tips = 50,
-  max_tips = 150, model = NULL, emp_tree = NULL, crown_age = NULL,
-  write_to_file = FALSE, file_name, exp_prior = FALSE)
+create_reference_table(
+  simulations_per_model = 1000,
+  min_tips = 50,
+  max_tips = 150,
+  model = NULL,
+  emp_tree = NULL,
+  crown_age = NULL,
+  write_to_file = FALSE,
+  file_name,
+  exp_prior = FALSE
+)
 }
 \arguments{
 \item{simulations_per_model}{number of particles used per iteration of

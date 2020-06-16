@@ -1,6 +1,7 @@
 #' function to perform ABC-SMC
 #' @param number_of_replicates number of particles used per iteration of
 #'                            the SMC algorithm
+#' @param parameters parameters, a vector with: 1) extinction rate, 2) (sympatric) speciation rate at high water, 3) sympatric speciation rate at low water, 4) allopatric speciation rate at low water, 5) posterior perturbation and 6) the specific model, where 1) model without water level changes, 2) literature water level changes, 3) extrapolated water level changes, 4) standard birth-death model.
 #' @param min_tips minimum number of tips
 #' @param max_tips maximum number of tips
 #' @param model used water model
@@ -19,14 +20,14 @@ generate_stack <- function(number_of_replicates = 1000,
                            write_to_file = FALSE,
                            file_name = NULL) {
 
-  if(!is.null(emp_tree)) {
+  if (!is.null(emp_tree)) {
     crown_age <- max(ape::branching.times(emp_tree))
   }
-  if(is.null(crown_age)) {
+  if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
   }
 
-  if(is.null(parameters)) {
+  if (is.null(parameters)) {
     parameters <- enviDiv::param_from_prior()
   }
 
@@ -50,10 +51,20 @@ generate_stack <- function(number_of_replicates = 1000,
       stats <- rep(Inf, 15)
 
       found_tree <- c()
-      if(x[6] == 4) {
-        found_tree <- TreeSim::sim.bd.age(age = crown_age, numbsim = 1, lambda = x[2], mu = x[1], complete = FALSE)[[1]]
-        while(is.numeric(found_tree)) {
-          found_tree <- TreeSim::sim.bd.age(age = crown_age, numbsim = 1, lambda = x[2], mu = x[1], complete = FALSE)[[1]]
+      if (x[6] == 4) {
+        found_tree <- TreeSim::sim.bd.age(age = crown_age,
+                                          numbsim = 1,
+                                          lambda = x[2],
+                                          mu = x[1],
+                                          mrca = TRUE,
+                                          complete = FALSE)[[1]]
+        while (is.numeric(found_tree)) {
+          found_tree <- TreeSim::sim.bd.age(age = crown_age,
+                                            numbsim = 1,
+                                            lambda = x[2],
+                                            mu = x[1],
+                                            mrca = TRUE,
+                                            complete = FALSE)[[1]]
         }
       } else {
         found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)

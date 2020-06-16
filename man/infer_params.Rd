@@ -4,9 +4,16 @@
 \alias{infer_params}
 \title{function to perform ABC-SMC}
 \usage{
-infer_params(number_of_particles, max_iter, sd_params, emp_tree,
-  write_to_file = TRUE, seed = NULL, continue_from_file = FALSE,
-  fix_model = -1)
+infer_params(
+  number_of_particles,
+  max_iter,
+  sd_params,
+  emp_tree,
+  write_to_file = TRUE,
+  seed = NULL,
+  continue_from_file = FALSE,
+  fix_model = -1
+)
 }
 \arguments{
 \item{number_of_particles}{number of particles used per iteration of

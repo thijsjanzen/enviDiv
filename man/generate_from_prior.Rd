@@ -4,9 +4,17 @@
 \alias{generate_from_prior}
 \title{function to perform ABC-SMC}
 \usage{
-generate_from_prior(number_of_particles = 1000, min_tips = 50,
-  max_tips = 150, model = NULL, emp_tree = NULL, crown_age = NULL,
-  write_to_file = FALSE, file_name, exp_prior = FALSE)
+generate_from_prior(
+  number_of_particles = 1000,
+  min_tips = 50,
+  max_tips = 150,
+  model = NULL,
+  emp_tree = NULL,
+  crown_age = NULL,
+  write_to_file = FALSE,
+  file_name,
+  exp_prior = FALSE
+)
 }
 \arguments{
 \item{number_of_particles}{number of particles used per iteration of

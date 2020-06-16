@@ -4,9 +4,16 @@
 \alias{generate_stack}
 \title{function to perform ABC-SMC}
 \usage{
-generate_stack(number_of_replicates = 1000, parameters = NULL,
-  min_tips = 50, max_tips = 150, emp_tree = NULL, crown_age = NULL,
-  write_to_file = FALSE, file_name = NULL)
+generate_stack(
+  number_of_replicates = 1000,
+  parameters = NULL,
+  min_tips = 50,
+  max_tips = 150,
+  emp_tree = NULL,
+  crown_age = NULL,
+  write_to_file = FALSE,
+  file_name = NULL
+)
 }
 \arguments{
 \item{number_of_replicates}{number of particles used per iteration of

@@ -1,5 +1,5 @@
 #include "Gillespie.h"
-#include <math.h>
+#include <cmath>
 #include "random_thijs.h"
 
 //#include <chrono>
