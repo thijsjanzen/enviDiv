@@ -32,8 +32,6 @@ the SMC algorithm}
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}
-
-\item{model}{used water model}
 }
 \value{
 a tibble containing the results
