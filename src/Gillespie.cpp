@@ -111,7 +111,9 @@ List create_ref_table_cpp(int model,
       int num_lin = get_num_lin(l_table);
       if(num_lin >= min_lin && num_lin <= max_lin) {
         l_tables[cnt] = l_table;
-        cnt++;
+
+        #pragma omp atomic
+        ++cnt;
       }
     }
   }
