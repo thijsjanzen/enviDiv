@@ -172,14 +172,14 @@ void merge_single_branches(std::vector<species>& all_species);
 
 
 // new R functions update
-std::string do_run_r(const std::vector< float >& parameters,
-                     const std::vector< float >& waterlevel_changes,
+std::string do_run_r(const Rcpp::NumericVector& parameters,
+                     const Rcpp::NumericVector& waterlevel_changes,
                      float maximum_time,
                      Rcpp::NumericMatrix& l_table,
                      rnd_t& rndgen);
 
-int run(const std::vector<float>& parameters,
-        const std::vector<float>& W,
+int run(const Rcpp::NumericVector& parameters,
+        const Rcpp::NumericVector& W,
         std::vector<species>& allSpecies,
         float maximum_time,
         rnd_t& rndgen);
@@ -191,7 +191,7 @@ void jiggle(std::vector< species > & s1,
             rnd_t& rndgen);
 
 Rcpp::NumericMatrix create_l_table( const std::vector< species > & s1,
-                              const std::vector< species > & s2);
+                                    const std::vector< species > & s2);
 
 int find_index_in_species_vector(const std::vector<species>& v,
                                  int id);
