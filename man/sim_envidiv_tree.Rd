@@ -4,7 +4,7 @@
 \alias{sim_envidiv_tree}
 \title{simulate a tree using the environmental diversification model}
 \usage{
-sim_envidiv_tree(params, crown_age, abc = FALSE, seed = NULL)
+sim_envidiv_tree(params, crown_age, max_lin = 500, abc = FALSE, seed = NULL)
 }
 \arguments{
 \item{params}{parameters used to simulate:
@@ -22,6 +22,8 @@ sim_envidiv_tree(params, crown_age, abc = FALSE, seed = NULL)
 }}
 
 \item{crown_age}{age of the crown of the tree}
+
+\item{max_lin}{maximum number of extant lineages in the tree.}
 
 \item{abc}{(boolean) is the tree simulated in an ABC fitting scheme,
 or not? additional verbal output is provided if not.}

@@ -13,6 +13,7 @@
 #'                     water level change, 3) extrapolated water level changes}
 #' }
 #' @param crown_age age of the crown of the tree
+#' @param max_lin maximum number of extant lineages in the tree.
 #' @param abc (boolean) is the tree simulated in an ABC fitting scheme,
 #'                      or not? additional verbal output is provided if not.
 #' @param seed random nmber seed
@@ -22,6 +23,7 @@
 #' @export
 sim_envidiv_tree <- function(params,
                              crown_age,
+                             max_lin = 500,
                              abc = FALSE,
                              seed = NULL) {
 
@@ -38,9 +40,10 @@ sim_envidiv_tree <- function(params,
   water_changes <- generate_water(params[6], crown_age)
 
   sim_result <- create_tree_cpp(params,
-                                         water_changes,
-                                         seed,
-                                         crown_age)
+                                water_changes,
+                                seed,
+                                crown_age,
+                                max_lin)
 
   error_code <- sim_result$code
 

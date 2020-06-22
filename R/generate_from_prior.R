@@ -38,7 +38,7 @@ generate_from_prior <- function(number_of_particles = 1000,
     sample_size <- min(10000, remaining_particles)
 
     param_matrix <- matrix(NA, nrow = sample_size,
-                           ncol = 7)  #6 parameters
+                           ncol = 6)  #6 parameters
 
     candidate_particles <- c()
     if (exp_prior) {

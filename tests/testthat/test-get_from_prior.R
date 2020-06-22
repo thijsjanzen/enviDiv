@@ -9,10 +9,8 @@ test_that("get_from_prior", {
   allo <- v1[4]
   jiggle <- v1[5]
   model <- v1[6]
-  weight <- v1[7]
 
   testthat::expect_gt(max(v1), 0)
-  testthat::expect_true(enviDiv::is_within_prior(v1))
 
   testthat::expect_true(log10(extinct) >= -3)
   testthat::expect_true(log10(extinct) < 2)
@@ -30,6 +28,4 @@ test_that("get_from_prior", {
   testthat::expect_true(log10(jiggle) < 0)
 
   testthat::expect_true(model %in% 1:3)
-
-  testthat::expect_true(weight == 1)
 })
