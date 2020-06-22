@@ -2,10 +2,6 @@
 #include <cmath>
 #include "random_thijs.h"
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 //#include <chrono>
 //#include <thread>
 #include <string>
@@ -43,88 +39,6 @@ List create_tree_cpp(NumericVector parameters,
   return List::create( Named("code") = code,
                        Named("Ltable") = l_table);
 }
-
-int get_num_lin(const NumericMatrix& l_table) {
-  int cnt = 0;
-  for(int i = 0; i < l_table.nrow(); ++i) {
-    if(l_table(i, 3) == -1) cnt++;
-  }
-  return(cnt);
-}
-
-//' simulate a tree using environmental diversification
-//' @param model a vector of the four paramaters of the model
-//' @param num_repl a vector that indicates the time points of water level changes
-//' @param crown_age crown age of the tree to be simulated
-//' @param min_lin minimum number of lineages
-//' @param max_lin maximum number of lineages
-//' @param num_threads
-//' @return newick string
-//' @export
-// [[Rcpp::export]]
-List create_ref_table_cpp(int model,
-                          int num_repl,
-                          float crown_age,
-                          int min_lin,
-                          int max_lin,
-                          int num_threads) {
-  // rnd_t rndgen;
-  // rndgen.set_seed(seed);
-
-#ifdef _OPENMP
-  omp_set_num_threads(num_threads);
-  Rcout << "using: " << num_threads << " threads\n";
-#endif
-
-
-  // Obtaining namespace of Matrix package
-  Environment pkg = Environment::namespace_env("enviDiv");
-  Function get_prior = pkg["generate_from_prior"];
-  Function get_waterlevel_changes = pkg["generate_water"];
-
-
-
-  std::vector< NumericMatrix > l_tables;
-
-  int num_remaining = num_repl;
-  int cnt = 0;
-  while(cnt < num_remaining) {
-    int loop_size = num_remaining - cnt;
-    #pragma omp parallel for shared(cnt)
-    for(int i = 0; i < loop_size; ++i) {
-
-      NumericVector parameters = get_prior();
-      int water_model = parameters[5];
-      NumericVector waterlevel_changes = get_waterlevel_changes(water_model,
-                                                                           crown_age);
-
-      rnd_t rndgen;
-      rndgen.set_seed(cnt * i);
-
-      NumericMatrix l_table;
-      std::string code = do_run_r(parameters,
-                                  waterlevel_changes,
-                                  crown_age,
-                                  l_table,
-                                  rndgen);
-
-      int num_lin = get_num_lin(l_table);
-      if(num_lin >= min_lin && num_lin <= max_lin) {
-        l_tables[cnt] = l_table;
-
-        #pragma omp atomic
-        ++cnt;
-      }
-    }
-  }
-
-  return List::create( Named("Ltable") = l_tables);
-}
-
-
-
-
-
 
 std::string do_run_r(const NumericVector& parameters,
                      const NumericVector& waterlevel_changes,

@@ -13,6 +13,15 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
 }
 
 #' simulate a tree using environmental diversification
+#' @param n size of vector
+#' @param num_threads number of threads
+#' @return vector of squared numbers
+#' @export
+sq_numbers_cpp_tbb <- function(n, num_threads) {
+    .Call('_enviDiv_sq_numbers_cpp_tbb', PACKAGE = 'enviDiv', n, num_threads)
+}
+
+#' simulate a tree using environmental diversification
 #' @param model a vector of the four paramaters of the model
 #' @param num_repl a vector that indicates the time points of water level changes
 #' @param crown_age crown age of the tree to be simulated
