@@ -1,10 +1,6 @@
 #ifndef RANDOM_THIJS
 #define RANDOM_THIJS
-
-
 #include <random>
-#include <vector>
-#include <array>
 
 struct rnd_t {
   std::mt19937 rndgen;
@@ -16,10 +12,10 @@ struct rnd_t {
   }
 
   std::uniform_real_distribution<float> unif_dist =
-    std::uniform_real_distribution<float>(0, 1.0);
+    std::uniform_real_distribution<float>(0.0f, 1.0f);
 
   std::normal_distribution<float> norm_dist_trunc =
-    std::normal_distribution<float>(0.0, 0.1);
+    std::normal_distribution<float>(0.0f, 0.1f);
 
   int random_number(int n)    {
     if(n <= 1) return 0;
@@ -67,5 +63,8 @@ struct rnd_t {
     }
     return output;
   }
+
 };
+
+
 #endif

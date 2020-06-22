@@ -6,10 +6,13 @@
 #' @param waterlevel_changes a vector that indicates the time points of water level changes
 #' @param seed pseudo-random number generator seed
 #' @param crown_age crown age of the tree to be simulated
+#' @param max_lin maximum number of lineages
 #' @return newick string
 #' @export
 create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max_lin) {
     .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, seed, crown_age, max_lin)
+<<<<<<< HEAD
+=======
 }
 
 #' simulate a tree using environmental diversification
@@ -23,5 +26,6 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
 #' @export
 create_ref_table_cpp <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
     .Call('_enviDiv_create_ref_table_cpp', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
+>>>>>>> 7836f6b3d7b4005a326564439c0cf333fcfa50ce
 }
 

@@ -17,6 +17,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     rcpp_result_gen = Rcpp::wrap(create_tree_cpp(parameters, waterlevel_changes, seed, crown_age, max_lin));
+<<<<<<< HEAD
+=======
     return rcpp_result_gen;
 END_RCPP
 }
@@ -33,13 +35,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
     rcpp_result_gen = Rcpp::wrap(create_ref_table_cpp(model, num_repl, crown_age, min_lin, max_lin, num_threads));
+>>>>>>> 7836f6b3d7b4005a326564439c0cf333fcfa50ce
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
+<<<<<<< HEAD
+=======
     {"_enviDiv_create_ref_table_cpp", (DL_FUNC) &_enviDiv_create_ref_table_cpp, 6},
+>>>>>>> 7836f6b3d7b4005a326564439c0cf333fcfa50ce
     {NULL, NULL, 0}
 };
 

@@ -2,12 +2,15 @@
 #include <cmath>
 #include "random_thijs.h"
 
+<<<<<<< HEAD
+=======
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
 //#include <chrono>
 //#include <thread>
+>>>>>>> 7836f6b3d7b4005a326564439c0cf333fcfa50ce
 #include <string>
 
 #include <Rcpp.h>
@@ -18,6 +21,7 @@ using namespace Rcpp;
 //' @param waterlevel_changes a vector that indicates the time points of water level changes
 //' @param seed pseudo-random number generator seed
 //' @param crown_age crown age of the tree to be simulated
+//' @param max_lin maximum number of lineages
 //' @return newick string
 //' @export
 // [[Rcpp::export]]
@@ -37,6 +41,7 @@ List create_tree_cpp(NumericVector parameters,
   std::string code = do_run_r(parameters,
                               waterlevel_changes,
                               crown_age,
+                              max_lin,
                               l_table,
                               rndgen);
 
@@ -44,6 +49,8 @@ List create_tree_cpp(NumericVector parameters,
                        Named("Ltable") = l_table);
 }
 
+<<<<<<< HEAD
+=======
 int get_num_lin(const NumericMatrix& l_table) {
   int cnt = 0;
   for(int i = 0; i < l_table.nrow(); ++i) {
@@ -126,9 +133,11 @@ List create_ref_table_cpp(int model,
 
 
 
+>>>>>>> 7836f6b3d7b4005a326564439c0cf333fcfa50ce
 std::string do_run_r(const NumericVector& parameters,
                      const NumericVector& waterlevel_changes,
                      float maximum_time,
+                     int max_lin,
                      NumericMatrix& l_table,
                      rnd_t& rndgen)
 {
@@ -140,7 +149,7 @@ std::string do_run_r(const NumericVector& parameters,
   //int idCount = 0;
   std::vector < std::vector < float > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
-                        s1, maximum_time,
+                        s1, maximum_time, max_lin,
                         rndgen);
 
   if (error_code == 0) {
@@ -155,7 +164,7 @@ std::string do_run_r(const NumericVector& parameters,
 
   int error_code2 = run(parameters,
       waterlevel_changes,
-      s2, maximum_time,
+      s2, maximum_time, max_lin,
       rndgen);
 
   if (error_code2 == 0) {
