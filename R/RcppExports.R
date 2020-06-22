@@ -66,3 +66,7 @@ param_from_prior_exp_cpp <- function() {
     .Call('_enviDiv_param_from_prior_exp_cpp', PACKAGE = 'enviDiv')
 }
 
+get_waterlevel_cpp <- function(water_model, maximum_time) {
+    .Call('_enviDiv_get_waterlevel_cpp', PACKAGE = 'enviDiv', water_model, maximum_time)
+}
+

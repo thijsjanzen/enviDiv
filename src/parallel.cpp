@@ -1,5 +1,6 @@
 #include <tbb/tbb.h>
 #include "Gillespie.h"
+#include "util.h"
 
 #include <cmath>
 #include "random_thijs.h"
@@ -121,33 +122,27 @@ List create_ref_table_cpp_serial(int model,
                           int max_lin,
                           int num_threads) {
 
-  // Obtaining namespace of Matrix package
-  Rcout << "getting R functions\n";
-  Environment pkg = Environment::namespace_env("enviDiv");
-  Function get_prior = pkg["generate_from_prior"];
-  Function get_waterlevel_changes = pkg["generate_water"];
-
   // test code
-  NumericVector params = get_prior();
+  NumericVector params = param_from_prior_cpp();
   for(int i = 0; i < params.size(); ++i) {
     Rcout << params[i] << " ";
   }
   Rcout << "\n";
 
-  NumericVector w = get_waterlevel_changes(1, 5);
+  std::vector<float> w = get_waterlevel_cpp(1, 5);
 
   for(int i = 0; i < w.size(); ++i) {
     Rcout << w[i] << " ";
   }
   Rcout << "\n";
 
-   w = get_waterlevel_changes(2, 5);
+   w = get_waterlevel_cpp(2, 5);
    for(int i = 0; i < w.size(); ++i) {
      Rcout << w[i] << " ";
    }
    Rcout << "\n";
 
-   w = get_waterlevel_changes(3, 5);
+   w = get_waterlevel_cpp(3, 5);
    for(int i = 0; i < w.size(); ++i) {
      Rcout << w[i] << " ";
    }

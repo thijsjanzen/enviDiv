@@ -84,6 +84,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_waterlevel_cpp
+std::vector<float> get_waterlevel_cpp(int water_model, float maximum_time);
+RcppExport SEXP _enviDiv_get_waterlevel_cpp(SEXP water_modelSEXP, SEXP maximum_timeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type water_model(water_modelSEXP);
+    Rcpp::traits::input_parameter< float >::type maximum_time(maximum_timeSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_waterlevel_cpp(water_model, maximum_time));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
@@ -92,6 +104,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_ref_table_cpp_serial", (DL_FUNC) &_enviDiv_create_ref_table_cpp_serial, 6},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 0},
     {"_enviDiv_param_from_prior_exp_cpp", (DL_FUNC) &_enviDiv_param_from_prior_exp_cpp, 0},
+    {"_enviDiv_get_waterlevel_cpp", (DL_FUNC) &_enviDiv_get_waterlevel_cpp, 2},
     {NULL, NULL, 0}
 };
 
