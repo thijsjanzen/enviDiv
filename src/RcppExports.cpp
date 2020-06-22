@@ -20,40 +20,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sq_numbers_cpp_tbb
-NumericVector sq_numbers_cpp_tbb(int n, int num_threads);
-RcppExport SEXP _enviDiv_sq_numbers_cpp_tbb(SEXP nSEXP, SEXP num_threadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sq_numbers_cpp_tbb(n, num_threads));
-    return rcpp_result_gen;
-END_RCPP
-}
-// create_ref_table_cpp
-List create_ref_table_cpp(int model, int num_repl, float crown_age, int min_lin, int max_lin, int num_threads);
-RcppExport SEXP _enviDiv_create_ref_table_cpp(SEXP modelSEXP, SEXP num_replSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_threadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type model(modelSEXP);
-    Rcpp::traits::input_parameter< int >::type num_repl(num_replSEXP);
-    Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
-    Rcpp::traits::input_parameter< int >::type min_lin(min_linSEXP);
-    Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_ref_table_cpp(model, num_repl, crown_age, min_lin, max_lin, num_threads));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
-    {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
-    {"_enviDiv_create_ref_table_cpp", (DL_FUNC) &_enviDiv_create_ref_table_cpp, 6},
-    {NULL, NULL, 0}
 };
 
 RcppExport void R_init_enviDiv(DllInfo *dll) {

@@ -89,8 +89,8 @@ struct allo_pair
   }
 
   allo_pair(int id, int index_A, int index_B) : ID(id),
-  index_a(index_A),
-  index_b(index_B)
+                                                index_a(index_A),
+                                                index_b(index_B)
   {
   }
 
@@ -175,6 +175,7 @@ void merge_single_branches(std::vector<species>& all_species);
 std::string do_run_r(const Rcpp::NumericVector& parameters,
                      const Rcpp::NumericVector& waterlevel_changes,
                      float maximum_time,
+                     int max_lin,
                      Rcpp::NumericMatrix& l_table,
                      rnd_t& rndgen);
 
@@ -182,6 +183,7 @@ int run(const Rcpp::NumericVector& parameters,
         const Rcpp::NumericVector& W,
         std::vector<species>& allSpecies,
         float maximum_time,
+        int max_lin,
         rnd_t& rndgen);
 
 void jiggle(std::vector< species > & s1,
