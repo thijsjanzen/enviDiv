@@ -172,15 +172,15 @@ void merge_single_branches(std::vector<species>& all_species);
 
 
 // new R functions update
-std::string do_run_r(const Rcpp::NumericVector& parameters,
-                     const Rcpp::NumericVector& waterlevel_changes,
+std::string do_run_r(const std::vector<float>& parameters,
+                     const std::vector<float>& waterlevel_changes,
                      float maximum_time,
                      int max_lin,
                      Rcpp::NumericMatrix& l_table,
                      rnd_t& rndgen);
 
-int run(const Rcpp::NumericVector& parameters,
-        const Rcpp::NumericVector& W,
+int run(const std::vector<float>& parameters,
+        const std::vector<float>& W,
         std::vector<species>& allSpecies,
         float maximum_time,
         int max_lin,

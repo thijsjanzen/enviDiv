@@ -20,6 +20,13 @@ sackin_stat <- function(tree)  {
   return(x)
 }
 
+#' @keywords internal
+calc_base_nltt_stat <- function(tree) {
+  empty_tree <- phytools::read.newick(text = "(1:4,2:4):0;")
+  nltt_stat <- nLTT::nltt_diff(tree, empty_tree)
+  return(nltt_stat)
+}
+
 #' calculate summary statistics for a focal tree. The following summary
 #'   statistics are calculated:
 #'   nLTT, gamma, mean branching times and number of lineages
@@ -28,15 +35,11 @@ sackin_stat <- function(tree)  {
 #' @param emp_tree reference empirical tree, only used to calculate the nLTT.
 #' @return vector of 8 summary statistics
 #' @export
-calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
+calc_sum_stats <- function(focal_tree) {
   # trees that are extinct turn up as NULL:
   if (is.null(focal_tree) || class(focal_tree) != "phylo") {
     warning("no tree found, returning infinite statistics")
     return(rep(Inf, 15))
-  }
-
-  if (is.null(emp_tree)) {
-    emp_tree <- focal_tree
   }
 
   if (!ape::is.rooted(focal_tree)) {
@@ -54,7 +57,7 @@ calc_sum_stats <- function(focal_tree, emp_tree = NULL) {
   }
 
   output <- c()
-  output[1] <- nLTT::nltt_diff_exact(focal_tree, emp_tree)
+  output[1] <- calc_base_nltt_stat(focal_tree)
   output[2] <- ape::gammaStat(focal_tree) # gamma
   output[3] <- mean(focal_tree$edge.length, na.rm = TRUE) # mean branch length
   output[4] <- focal_tree$Nnode + 1 # number of lineages

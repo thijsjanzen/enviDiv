@@ -6,29 +6,17 @@
 using namespace Rcpp;
 
 // create_tree_cpp
-List create_tree_cpp(NumericVector parameters, NumericVector waterlevel_changes, int seed, float crown_age, int max_lin);
+List create_tree_cpp(std::vector<float> parameters, std::vector<float> waterlevel_changes, int seed, float crown_age, int max_lin);
 RcppExport SEXP _enviDiv_create_tree_cpp(SEXP parametersSEXP, SEXP waterlevel_changesSEXP, SEXP seedSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type parameters(parametersSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type waterlevel_changes(waterlevel_changesSEXP);
+    Rcpp::traits::input_parameter< std::vector<float> >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< std::vector<float> >::type waterlevel_changes(waterlevel_changesSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     rcpp_result_gen = Rcpp::wrap(create_tree_cpp(parameters, waterlevel_changes, seed, crown_age, max_lin));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sq_numbers_cpp_tbb
-NumericVector sq_numbers_cpp_tbb(int n, int num_threads);
-RcppExport SEXP _enviDiv_sq_numbers_cpp_tbb(SEXP nSEXP, SEXP num_threadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sq_numbers_cpp_tbb(n, num_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -49,8 +37,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // create_ref_table_cpp_serial
-List create_ref_table_cpp_serial(int model, int num_repl, float crown_age, int min_lin, int max_lin, int num_threads);
-RcppExport SEXP _enviDiv_create_ref_table_cpp_serial(SEXP modelSEXP, SEXP num_replSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_threadsSEXP) {
+List create_ref_table_cpp_serial(int model, int num_repl, float crown_age, int min_lin, int max_lin);
+RcppExport SEXP _enviDiv_create_ref_table_cpp_serial(SEXP modelSEXP, SEXP num_replSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,13 +47,24 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
     Rcpp::traits::input_parameter< int >::type min_lin(min_linSEXP);
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_ref_table_cpp_serial(model, num_repl, crown_age, min_lin, max_lin));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sq_numbers_cpp_tbb
+NumericVector sq_numbers_cpp_tbb(int n, int num_threads);
+RcppExport SEXP _enviDiv_sq_numbers_cpp_tbb(SEXP nSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(create_ref_table_cpp_serial(model, num_repl, crown_age, min_lin, max_lin, num_threads));
+    rcpp_result_gen = Rcpp::wrap(sq_numbers_cpp_tbb(n, num_threads));
     return rcpp_result_gen;
 END_RCPP
 }
 // param_from_prior_cpp
-NumericVector param_from_prior_cpp();
+std::vector<float> param_from_prior_cpp();
 RcppExport SEXP _enviDiv_param_from_prior_cpp() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -75,7 +74,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // param_from_prior_exp_cpp
-NumericVector param_from_prior_exp_cpp();
+std::vector<float> param_from_prior_exp_cpp();
 RcppExport SEXP _enviDiv_param_from_prior_exp_cpp() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -99,9 +98,9 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
-    {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
     {"_enviDiv_create_ref_table_cpp", (DL_FUNC) &_enviDiv_create_ref_table_cpp, 6},
-    {"_enviDiv_create_ref_table_cpp_serial", (DL_FUNC) &_enviDiv_create_ref_table_cpp_serial, 6},
+    {"_enviDiv_create_ref_table_cpp_serial", (DL_FUNC) &_enviDiv_create_ref_table_cpp_serial, 5},
+    {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 0},
     {"_enviDiv_param_from_prior_exp_cpp", (DL_FUNC) &_enviDiv_param_from_prior_exp_cpp, 0},
     {"_enviDiv_get_waterlevel_cpp", (DL_FUNC) &_enviDiv_get_waterlevel_cpp, 2},

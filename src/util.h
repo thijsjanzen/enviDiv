@@ -2,12 +2,78 @@
 #define UTIL_H
 
 #include <vector>
-#include "Rcpp.h"
-#include "random_thijs.h"
+#include <array>
+#include <thread>
+#include <chrono>
+#include <cmath>
+#include <random>
+#include <numeric>
+#include <algorithm>
 
-Rcpp::NumericVector param_from_prior_cpp();
-Rcpp::NumericVector param_from_prior_exp_cpp();
+#include "random_thijs.h"
+#include "Rcpp.h"
+
+std::vector<float> param_from_prior_cpp();
+std::vector<float> param_from_prior_exp_cpp();
 std::vector<float> get_waterlevel_cpp(int water_model,
                                       float maximum_time);
 
+
+
+// returns low-entropy 512 bit array for seed sequence
+// based on std::chrono::high_resolution_clock.
+// ripped from rndutils
+inline auto make_low_entropy_seed_array() noexcept->std::array<uint64_t, 8>
+{
+  // the classic: time, advertised with nano-second resolution.
+  const auto e1 = static_cast< uint64_t>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+  // different between invocations from different threads within one app: thread-id
+  const auto tid = std::this_thread::get_id();
+  const uint64_t e2{ std::hash<typename std::remove_const<decltype(tid)>::type>()(tid) };
+  return std::array<uint64_t, 8>{ {
+    e1, e2,
+    0x000000003c10b019, 0x2bf820b4dd7c1a8a,
+    0x9901cf90a40883da, 0x5a3686b2e1de6e51,
+    0x000000cc0494d228, 0x000000cc04b66740
+    }};
+}
+
+
+// random number generator from low-entropy seed sequence
+// ripped from rndutils
+template <typename URNG>
+inline auto make_random_engine() -> URNG
+{
+  auto seed_array = make_low_entropy_seed_array();
+  std::seed_seq sseq(seed_array.cbegin(), seed_array.cend());
+  return URNG(sseq);
+}
+
+
+
+namespace parallel {
+
+  struct simulation {
+      int max_lin_;
+      int num_lin_;
+
+      Rcpp::NumericMatrix l_table;
+      float crown_age;
+      std::vector< float > parameters;
+      std::vector< float > waterlevel_changes;
+
+      simulation(int max_l, float crown) : max_lin_(max_l), crown_age(crown) {
+        num_lin_ = 0;
+      }
+
+      void get_l_table();
+
+      std::string get_tree();
+
+      std::vector<float> parameters_from_prior(rnd_t& rndgen_);
+      std::vector<float> get_waterlevel_changes(int water_model,
+                                                float maximum_time,
+                                                rnd_t& rndgen_);
+    };
+}
 #endif

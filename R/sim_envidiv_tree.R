@@ -57,7 +57,20 @@ sim_envidiv_tree <- function(params,
     return(NULL)
   }
 
-  local_l_table <- sim_result$Ltable
+  phy_tree <- enviDiv::sim_table_to_phy(sim_result$Ltable,
+                               crown_age)
+
+  return(phy_tree)
+}
+
+#' function to transform an Ltable to a phylogeny
+#' @description transform an Ltable to a phy object
+#' @param input_matrix input matrix
+#' @param crown_age crown age
+#' @export
+sim_table_to_phy <- function(input_matrix,
+                             crown_age) {
+  local_l_table <- input_matrix
   local_l_table[, 1] <- crown_age - local_l_table[, 1]
   local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
 
@@ -76,40 +89,20 @@ sim_envidiv_tree <- function(params,
 
   phy_tree <- DDD::L2phylo(local_l_table)
 
-  if (is.null(phy_tree))  {
-    warning("phy tree is NULL")
-    return(NULL)
-  }
-  if (is.null(phy_tree$edge.length)) {
-    warning("phy_tree$edge.length == NULL")
-    return(NULL)
-  }
-
-  if (!"phylo" %in% class(phy_tree)) {
-    warning("phy is not of class phylo")
-    return(NULL)
-  }
-
-  if (length(phy_tree$tip.label) == 2) {
-    if (!abc) warning("tree has only two tips\n")
-    if (abc) return(NULL)
-  }
 
   if (length(ape::is.binary(phy_tree)) > 1) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
     if (length(ape::is.binary(new_phy_tree)) > 1) {
-      cat(params, "\n")
       stop("could not generate binary tree\n")
     }
     phy_tree <- new_phy_tree
   }
 
   if (length(ape::branching.times(phy_tree)) !=
-     (-1 + length(phy_tree$tip.label))) {
+      (-1 + length(phy_tree$tip.label))) {
     new_phy_tree <- ape::collapse.singles(phy_tree)
     if (length(ape::branching.times(new_phy_tree)) !=
-       (-1 + length(new_phy_tree$tip.label))) {
-      cat(params, "\n")
+        (-1 + length(new_phy_tree$tip.label))) {
       stop("could not generate tree without singles\n")
     }
     phy_tree <- new_phy_tree
@@ -117,3 +110,18 @@ sim_envidiv_tree <- function(params,
 
   return(phy_tree)
 }
+
+
+#' function to transform an Ltable to a newick string. Calls
+#' sim_table_to_phy and then transforms to newick
+#' @description transform an Ltable to a newick string
+#' @param input_matrix input matrix
+#' @param crown_age crown age
+#' @export
+sim_table_to_newick <- function(input_matrix,
+                                crown_age) {
+  phy_tree <- sim_table_to_phy(input_matrix, crown_age)
+  return(ape::write.tree(phy_tree))
+}
+
+

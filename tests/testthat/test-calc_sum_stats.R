@@ -13,11 +13,12 @@ test_that("usage", {
     emp_tree2 <- sim_envidiv_tree(params, crown_age = 5)
 
   v1 <- calc_sum_stats(emp_tree)
-  v2 <- calc_sum_stats(emp_tree, emp_tree2)
+  v2 <- calc_sum_stats(emp_tree2)
 
   a <- sum(v1 != v2)
-  testthat::expect_true(a == 1)
-  testthat::expect_equal(v1[[1]], 0)
+  testthat::expect_true(a != 0)
+  testthat::expect_equal(v1[[11]], 5)
+  testthat::expect_equal(v2[[11]], 5)
 })
 
 test_that("abuse", {

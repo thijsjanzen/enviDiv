@@ -1,13 +1,83 @@
+#include <mutex>
+#include <atomic>
 #include <tbb/tbb.h>
-#include "Gillespie.h"
-#include "util.h"
 
 #include <cmath>
-#include "random_thijs.h"
 #include <string>
+
+#include "random_thijs.h"
+#include "util.h"
+#include "Gillespie.h"
 
 #include <Rcpp.h>
 using namespace Rcpp;
+
+
+//' simulate a tree using environmental diversification
+//' @param model a vector of the four paramaters of the model
+//' @param num_repl a vector that indicates the time points of water level changes
+//' @param crown_age crown age of the tree to be simulated
+//' @param min_lin minimum number of lineages
+//' @param max_lin maximum number of lineages
+//' @param num_threads number of threads
+//' @return newick string
+//' @export
+// [[Rcpp::export]]
+List create_ref_table_cpp(int model,
+                          int num_repl,
+                          float crown_age,
+                          int min_lin,
+                          int max_lin,
+                          int num_threads) {
+
+  int num_remaining = num_repl;
+
+  std::vector< Rcpp::NumericMatrix > l_tables;
+
+  int cnt = 0;
+  auto T0 = std::chrono::high_resolution_clock::now();
+
+  while(cnt < num_remaining) {
+    int loop_size = num_remaining - cnt;
+    Rcout << loop_size << "\n";
+
+    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+    std::mutex mutex;
+
+    tbb::parallel_for(
+      tbb::blocked_range<unsigned>(0, loop_size, 1),
+      [&](const tbb::blocked_range<unsigned>& r) {
+        for (unsigned i = r.begin(); i < r.end(); ++i) {
+          try {
+
+            parallel::simulation sim(max_lin, crown_age);
+            sim.get_l_table();
+            if(sim.num_lin_ >= min_lin && sim.num_lin_ <= max_lin) {
+              std::lock_guard<std::mutex> _(mutex);
+              l_tables.push_back(sim.l_table);
+            }
+          }
+          catch(const std::exception& e) {
+            Rcout << "runtime error\n";
+          }
+        }
+      });
+  }
+
+  Rcpp::Environment pkg = Rcpp::Environment::namespace_env("enviDiv");
+  Rcpp::Function to_newick = pkg["sim_table_to_newick"];
+
+  Rcpp::List trees(num_repl);
+
+  for(int i = 0; i < l_tables.size(); ++i) {
+    trees[i] = to_newick(l_tables[i], crown_age);
+  }
+
+  auto T1 = std::chrono::high_resolution_clock::now();
+  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
+  std::cout << "computed in: " << elapsed << "ms";
+  return trees;
+}
 
 
 int get_num_lin(const NumericMatrix& l_table) {
@@ -17,6 +87,70 @@ int get_num_lin(const NumericMatrix& l_table) {
   }
   return(cnt);
 }
+
+//' simulate a tree using environmental diversification
+//' @param model a vector of the four paramaters of the model
+//' @param num_repl a vector that indicates the time points of water level changes
+//' @param crown_age crown age of the tree to be simulated
+//' @param min_lin minimum number of lineages
+//' @param max_lin maximum number of lineages
+//' @return newick string
+//' @export
+// [[Rcpp::export]]
+List create_ref_table_cpp_serial(int model,
+                                 int num_repl,
+                                 float crown_age,
+                                 int min_lin,
+                                 int max_lin) {
+
+  int num_remaining = num_repl;
+
+  Rcpp::List trees(num_remaining);
+
+  Environment pkg = Environment::namespace_env("enviDiv");
+  Function to_newick = pkg["sim_table_to_newick"];
+
+  int cnt = 0;
+  auto T0 = std::chrono::high_resolution_clock::now();
+
+  while(cnt < num_remaining) {
+    int loop_size = num_remaining - cnt;
+    Rcout << loop_size << "\n";
+
+    for (unsigned i = 0; i < loop_size; ++i) {
+      std::vector<float> parameters = param_from_prior_cpp();
+      int water_model = parameters[5];
+
+      std::vector<float> waterlevel_changes = get_waterlevel_cpp(water_model,
+                                                                 crown_age);
+
+      rnd_t thread_local rndgen;
+      rndgen.set_seed(cnt * i);
+
+      NumericMatrix l_table;
+      std::string code = do_run_r(parameters,
+                                  waterlevel_changes,
+                                  crown_age,
+                                  max_lin,
+                                  l_table,
+                                  rndgen);
+
+      //  Rcout << code << "\n";
+      int num_lin = get_num_lin(l_table);
+      if(num_lin >= min_lin && num_lin <= max_lin) {
+        auto input = to_newick(l_table, crown_age);
+        trees[cnt] = input;
+        ++cnt;
+      }
+    }
+  }
+  auto T1 = std::chrono::high_resolution_clock::now();
+  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
+  std::cout << "computed in: " << elapsed << "ms";
+
+  return trees;
+}
+
 
 //' test multithreaded works!
 //' @param n size of vector
@@ -40,157 +174,30 @@ NumericVector sq_numbers_cpp_tbb(int n,
   return results;
 }
 
+/*
 
-//' simulate a tree using environmental diversification
-//' @param model a vector of the four paramaters of the model
-//' @param num_repl a vector that indicates the time points of water level changes
-//' @param crown_age crown age of the tree to be simulated
-//' @param min_lin minimum number of lineages
-//' @param max_lin maximum number of lineages
-//' @param num_threads number of threads
-//' @return newick string
-//' @export
-// [[Rcpp::export]]
-List create_ref_table_cpp(int model,
-                          int num_repl,
-                          float crown_age,
-                          int min_lin,
-                          int max_lin,
-                          int num_threads) {
+ std::vector< float > parameters = param_from_prior_cpp();
+ std::vector< float > waterlevel_changes = get_waterlevel_cpp(parameters[5],
+ crown_age);
 
-  // Obtaining namespace of Matrix package
-  Environment pkg = Environment::namespace_env("enviDiv");
-  Function get_prior = pkg["generate_from_prior"];
-  Function get_waterlevel_changes = pkg["generate_water"];
+ rnd_t thread_local rndgen(cnt * i);
 
-  std::vector< NumericMatrix > l_tables;
+ Rcout << i << "\n";
+ NumericMatrix l_table;
+ std::string code = do_run_r(parameters,
+ waterlevel_changes,
+ crown_age,
+ max_lin,
+ l_table,
+ rndgen);
 
-  int num_remaining = num_repl;
-  int cnt = 0;
-  while(cnt < num_remaining) {
-    int loop_size = num_remaining - cnt;
-    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+ Rcout << code << "\n";
+ int num_lin = get_num_lin(l_table);
+ if(num_lin >= min_lin && num_lin <= max_lin) {
+ auto input = to_newick(l_table, crown_age);
+ std::lock_guard<std::mutex> _(mutex);
+ trees[cnt] = input;
+ ++cnt;
+ }
 
-    tbb::parallel_for(
-      tbb::blocked_range<unsigned>(0, loop_size, 1),
-      [&](const tbb::blocked_range<unsigned>& r) {
-
-        for (unsigned i = r.begin(); i < r.end(); ++i) {
-            NumericVector parameters = get_prior();
-            int water_model = parameters[5];
-            NumericVector waterlevel_changes = get_waterlevel_changes(water_model,
-                                                                      crown_age);
-            rnd_t rndgen;
-            rndgen.set_seed(cnt * i);
-
-            NumericMatrix l_table;
-            std::string code = do_run_r(parameters,
-                                        waterlevel_changes,
-                                        crown_age,
-                                        max_lin,
-                                        l_table,
-                                        rndgen);
-
-            int num_lin = get_num_lin(l_table);
-            if(num_lin >= min_lin && num_lin <= max_lin) {
-              l_tables[cnt] = l_table;
-              ++cnt;
-            }
-        }
-      });
-  }
-
-  return List::create( Named("Ltable") = l_tables);
-}
-
-
-
-//' simulate a tree using environmental diversification
-//' @param model a vector of the four paramaters of the model
-//' @param num_repl a vector that indicates the time points of water level changes
-//' @param crown_age crown age of the tree to be simulated
-//' @param min_lin minimum number of lineages
-//' @param max_lin maximum number of lineages
-//' @param num_threads number of threads
-//' @return newick string
-//' @export
-// [[Rcpp::export]]
-List create_ref_table_cpp_serial(int model,
-                          int num_repl,
-                          float crown_age,
-                          int min_lin,
-                          int max_lin,
-                          int num_threads) {
-
-  // test code
-  NumericVector params = param_from_prior_cpp();
-  for(int i = 0; i < params.size(); ++i) {
-    Rcout << params[i] << " ";
-  }
-  Rcout << "\n";
-
-  std::vector<float> w = get_waterlevel_cpp(1, 5);
-
-  for(int i = 0; i < w.size(); ++i) {
-    Rcout << w[i] << " ";
-  }
-  Rcout << "\n";
-
-   w = get_waterlevel_cpp(2, 5);
-   for(int i = 0; i < w.size(); ++i) {
-     Rcout << w[i] << " ";
-   }
-   Rcout << "\n";
-
-   w = get_waterlevel_cpp(3, 5);
-   for(int i = 0; i < w.size(); ++i) {
-     Rcout << w[i] << " ";
-   }
-   Rcout << "\n";
-
-  std::vector< NumericMatrix > l_tables;
-  /*
-
-
-
-
-
-  int num_remaining = num_repl;
-  int cnt = 0;
-  while(cnt < num_remaining) {
-    int loop_size = num_remaining - cnt;
-    Rcout << "num_remaining\n";
-
-    for (unsigned i = 0; i < loop_size; ++i) {
-          NumericVector parameters = get_prior();
-          int water_model = parameters[5];
-
-          for(int j = 0; j < parameters.size(); ++j) {
-            Rcout << parameters[j] << " ";
-          }
-          Rcout << "\n";
-
-          NumericVector waterlevel_changes = get_waterlevel_changes(water_model,
-                                                                    crown_age);
-          rnd_t rndgen;
-          rndgen.set_seed(cnt * i);
-
-          NumericMatrix l_table;
-          std::string code = do_run_r(parameters,
-                                      waterlevel_changes,
-                                      crown_age,
-                                      max_lin,
-                                      l_table,
-                                      rndgen);
-
-          Rcout << code << "\n";
-          int num_lin = get_num_lin(l_table);
-          if(num_lin >= min_lin && num_lin <= max_lin) {
-            l_tables[cnt] = l_table;
-            ++cnt;
-          }
-    }
-  }
-*/
-  return List::create( Named("Ltable") = l_tables);
-}
+ */

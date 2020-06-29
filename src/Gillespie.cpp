@@ -15,8 +15,8 @@ using namespace Rcpp;
 //' @return newick string
 //' @export
 // [[Rcpp::export]]
-List create_tree_cpp(NumericVector parameters,
-                     NumericVector waterlevel_changes,
+List create_tree_cpp(std::vector<float> parameters,
+                     std::vector<float> waterlevel_changes,
                      int seed,
                      float crown_age,
                      int max_lin) {
@@ -40,8 +40,8 @@ List create_tree_cpp(NumericVector parameters,
 }
 
 
-std::string do_run_r(const NumericVector& parameters,
-                     const NumericVector& waterlevel_changes,
+std::string do_run_r(const std::vector<float>& parameters,
+                     const std::vector<float>& waterlevel_changes,
                      float maximum_time,
                      int max_lin,
                      NumericMatrix& l_table,
@@ -349,8 +349,8 @@ bool verify_consistency(const std::vector<species>& pop,
 }
 
 
-int run(const NumericVector& parameters,
-        const NumericVector& W,
+int run(const std::vector<float>& parameters,
+        const std::vector<float>& W,
         std::vector<species>& allSpecies,
         float maximum_time,
         int max_lin,
@@ -363,6 +363,7 @@ int run(const NumericVector& parameters,
 
   allSpecies.clear();
   int id_count = 1;
+
   std::vector<species> pop;
   pop.push_back(species(id_count));
 
@@ -379,17 +380,17 @@ int run(const NumericVector& parameters,
   std::vector<allo_pair> pairs;
 
   while (time < maximum_time)  {
-    verify_consistency(pop, extinct_species, "general_beforepairs");
+    // verify_consistency(pop, extinct_species, "general_beforepairs");
     iter ++;
 
     float Pe = extinction_rate * pop.size();
 
     float Ps = 0.0;
 
-    if (waterLevel == 0) Ps = sympatric_low_water * pop.size();
+    if (waterLevel == 0) Ps = sympatric_low_water  * pop.size();
     if (waterLevel == 1) Ps = sympatric_high_water * pop.size();
 
-    if (waterLevel == 0) updatePairs2(pop,pairs);
+    if (waterLevel == 0) updatePairs2(pop, pairs); // low water
 
     float Pa = (1 - waterLevel) * allopatric_spec_rate * (pairs.size() * 2);
 
@@ -399,7 +400,7 @@ int run(const NumericVector& parameters,
 
     time += timestep;
 
-    verify_consistency(pop, extinct_species, "general_afterpairs");
+    // verify_consistency(pop, extinct_species, "general_afterpairs");
 
     if (time >= W[numberWlevelChanges] && (time-timestep) < W[numberWlevelChanges])
     {
@@ -412,23 +413,23 @@ int run(const NumericVector& parameters,
 
       int event_chosen = drawEvent(Pe, Ps, Pa, rndgen);
       float time_of_previous_waterlevelchange = 0.0;
-      if(numberWlevelChanges != 0) time_of_previous_waterlevelchange = W[numberWlevelChanges-1];
+      if(numberWlevelChanges != 0)
+        time_of_previous_waterlevelchange = W[numberWlevelChanges - 1];
 
       switch(event_chosen)
       {
         case 0:
           extinction(pop, extinct_species, time, waterLevel, rndgen);
           numberExtinctions++;
-
-          verify_consistency(pop, extinct_species, "extinction");
+          // verify_consistency(pop, extinct_species, "extinction");
           break;
         case 1:
           Symp_speciation(pop, id_count, extinct_species, time, time_of_previous_waterlevelchange, waterLevel, rndgen);
-          verify_consistency(pop, extinct_species, "symp_spec");
+          // verify_consistency(pop, extinct_species, "symp_spec");
           break;
         case 2:
           Allo_speciation(pop, id_count,time, time_of_previous_waterlevelchange,pairs, extinct_species, rndgen);
-          verify_consistency(pop, extinct_species, "allo_spec");
+          // verify_consistency(pop, extinct_species, "allo_spec");
           break;
         }
     }
@@ -438,11 +439,9 @@ int run(const NumericVector& parameters,
       return 0;
     }
 
-    if (pop.size() > max_lin) //more than 300 species, unlikely to provide a good fit, but slows down the program considerably
-    {
+    if (pop.size() > max_lin * 2) { // too many species
       return 1e6;
     }
-
   }
 
   verify_consistency(pop, extinct_species, "time limit");
@@ -452,10 +451,6 @@ int run(const NumericVector& parameters,
 
   allSpecies.swap(pop);
   allSpecies.insert(allSpecies.end(), extinct_species.begin(), extinct_species.end());
-
-
-  // remove_extinct_branches(allSpecies);
-  // merge_single_branches(allSpecies);
 
   return 1;
 }

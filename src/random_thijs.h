@@ -11,6 +11,15 @@ struct rnd_t {
     rndgen = rndgen_t;
   }
 
+  rnd_t(unsigned seed) {
+    rndgen = std::mt19937(seed);
+  }
+
+  rnd_t(std::mt19937 r) {
+    rndgen = r;
+  }
+
+
   std::uniform_real_distribution<float> unif_dist =
     std::uniform_real_distribution<float>(0.0f, 1.0f);
 

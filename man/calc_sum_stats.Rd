@@ -6,7 +6,7 @@
   statistics are calculated:
   nLTT, gamma, mean branching times and number of lineages}
 \usage{
-calc_sum_stats(focal_tree, emp_tree = NULL)
+calc_sum_stats(focal_tree)
 }
 \arguments{
 \item{focal_tree}{input phylogenetic tree for which to calculate
