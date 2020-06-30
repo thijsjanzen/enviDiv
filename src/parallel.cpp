@@ -29,14 +29,17 @@ List create_ref_table_tbb(int model,
                           int max_lin,
                           int num_threads) {
 
-  int num_remaining = num_repl;
 
   std::vector< Rcpp::NumericMatrix > l_tables;
 
   auto T0 = std::chrono::high_resolution_clock::now();
-  int loop_size = num_remaining - l_tables.size();
+  int loop_size = num_repl - l_tables.size();
 
-  while(loop_size > 0) {
+  while(l_tables.size() < num_repl) {
+    // loop size can be optimized further, depending on the average success rate
+    // e.g. loop_size = loop_size * 1.0f / success_rate
+    // this is especially interesting once only a few are left.
+    int loop_size = num_repl - l_tables.size();
     Rcout << loop_size << "\n";
 
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
@@ -79,7 +82,6 @@ List create_ref_table_tbb(int model,
           }
         }
       });
-    loop_size = num_remaining - l_tables.size();
   }
 
   Rcpp::Environment pkg = Rcpp::Environment::namespace_env("enviDiv");
