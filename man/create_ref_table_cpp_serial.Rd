@@ -4,14 +4,7 @@
 \alias{create_ref_table_cpp_serial}
 \title{simulate a tree using environmental diversification}
 \usage{
-create_ref_table_cpp_serial(
-  model,
-  num_repl,
-  crown_age,
-  min_lin,
-  max_lin,
-  num_threads
-)
+create_ref_table_cpp_serial(model, num_repl, crown_age, min_lin, max_lin)
 }
 \arguments{
 \item{model}{a vector of the four paramaters of the model}
@@ -23,8 +16,6 @@ create_ref_table_cpp_serial(
 \item{min_lin}{minimum number of lineages}
 
 \item{max_lin}{maximum number of lineages}
-
-\item{num_threads}{number of threads}
 }
 \value{
 newick string

@@ -18,6 +18,11 @@ std::vector<float> param_from_prior_exp_cpp();
 std::vector<float> get_waterlevel_cpp(int water_model,
                                       float maximum_time);
 
+std::vector<float> parameters_from_prior(rnd_t& rndgen_);
+std::vector<float> get_waterlevel_changes(int water_model,
+                                          float maximum_time,
+                                          rnd_t& rndgen_);
+
 
 
 // returns low-entropy 512 bit array for seed sequence
@@ -49,31 +54,4 @@ inline auto make_random_engine() -> URNG
   return URNG(sseq);
 }
 
-
-
-namespace parallel {
-
-  struct simulation {
-      int max_lin_;
-      int num_lin_;
-
-      Rcpp::NumericMatrix l_table;
-      float crown_age;
-      std::vector< float > parameters;
-      std::vector< float > waterlevel_changes;
-
-      simulation(int max_l, float crown) : max_lin_(max_l), crown_age(crown) {
-        num_lin_ = 0;
-      }
-
-      void get_l_table();
-
-      std::string get_tree();
-
-      std::vector<float> parameters_from_prior(rnd_t& rndgen_);
-      std::vector<float> get_waterlevel_changes(int water_model,
-                                                float maximum_time,
-                                                rnd_t& rndgen_);
-    };
-}
 #endif

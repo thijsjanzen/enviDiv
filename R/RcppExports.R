@@ -13,6 +13,15 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
     .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, seed, crown_age, max_lin)
 }
 
+#' test for tbb implementation
+#' @param loop_size size of task
+#' @param num_threads number of threads
+#' @return list
+#' @export
+test_tbb <- function(loop_size, num_threads) {
+    .Call('_enviDiv_test_tbb', PACKAGE = 'enviDiv', loop_size, num_threads)
+}
+
 #' simulate a tree using environmental diversification
 #' @param model a vector of the four paramaters of the model
 #' @param num_repl a vector that indicates the time points of water level changes
@@ -22,8 +31,8 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
 #' @param num_threads number of threads
 #' @return newick string
 #' @export
-create_ref_table_cpp <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
-    .Call('_enviDiv_create_ref_table_cpp', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
+create_ref_table_tbb <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
+    .Call('_enviDiv_create_ref_table_tbb', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
 }
 
 #' simulate a tree using environmental diversification

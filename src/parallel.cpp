@@ -12,7 +12,6 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-
 //' simulate a tree using environmental diversification
 //' @param model a vector of the four paramaters of the model
 //' @param num_repl a vector that indicates the time points of water level changes
@@ -23,7 +22,7 @@ using namespace Rcpp;
 //' @return newick string
 //' @export
 // [[Rcpp::export]]
-List create_ref_table_cpp(int model,
+List create_ref_table_tbb(int model,
                           int num_repl,
                           float crown_age,
                           int min_lin,
@@ -34,11 +33,10 @@ List create_ref_table_cpp(int model,
 
   std::vector< Rcpp::NumericMatrix > l_tables;
 
-  int cnt = 0;
   auto T0 = std::chrono::high_resolution_clock::now();
+  int loop_size = num_remaining - l_tables.size();
 
-  while(cnt < num_remaining) {
-    int loop_size = num_remaining - cnt;
+  while(loop_size > 0) {
     Rcout << loop_size << "\n";
 
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
@@ -50,11 +48,30 @@ List create_ref_table_cpp(int model,
         for (unsigned i = r.begin(); i < r.end(); ++i) {
           try {
 
-            parallel::simulation sim(max_lin, crown_age);
-            sim.get_l_table();
-            if(sim.num_lin_ >= min_lin && sim.num_lin_ <= max_lin) {
+            rnd_t thread_local reng = rnd_t( make_random_engine<std::mt19937>() );
+
+            std::vector<float> parameters = parameters_from_prior(reng);
+            std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+                                                        crown_age,
+                                                        reng);
+
+            NumericMatrix l_table;
+
+            std::string code = do_run_r(parameters,
+                                        waterlevel_changes,
+                                        crown_age,
+                                        max_lin,
+                                        l_table,
+                                        reng);
+
+            int num_lin = 0;
+            for(int i = 0; i < l_table.nrow(); ++i) {
+              if(l_table(i, 3) == -1) num_lin++;
+            }
+
+            if(num_lin >= min_lin && num_lin <= max_lin) {
               std::lock_guard<std::mutex> _(mutex);
-              l_tables.push_back(sim.l_table);
+              l_tables.push_back(l_table);
             }
           }
           catch(const std::exception& e) {
@@ -62,6 +79,7 @@ List create_ref_table_cpp(int model,
           }
         }
       });
+    loop_size = num_remaining - l_tables.size();
   }
 
   Rcpp::Environment pkg = Rcpp::Environment::namespace_env("enviDiv");
@@ -172,6 +190,57 @@ NumericVector sq_numbers_cpp_tbb(int n,
     });
 
   return results;
+}
+
+
+//' test for tbb implementation
+//' @param loop_size size of task
+//' @param num_threads number of threads
+//' @return list
+//' @export
+// [[Rcpp::export]]
+List test_tbb(  int loop_size,
+                int num_threads) {
+
+  auto T0 = std::chrono::high_resolution_clock::now();
+
+  std::vector< float > for_output;
+
+  tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+  std::mutex mutex;
+
+  tbb::parallel_for(
+    tbb::blocked_range<unsigned>(0, loop_size, 1),
+    [&](const tbb::blocked_range<unsigned>& r) {
+      for (unsigned i = r.begin(); i < r.end(); ++i) {
+        try {
+
+          rnd_t thread_local reng = rnd_t( make_random_engine<std::mt19937>() );
+
+          float a = reng.Expon(0.1);
+          float b = reng.Expon(0.5);
+          float add = sin(a) + cos(b);
+
+          std::lock_guard<std::mutex> _(mutex);
+          for_output.push_back(add);
+        }
+        catch(const std::exception& e) {
+          Rcout << "runtime error\n";
+        }
+      }
+    });
+
+
+
+  Rcpp::List output(loop_size);
+  for(int i = 0; i < for_output.size(); ++i) {
+    output[i] = for_output[i];
+  }
+  auto T1 = std::chrono::high_resolution_clock::now();
+  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
+  std::cout << "computed in: " << elapsed << "ms";
+
+  return output;
 }
 
 /*
