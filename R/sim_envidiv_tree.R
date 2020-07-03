@@ -70,6 +70,7 @@ sim_envidiv_tree <- function(params,
 #' @export
 sim_table_to_phy <- function(input_matrix,
                              crown_age) {
+
   local_l_table <- input_matrix
   local_l_table[, 1] <- crown_age - local_l_table[, 1]
   local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]

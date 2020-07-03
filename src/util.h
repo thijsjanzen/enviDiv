@@ -25,6 +25,25 @@ std::vector<float> get_waterlevel_changes(int water_model,
 
 
 
+struct ltable_entry {
+  float bt;
+  float parent;
+  float daughter;
+  float extant;
+  float tend;
+  std::string label;
+
+  ltable_entry(float b, float p, float d, float e) : bt(b),
+        parent(p), daughter(d), extant(e) {
+  }
+
+  ltable_entry() {
+  }
+};
+
+std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
+                             float crown_age);
+
 // returns low-entropy 512 bit array for seed sequence
 // based on std::chrono::high_resolution_clock.
 // ripped from rndutils

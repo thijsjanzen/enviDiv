@@ -20,18 +20,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// test_tbb
-List test_tbb(int loop_size, int num_threads);
-RcppExport SEXP _enviDiv_test_tbb(SEXP loop_sizeSEXP, SEXP num_threadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type loop_size(loop_sizeSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(test_tbb(loop_size, num_threads));
-    return rcpp_result_gen;
-END_RCPP
-}
 // create_ref_table_tbb
 List create_ref_table_tbb(int model, int num_repl, float crown_age, int min_lin, int max_lin, int num_threads);
 RcppExport SEXP _enviDiv_create_ref_table_tbb(SEXP modelSEXP, SEXP num_replSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_threadsSEXP) {
@@ -45,6 +33,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
     rcpp_result_gen = Rcpp::wrap(create_ref_table_tbb(model, num_repl, crown_age, min_lin, max_lin, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_ltable_to_newick
+std::string test_ltable_to_newick(const NumericMatrix& input_matrix);
+RcppExport SEXP _enviDiv_test_ltable_to_newick(SEXP input_matrixSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type input_matrix(input_matrixSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_ltable_to_newick(input_matrix));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -72,6 +71,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
     rcpp_result_gen = Rcpp::wrap(sq_numbers_cpp_tbb(n, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_tbb
+List test_tbb(int loop_size, int num_threads);
+RcppExport SEXP _enviDiv_test_tbb(SEXP loop_sizeSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type loop_size(loop_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_tbb(loop_size, num_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -110,10 +121,11 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
-    {"_enviDiv_test_tbb", (DL_FUNC) &_enviDiv_test_tbb, 2},
     {"_enviDiv_create_ref_table_tbb", (DL_FUNC) &_enviDiv_create_ref_table_tbb, 6},
+    {"_enviDiv_test_ltable_to_newick", (DL_FUNC) &_enviDiv_test_ltable_to_newick, 1},
     {"_enviDiv_create_ref_table_cpp_serial", (DL_FUNC) &_enviDiv_create_ref_table_cpp_serial, 5},
     {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
+    {"_enviDiv_test_tbb", (DL_FUNC) &_enviDiv_test_tbb, 2},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 0},
     {"_enviDiv_param_from_prior_exp_cpp", (DL_FUNC) &_enviDiv_param_from_prior_exp_cpp, 0},
     {"_enviDiv_get_waterlevel_cpp", (DL_FUNC) &_enviDiv_get_waterlevel_cpp, 2},
