@@ -20,6 +20,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_envidiv_tbb
+Rcpp::List test_envidiv_tbb(int model, float crown_age);
+RcppExport SEXP _enviDiv_test_envidiv_tbb(SEXP modelSEXP, SEXP crown_ageSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_envidiv_tbb(model, crown_age));
+    return rcpp_result_gen;
+END_RCPP
+}
 // create_ref_table_tbb
 List create_ref_table_tbb(int model, int num_repl, float crown_age, int min_lin, int max_lin, int num_threads);
 RcppExport SEXP _enviDiv_create_ref_table_tbb(SEXP modelSEXP, SEXP num_replSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_threadsSEXP) {
@@ -121,6 +133,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
+    {"_enviDiv_test_envidiv_tbb", (DL_FUNC) &_enviDiv_test_envidiv_tbb, 2},
     {"_enviDiv_create_ref_table_tbb", (DL_FUNC) &_enviDiv_create_ref_table_tbb, 6},
     {"_enviDiv_test_ltable_to_newick", (DL_FUNC) &_enviDiv_test_ltable_to_newick, 1},
     {"_enviDiv_create_ref_table_cpp_serial", (DL_FUNC) &_enviDiv_create_ref_table_cpp_serial, 5},

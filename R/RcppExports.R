@@ -13,6 +13,15 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
     .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, seed, crown_age, max_lin)
 }
 
+#' function to test table conversion
+#' @param model a vector of the four parameters of the model
+#' @param crown_age crown age of the tree to be simulated
+#' @return list
+#' @export
+test_envidiv_tbb <- function(model, crown_age) {
+    .Call('_enviDiv_test_envidiv_tbb', PACKAGE = 'enviDiv', model, crown_age)
+}
+
 #' simulate a tree using environmental diversification
 #' @param model a vector of the four paramaters of the model
 #' @param num_repl a vector that indicates the time points of water level changes

@@ -27,6 +27,59 @@ std::string do_run_tbb(const std::vector<float>& parameters,
                        std::vector< std::vector< float > >& l_table,
                        rnd_t& rndgen);
 
+
+//' function to test table conversion
+//' @param model a vector of the four parameters of the model
+//' @param crown_age crown age of the tree to be simulated
+//' @return list
+//' @export
+// [[Rcpp::export]]
+Rcpp::List test_envidiv_tbb(int model,
+                            float crown_age) {
+
+  rnd_t reng;
+
+  std::vector<float> parameters = parameters_from_prior(reng);
+
+  parameters[0] = 0.0;
+  parameters[1] = 0.3;
+ parameters[5] = model;
+
+  std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+                                                                 crown_age,
+                                                                 reng);
+
+  int max_lin = 1e6;
+  std::vector< std::vector< float > > l_table;
+
+   std::string code = do_run_tbb(parameters,
+                                waterlevel_changes,
+                                crown_age,
+                                max_lin,
+                                l_table,
+                                reng);
+
+  force_output("done simulation, starting on table conversion");
+
+  std::string newick_string = ltable_to_newick(l_table, crown_age);
+
+  force_output("done conversion");
+//  std::string newick_string = "placeholder";
+  NumericMatrix ltab;
+  if(!l_table.empty()) {
+    ltab = NumericMatrix(l_table.size(), l_table[0].size());
+    for(int i = 0; i < l_table.size(); ++i) {
+      for(int j = 0; j < l_table[i].size(); ++j) {
+        ltab(i, j) = l_table[i][j];
+      }
+    }
+  }
+
+  return List::create( Named("newick_string") = newick_string,
+                       Named("Ltable") = ltab);
+}
+
+
 //' simulate a tree using environmental diversification
 //' @param model a vector of the four paramaters of the model
 //' @param num_repl a vector that indicates the time points of water level changes
@@ -69,7 +122,7 @@ List create_ref_table_tbb(int model,
   //  tbb::parallel_for(
 //      tbb::blocked_range<unsigned>(0, loop_size),
 //      [&](const tbb::blocked_range<unsigned>& r) {
-        rnd_t thread_local reng = rnd_t( make_random_engine<std::mt19937>() );
+        rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
   //      for (unsigned i = r.begin(); i < r.end(); ++i) {
           std::vector<float> parameters = parameters_from_prior(reng);
@@ -154,10 +207,11 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
     ltab[i] = temp;
   }
 
-  /*
-   local_l_table <- input_matrix
-   local_l_table[, 1] <- crown_age - local_l_table[, 1]
-  */
+  Rcout << "received this input table:\n";
+  for(auto i : ltab) {
+    Rcout << i.bt << " " << i.parent << " " << i.daughter << " " << i.extant << "\n";
+  }
+
   for(auto& i : ltab) {
     i.bt = crown_age - i.bt;
     if(i.bt < 0) i.bt = 0;
@@ -168,13 +222,7 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
                ltable_entry const& b) {return abs(a.daughter) < abs(b.daughter);});
 
   ltab[0].parent = 0;
-  /*
-  * local_l_table <-  local_l_table[order(abs(local_l_table[, 3])), 1:4]
 
-  * local_l_table[1, 2] <- 0
-  * local_l_table[which(local_l_table[, 1] < 0), 1] <- 0
-
-  */
   std::vector< ltable_entry > temp;
   for(auto i : ltab) {
     if(i.bt == crown_age) {
@@ -199,17 +247,10 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
     }
   }
 
-  /*
-   a <- subset(local_l_table, local_l_table[, 1] == crown_age)
-   connected <- FALSE
-   if (a[2, 3] == a[1, 2]) connected <- TRUE
-   if (a[1, 3] == a[2, 2]) connected <- TRUE
-
-   if (connected == FALSE) {
-   parent_id <- local_l_table[1, 3]
-   local_l_table[which(local_l_table[, 2] == -1), 2] <- parent_id
-   }
-   */
+  force_output("after connecting");
+  for(auto i : ltab) {
+    Rcout << i.bt << " " << i.parent << " " << i.daughter << " " << i.extant << "\n";
+  }
 
 
   force_output("ltab sorted");
@@ -237,12 +278,22 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
                                 return a.bt < b.bt;
                               });
 
-    int j = std::distance(linlist.begin(), m); //get_max(linlist);
+    int j = std::distance(linlist.begin(), m);
+
+    if (j > linlist.size() || j < 0) {
+      Rcout << "stop, j out of bounds\n";
+      return("j out of bounds");
+    }
+
     int parent   = linlist[j].parent;
     std::vector<int> parentj = get_parent_from_linlist(linlist, parent);
 
     if(parentj.size() == 1) {
       int index = parentj[0];
+      if(index > linlist.size() || index < 0) {
+        Rcout << "stop, index out of bounds\n";
+        return("index out of bounds");
+      }
       std::string spec1 = linlist[index].label + ":" +
           std::to_string(linlist[index].tend - linlist[j].bt);
 
@@ -257,6 +308,12 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
     } else {
        std::vector< int > indices = get_parent_from_linlist(ltab, parent);
        int parent_index = indices[0];
+
+       if(parent_index > ltab.size() || parent_index < 0) {
+         Rcout << "stop, parent_index out of bounds\n";
+         return("parent_index out of bounds");
+       }
+
        linlist[j].bt        = ltab[parent_index].bt;
        linlist[j].parent    = ltab[parent_index].bt;
        linlist[j].daughter  = ltab[parent_index].bt;
@@ -267,9 +324,12 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
     }
   }
 
+  /*
   std::string newick_tree = linlist[0].label + ":" +
     std::to_string(linlist[0].tend) + ";";
 
+  */
+  std::string newick_tree = "placeholder";
   return newick_tree;
 }
 
@@ -411,7 +471,7 @@ List test_tbb(  int loop_size,
       for (unsigned i = r.begin(); i < r.end(); ++i) {
         try {
 
-          rnd_t thread_local reng = rnd_t( make_random_engine<std::mt19937>() );
+          rnd_t  reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
           float a = reng.Expon(0.1);
           float b = reng.Expon(0.5);
