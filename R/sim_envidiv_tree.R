@@ -124,5 +124,3 @@ sim_table_to_newick <- function(input_matrix,
   phy_tree <- sim_table_to_phy(input_matrix, crown_age)
   return(ape::write.tree(phy_tree))
 }
-
-

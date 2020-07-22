@@ -32,7 +32,7 @@ create_reference_table <- function(simulations_per_model = 1000,
                         file_name,
                         exp_prior)
   } else {
-    for(focal_model in 1:3) {
+    for (focal_model in 1:3) {
       generate_from_prior(simulations_per_model,
                           min_tips,
                           max_tips,
@@ -45,7 +45,3 @@ create_reference_table <- function(simulations_per_model = 1000,
     }
   }
 }
-
-
-
-

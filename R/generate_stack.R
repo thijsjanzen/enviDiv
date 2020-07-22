@@ -1,7 +1,15 @@
 #' function to perform ABC-SMC
 #' @param number_of_replicates number of particles used per iteration of
 #'                            the SMC algorithm
-#' @param parameters parameters, a vector with: 1) extinction rate, 2) (sympatric) speciation rate at high water, 3) sympatric speciation rate at low water, 4) allopatric speciation rate at low water, 5) posterior perturbation and 6) the specific model, where 1) model without water level changes, 2) literature water level changes, 3) extrapolated water level changes, 4) standard birth-death model.
+#' @param parameters parameters, a vector with:
+#' 1) extinction rate,
+#' 2) (sympatric) speciation rate at high water,
+#' 3) sympatric speciation rate at low water,
+#' 4) allopatric speciation rate at low water,
+#' 5) posterior perturbation and
+#' 6) the specific model, where 1) model without water level changes,
+#' 2) literature water level changes, 3) extrapolated water level changes,
+#' 4) standard birth-death model.
 #' @param min_tips minimum number of tips
 #' @param max_tips maximum number of tips
 #' @param emp_tree phy object holding phylogeny of the tree to be fitted on

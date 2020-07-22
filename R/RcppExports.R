@@ -31,15 +31,8 @@ test_envidiv_tbb <- function(model, crown_age) {
 #' @param num_threads number of threads
 #' @return newick string
 #' @export
-create_ref_table_tbb <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
-    .Call('_enviDiv_create_ref_table_tbb', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
-}
-
-#' test ltable
-#' @param input_table input table
-#' @export
-test_ltable_to_newick <- function(input_matrix) {
-    .Call('_enviDiv_test_ltable_to_newick', PACKAGE = 'enviDiv', input_matrix)
+create_ref_table_tbb_serial <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
+    .Call('_enviDiv_create_ref_table_tbb_serial', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
 }
 
 #' simulate a tree using environmental diversification
@@ -48,10 +41,11 @@ test_ltable_to_newick <- function(input_matrix) {
 #' @param crown_age crown age of the tree to be simulated
 #' @param min_lin minimum number of lineages
 #' @param max_lin maximum number of lineages
+#' @param num_threads number of threads
 #' @return newick string
 #' @export
-create_ref_table_cpp_serial <- function(model, num_repl, crown_age, min_lin, max_lin) {
-    .Call('_enviDiv_create_ref_table_cpp_serial', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin)
+create_ref_table_tbb_par <- function(model, num_repl, crown_age, min_lin, max_lin, num_threads) {
+    .Call('_enviDiv_create_ref_table_tbb_par', PACKAGE = 'enviDiv', model, num_repl, crown_age, min_lin, max_lin, num_threads)
 }
 
 #' test multithreaded works!
@@ -61,15 +55,6 @@ create_ref_table_cpp_serial <- function(model, num_repl, crown_age, min_lin, max
 #' @export
 sq_numbers_cpp_tbb <- function(n, num_threads) {
     .Call('_enviDiv_sq_numbers_cpp_tbb', PACKAGE = 'enviDiv', n, num_threads)
-}
-
-#' test for tbb implementation
-#' @param loop_size size of task
-#' @param num_threads number of threads
-#' @return list
-#' @export
-test_tbb <- function(loop_size, num_threads) {
-    .Call('_enviDiv_test_tbb', PACKAGE = 'enviDiv', loop_size, num_threads)
 }
 
 #' draw parameter combinations from the prior

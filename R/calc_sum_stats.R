@@ -66,7 +66,8 @@ calc_sum_stats <- function(focal_tree) {
   output[7] <- sackin_stat(focal_tree) # sackin
   output[8] <- phyloTop::avgLadder(focal_tree) # ladder
   output[9] <- phyloTop::cherries(focal_tree) # cherries
-  output[10] <- phyloTop::ILnumber(focal_tree) # number of internal nodes with a single child
+  output[10] <- phyloTop::ILnumber(focal_tree) # number of internal nodes with
+                                               # a single child
   output[11] <- phyloTop::pitchforks(focal_tree) #pitchforks
   output[12] <- phyloTop::stairs(focal_tree)[[1]] # stair casedness
 

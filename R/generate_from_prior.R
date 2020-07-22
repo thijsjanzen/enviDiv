@@ -21,10 +21,10 @@ generate_from_prior <- function(number_of_particles = 1000,
                            file_name,
                            exp_prior = FALSE) {
 
-  if(!is.null(emp_tree)) {
+  if (!is.null(emp_tree)) {
     crown_age <- max(ape::branching.times(emp_tree))
   }
-  if(is.null(crown_age)) {
+  if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
   }
 

@@ -11,7 +11,8 @@ infer_params_abcrf(reference_table, focal_model, to_analyze)
 
 \item{focal_model}{focal model}
 
-\item{to_analyze}{matrix with summary statistics of tree to infer paramaters for}
+\item{to_analyze}{matrix with summary statistics of tree to infer paramaters
+for}
 }
 \value{
 tibble with parameter estimates

@@ -6,7 +6,7 @@ test_that("usage", {
   emp_tree <- sim_envidiv_tree(params, crown_age = 5, seed = 5)
 
   # skip
-  if(1 == 2) {
+  if (1 == 2) {
     vx <- generate_naive(number_of_particle = 10,
                          min_tips = 50,
                          max_tips = 150,
