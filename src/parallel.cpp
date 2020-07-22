@@ -156,7 +156,7 @@ List create_ref_table_tbb_serial(int model,
 
   auto T1 = std::chrono::high_resolution_clock::now();
   auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
-  std::cout << "computed in: " << elapsed << "ms";
+  Rcout << "computed in: " << elapsed << "ms";
   return output;
 }
 

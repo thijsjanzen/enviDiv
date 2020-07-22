@@ -11,12 +11,12 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Depends:
+   Rcpp,
    RcppParallel
 LinkingTo: 
     Rcpp,
     RcppParallel
 Imports: 
-    Rcpp,
     ape,
     nLTT,
     geiger,
@@ -28,9 +28,8 @@ Imports:
     phyloTop,
     testit,
     DDD,
-    future.apply,
-    future,
     RPANDA,
     dplyr,
     TreeSim,
     abcrf
+SystemRequirements: GNU make
