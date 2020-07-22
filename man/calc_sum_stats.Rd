@@ -11,8 +11,6 @@ calc_sum_stats(focal_tree)
 \arguments{
 \item{focal_tree}{input phylogenetic tree for which to calculate
 summary statistics.}
-
-\item{emp_tree}{reference empirical tree, only used to calculate the nLTT.}
 }
 \value{
 vector of 8 summary statistics

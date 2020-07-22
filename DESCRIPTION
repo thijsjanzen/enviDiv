@@ -19,17 +19,16 @@ LinkingTo:
 Imports: 
     ape,
     nLTT,
-    geiger,
     phytools,
     readr,
     tibble,
     testthat,
     apTreeshape,
     phyloTop,
-    testit,
     DDD,
     RPANDA,
     dplyr,
     TreeSim,
-    abcrf
+    abcrf,
+    future.apply
 SystemRequirements: GNU make

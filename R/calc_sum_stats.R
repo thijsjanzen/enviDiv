@@ -32,7 +32,6 @@ calc_base_nltt_stat <- function(tree) {
 #'   nLTT, gamma, mean branching times and number of lineages
 #' @param focal_tree input phylogenetic tree for which to calculate
 #'                   summary statistics.
-#' @param emp_tree reference empirical tree, only used to calculate the nLTT.
 #' @return vector of 8 summary statistics
 #' @export
 calc_sum_stats <- function(focal_tree) {
