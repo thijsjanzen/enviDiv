@@ -21,11 +21,11 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   }
 
   sim_result <- enviDiv::create_ref_table_tbb_par(model = model,
-                                                    num_repl = number_of_trees,
-                                                    crown_age = crown_age,
-                                                    min_lin = min_tips,
-                                                    max_lin = max_tips,
-                                                    num_threads = num_threads)
+                                                  num_repl = number_of_trees,
+                                                  crown_age = crown_age,
+                                                  min_lin = min_tips,
+                                                  max_lin = max_tips,
+                                                  num_threads = num_threads)
 
   convert_to_phylo <- function(newick_string) {
     phylo_tree <- ape::read.tree(text = newick_string)
