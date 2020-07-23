@@ -254,8 +254,8 @@ List create_ref_table_tbb_par(int model,
 
 
   auto T1 = std::chrono::high_resolution_clock::now();
-  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
-  Rcout << "computed in: " << elapsed << "ms";
+  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(T1 - T0).count());
+  Rcout << "trees simulated in: " << elapsed << "seconds\n";
   return List::create(Named("trees") = trees,
                       Named("parameters") = parameter_matrix);
 }

@@ -30,5 +30,6 @@ Imports:
     dplyr,
     TreeSim,
     abcrf,
-    future.apply
+    future.apply,
+    progressr
 SystemRequirements: GNU make

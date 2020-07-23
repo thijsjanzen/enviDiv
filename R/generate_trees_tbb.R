@@ -35,8 +35,20 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
   phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
 
+  cat("simulating trees is done\n")
+
   # now we calculate stats
-  stats <- future.apply::future_lapply(phylo_trees, calc_sum_stats)
+  cat("calculating summary statistics for all trees...\n")
+
+  indices <- seq_along(phylo_trees)
+
+  progressr::with_progress({
+    p <- progressr::progressor(along = phylo_trees)
+    stats <- future.apply::future_lapply(indices, function(x, ...) {
+      p(sprintf("x=%g", x))
+      calc_sum_stats(phylo_trees[[x]])
+    })
+  })
 
   stat_matrix <- matrix(unlist(stats, use.names = FALSE),
                         ncol = 15,
@@ -54,7 +66,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   results <- tibble::as_tibble(results)
 
   readr::write_tsv(results, path = file_name)
-
+  cat(paste("reference table written to:", file_name))
   return(results)
-
 }
