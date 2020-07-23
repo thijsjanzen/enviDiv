@@ -1,7 +1,6 @@
 context("calculate sum stats")
 
 test_that("usage", {
-  skip()
   params <- c(0, 0.5, 0, 0, 0, 1)
   emp_tree <- enviDiv::sim_envidiv_tree(params, crown_age = 5, seed = 42)
 
