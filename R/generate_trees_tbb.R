@@ -53,7 +53,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
   results <- tibble::as_tibble(results)
 
-  readr::write_tsv(results, path = file_name,
-                   append = TRUE)
+  readr::write_tsv(results, path = file_name)
+
+  return(results)
 
 }
