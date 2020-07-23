@@ -18,8 +18,6 @@
 #'                      or not? additional verbal output is provided if not.
 #' @param seed random nmber seed
 #' @return phy object
-#' @rawNamespace useDynLib(enviDiv)
-#' @rawNamespace import(Rcpp)
 #' @export
 sim_envidiv_tree <- function(params,
                              crown_age,

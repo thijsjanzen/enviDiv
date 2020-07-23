@@ -108,6 +108,11 @@ std::vector<float> param_from_prior_exp_cpp() {
   return(output);
 }
 
+//' draw water level change2
+//' @param water_model water model
+//' @param maximum_time crown age
+//' @return water level changes
+//' @export
 // [[Rcpp::export]]
 std::vector<float> get_waterlevel_cpp(int water_model,
                                       float maximum_time) {

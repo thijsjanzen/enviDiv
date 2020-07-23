@@ -2,6 +2,7 @@
 #' @param L ltable
 #' @param dropextinct drop extinct
 #' @return newick
+#' @rawNamespace useDynLib(enviDiv)
 #' @export
 ltable_to_phylo <- function(L, dropextinct = T) {
   L <- L[order(abs(L[, 3])), 1:4]
