@@ -15,23 +15,22 @@ generate_trees_tbb(
 )
 }
 \arguments{
-\item{number_of_trees}{number of particles used per iteration of
-the SMC algorithm}
+\item{number_of_trees}{number of trees to generate}
 
-\item{min_tips}{minimum number of tips}
+\item{min_tips}{minimum number of tips (inclusive)}
 
-\item{max_tips}{maximum number of tips}
+\item{max_tips}{maximum number of tips (inclusive)}
 
 \item{model}{used water model}
 
 \item{crown_age}{crown age}
 
-\item{num_threads}{number of threads}
+\item{file_name}{file name to write output to}
 
-\item{write_to_file}{boolean, if TRUE, results are written to file.}
+\item{num_threads}{number of threads}
 }
 \value{
-a tibble containing the results
+a matrix with parameter values and the associated summary statistics
 }
 \description{
 function to perform ABC-SMC

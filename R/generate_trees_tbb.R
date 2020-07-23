@@ -1,13 +1,12 @@
 #' function to perform ABC-SMC
-#' @param number_of_trees number of particles used per iteration of
-#'                            the SMC algorithm
-#' @param min_tips minimum number of tips
-#' @param max_tips maximum number of tips
+#' @param number_of_trees number of trees to generate
+#' @param min_tips minimum number of tips (inclusive)
+#' @param max_tips maximum number of tips (inclusive)
 #' @param model used water model
 #' @param crown_age crown age
-#' @param write_to_file boolean, if TRUE, results are written to file.
+#' @param file_name file name to write output to
 #' @param num_threads number of threads
-#' @return a tibble containing the results
+#' @return a matrix with parameter values and the associated summary statistics
 #' @export
 generate_trees_tbb <- function(number_of_trees = 1000,
                                 min_tips = 50,
