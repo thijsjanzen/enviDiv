@@ -180,6 +180,7 @@ List create_ref_table_tbb_par(int model,
                               int num_threads) {
 
   std::vector< std::string > trees;
+  std::vector< std::vector < float > > parameter_list;
 
   auto T0 = std::chrono::high_resolution_clock::now();
   int loop_size = num_repl - trees.size();
@@ -191,6 +192,8 @@ List create_ref_table_tbb_par(int model,
     loop_size = num_repl - trees.size();
 
     std::vector< std::string > add(loop_size);
+    std::vector< float > temp_filler(6);
+    std::vector< std::vector< float > > add_params(loop_size, temp_filler);
     std::vector< bool > add_flag(loop_size, false);
 
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
@@ -202,7 +205,7 @@ List create_ref_table_tbb_par(int model,
         rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
         for (unsigned i = r.begin(); i < r.end(); ++i) {
-          std::vector<float> parameters = parameters_from_prior(reng);
+          std::vector<float> parameters = parameters_from_prior(reng, model);
           std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
                                                                          crown_age,
                                                                          reng);
@@ -223,6 +226,7 @@ List create_ref_table_tbb_par(int model,
 
           if(num_lin >= min_lin && num_lin <= max_lin) {
             add[i]      = ltable_to_newick(l_table, crown_age);
+            add_params[i] = parameters;
             add_flag[i] = true;
           }
         }
@@ -231,6 +235,7 @@ List create_ref_table_tbb_par(int model,
     for(int j = 0; j < add_flag.size(); ++j) {
       if(add_flag[j]) {
         trees.push_back(add[j]);
+        parameter_list.push_back(add_params[j]);
       }
     }
   }
@@ -240,10 +245,19 @@ List create_ref_table_tbb_par(int model,
     output[k] = trees[k];
   }
 
+  Rcpp::NumericMatrix parameter_matrix(num_repl, 6);
+  for(int k = 0; k < parameter_list.size(); ++k) {
+    for(int j = 0; j < parameter_list[0].size(); ++j) {
+      parameter_matrix(k, j) = parameter_list[k][j];
+    }
+  }
+
+
   auto T1 = std::chrono::high_resolution_clock::now();
   auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(T1 - T0).count());
   Rcout << "computed in: " << elapsed << "ms";
-  return output;
+  return List::create(Named("trees") = trees,
+                      Named("parameters") = parameter_matrix);
 }
 
 

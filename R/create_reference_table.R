@@ -4,7 +4,6 @@
 #' @param min_tips minimum number of tips
 #' @param max_tips maximum number of tips
 #' @param model used water model
-#' @param emp_tree phy object holding phylogeny of the tree to be fitted on
 #' @param crown_age crown age
 #' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
@@ -15,7 +14,6 @@ create_reference_table <- function(simulations_per_model = 1000,
                                 min_tips = 50,
                                 max_tips = 150,
                                 model = NULL,
-                                emp_tree = NULL,
                                 crown_age = NULL,
                                 write_to_file = FALSE,
                                 file_name,
@@ -26,7 +24,6 @@ create_reference_table <- function(simulations_per_model = 1000,
                         min_tips,
                         max_tips,
                         model,
-                        emp_tree,
                         crown_age,
                         write_to_file,
                         file_name,
@@ -37,7 +34,6 @@ create_reference_table <- function(simulations_per_model = 1000,
                           min_tips,
                           max_tips,
                           focal_model,
-                          emp_tree,
                           crown_age,
                           write_to_file,
                           file_name,

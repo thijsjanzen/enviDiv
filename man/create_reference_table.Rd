@@ -9,7 +9,6 @@ create_reference_table(
   min_tips = 50,
   max_tips = 150,
   model = NULL,
-  emp_tree = NULL,
   crown_age = NULL,
   write_to_file = FALSE,
   file_name,
@@ -25,8 +24,6 @@ the SMC algorithm}
 \item{max_tips}{maximum number of tips}
 
 \item{model}{used water model}
-
-\item{emp_tree}{phy object holding phylogeny of the tree to be fitted on}
 
 \item{crown_age}{crown age}
 

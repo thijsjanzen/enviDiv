@@ -4,7 +4,6 @@
 #' @param min_tips minimum number of tips
 #' @param max_tips maximum number of tips
 #' @param model used water model
-#' @param emp_tree phy object holding phylogeny of the tree to be fitted on
 #' @param crown_age crown age
 #' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
@@ -15,15 +14,11 @@ generate_from_prior <- function(number_of_particles = 1000,
                            min_tips = 50,
                            max_tips = 150,
                            model = NULL,
-                           emp_tree = NULL,
                            crown_age = NULL,
                            write_to_file = FALSE,
                            file_name,
                            exp_prior = FALSE) {
 
-  if (!is.null(emp_tree)) {
-    crown_age <- max(ape::branching.times(emp_tree))
-  }
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
   }
@@ -61,7 +56,7 @@ generate_from_prior <- function(number_of_particles = 1000,
       num_tips <- found_tree$Nnode + 1
 
       if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)
+        stats <- enviDiv::calc_sum_stats(found_tree)
       }
       return(stats)
     }

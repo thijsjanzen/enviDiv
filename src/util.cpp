@@ -7,6 +7,20 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+std::vector<float> parameters_from_prior(rnd_t& rndgen_,
+                                         int model) {
+  std::vector<float> output(6, 0.f);
+
+  output[0] = powf(10, (-3 + 5 * rndgen_.uniform()));  // extinction
+  output[1] = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec high
+  output[2] = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec low
+  output[3] = powf(10, (-3 + 5 * rndgen_.uniform()));  // allo spec
+  output[4] = powf(10, (-3 + 3 * rndgen_.uniform()));  // jiggle
+  output[5] = model; // model
+
+  return(output);
+}
+
 std::vector<float> parameters_from_prior(rnd_t& rndgen_) {
   std::vector<float> output(6, 0.f);
 
