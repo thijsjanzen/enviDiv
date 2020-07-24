@@ -10,7 +10,8 @@ generate_trees_tbb(
   max_tips = 150,
   model = NULL,
   crown_age = NULL,
-  file_name = NULL,
+  file_name_trees = "trees.txt",
+  file_name_stats = "stats.txt",
   num_threads = -1
 )
 }
@@ -25,7 +26,9 @@ generate_trees_tbb(
 
 \item{crown_age}{crown age}
 
-\item{file_name}{file name to write output to}
+\item{file_name_trees}{file name to write trees}
+
+\item{file_name_stats}{file name to write stats}
 
 \item{num_threads}{number of threads}
 }
