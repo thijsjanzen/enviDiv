@@ -190,6 +190,9 @@ List create_ref_table_tbb_par(int model,
     // e.g. loop_size = loop_size * 1.0f / success_rate
     // this is especially interesting once only a few are left.
     loop_size = num_repl - trees.size();
+    Rcout << "trees remaining: " << loop_size << "\n";
+    if (loop_size < 1000) loop_size = 1000;
+
 
     std::vector< std::string > add(loop_size);
     std::vector< float > temp_filler(6);
@@ -202,7 +205,7 @@ List create_ref_table_tbb_par(int model,
     tbb::parallel_for(
       tbb::blocked_range<unsigned>(0, loop_size),
       [&](const tbb::blocked_range<unsigned>& r) {
-        rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
+        rnd_t reng;
 
         for (unsigned i = r.begin(); i < r.end(); ++i) {
           std::vector<float> parameters = parameters_from_prior(reng, model);
@@ -220,8 +223,8 @@ List create_ref_table_tbb_par(int model,
                                         reng);
 
           int num_lin = 0;
-          for(int k = 0; k < l_table.size(); ++k) {
-            if(l_table[k][3] == -1) num_lin++;
+          for (auto i : l_table) {
+            if (i[3] == -1) num_lin++;
           }
 
           if(num_lin >= min_lin && num_lin <= max_lin) {
