@@ -37,9 +37,11 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
 
   cat("simulating trees is done\n")
+  trees_for_writing <- phylo_trees
+  class(trees_for_writing) <- "multiPhylo"
 
-  ape::write.nexus(phylo_trees, file_name_trees)
-
+  ape::write.tree(trees_for_writing, file_name_trees)
+  rm(trees_for_writing)
   # now we calculate stats
   cat("calculating summary statistics for all trees...\n")
 
