@@ -185,13 +185,20 @@ List create_ref_table_tbb_par(int model,
   auto T0 = std::chrono::high_resolution_clock::now();
   int loop_size = num_repl - trees.size();
 
+  float accept_rate = 1.0;
+  int num_tried = 0;
+  int num_accepted = 0;
+
   while(trees.size() < num_repl) {
     // loop size can be optimized further, depending on the average success rate
     // e.g. loop_size = loop_size * 1.0f / success_rate
     // this is especially interesting once only a few are left.
     loop_size = num_repl - trees.size();
-    Rcout << "trees remaining: " << loop_size << "\n";
+    Rcout << "trees remaining: " << loop_size   <<
+             " accept rate: "    << accept_rate << "\n";
+
     if (loop_size < 1000) loop_size = 1000;
+    loop_size *= 1.0 / accept_rate;
 
 
     std::vector< std::string > add(loop_size);
@@ -241,6 +248,9 @@ List create_ref_table_tbb_par(int model,
         parameter_list.push_back(add_params[j]);
       }
     }
+    num_accepted += add_flag.size();
+    num_tried    += loop_size;
+    accept_rate = num_accepted / num_tried;
   }
 
   Rcpp::List output(num_repl);
