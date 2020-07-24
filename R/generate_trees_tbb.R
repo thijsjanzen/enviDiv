@@ -4,7 +4,8 @@
 #' @param max_tips maximum number of tips (inclusive)
 #' @param model used water model
 #' @param crown_age crown age
-#' @param file_name file name to write output to
+#' @param file_name_trees file name to write trees
+#' @param file_name_stats file name to write stats
 #' @param num_threads number of threads
 #' @return a matrix with parameter values and the associated summary statistics
 #' @export
@@ -13,7 +14,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                 max_tips = 150,
                                 model = NULL,
                                 crown_age = NULL,
-                                file_name= NULL,
+                                file_name_trees = "trees.txt",
+                                file_name_stats = "stats.txt",
                                 num_threads = -1) {
 
   if (is.null(crown_age)) {
@@ -35,6 +37,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
 
   cat("simulating trees is done\n")
+
+  ape::write.nexus(phylo_trees, file_name_trees)
 
   # now we calculate stats
   cat("calculating summary statistics for all trees...\n")

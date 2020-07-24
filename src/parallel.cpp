@@ -210,7 +210,7 @@ List create_ref_table_tbb_par(int model,
 
 
     tbb::parallel_for(
-      tbb::blocked_range<unsigned>(0, loop_size),
+      tbb::blocked_range<unsigned>(0, loop_size - 1),
       [&](const tbb::blocked_range<unsigned>& r) {
         rnd_t reng;
 
@@ -230,14 +230,14 @@ List create_ref_table_tbb_par(int model,
                                         reng);
 
           int num_lin = 0;
-          for (auto i : l_table) {
-            if (i[3] == -1) num_lin++;
+          for(int k = 0; k < l_table.size(); ++k) {
+            if(l_table[k][3] == -1) num_lin++;
           }
 
           if(num_lin >= min_lin && num_lin <= max_lin) {
-            add[i]      = ltable_to_newick(l_table, crown_age);
+            add[i]        = ltable_to_newick(l_table, crown_age);
             add_params[i] = parameters;
-            add_flag[i] = true;
+            add_flag[i]   = true;
           }
         }
       });
@@ -248,17 +248,20 @@ List create_ref_table_tbb_par(int model,
         parameter_list.push_back(add_params[j]);
       }
     }
-    num_accepted += add_flag.size();
+
+    num_accepted  =  trees.size();
     num_tried    += loop_size;
-    accept_rate = num_accepted / num_tried;
+    accept_rate = 1.0f * num_accepted / num_tried;
   }
 
-  Rcpp::List output(num_repl);
+  force_output("now converting to R objects\n");
+
+  Rcpp::List output(trees.size());
   for(int k = 0; k < trees.size(); ++k) {
     output[k] = trees[k];
   }
 
-  Rcpp::NumericMatrix parameter_matrix(num_repl, 6);
+  Rcpp::NumericMatrix parameter_matrix(parameter_list.size(), 6);
   for(int k = 0; k < parameter_list.size(); ++k) {
     for(int j = 0; j < parameter_list[0].size(); ++j) {
       parameter_matrix(k, j) = parameter_list[k][j];
