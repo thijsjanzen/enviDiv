@@ -70,7 +70,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
   results <- tibble::as_tibble(results)
 
-  readr::write_tsv(results, path = file_name)
-  cat(paste("reference table written to:", file_name))
+  readr::write_tsv(results, path = file_name_stats)
+  cat(paste("reference table written to:", file_name_stats))
   return(results)
 }
