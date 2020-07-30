@@ -90,11 +90,11 @@ std::string do_run_r(const std::vector<float>& parameters,
 
 
 
-int drawEvent(float E, float S, float A, rnd_t& rndgen) {
+int drawEvent(double E, double S, double A, rnd_t& rndgen) {
   // this is a rather naive implementation
   // but for such a low number of events it suffices.
-  float sum = E + S + A;
-  float events[3] = {E/sum, S/sum, A/sum};
+  double sum = E + S + A;
+  double events[3] = {E/sum, S/sum, A/sum};
   float r = rndgen.uniform();
   for (int i = 0; i < 3; ++i) {
     r -= events[i];
@@ -371,7 +371,7 @@ int run(const std::vector<float>& parameters,
 
   int numberExtinctions = 0;
 
-  float time = 0;
+  double time = 0;
   int waterLevel = 1;
 
   int iter = 0;
@@ -385,20 +385,20 @@ int run(const std::vector<float>& parameters,
     // verify_consistency(pop, extinct_species, "general_beforepairs");
     iter ++;
 
-    float Pe = extinction_rate * pop.size();
+    double Pe = extinction_rate * pop.size();
 
-    float Ps = 0.0;
+    double Ps = 0.0;
 
     if (waterLevel == 0) Ps = sympatric_low_water  * pop.size();
     if (waterLevel == 1) Ps = sympatric_high_water * pop.size();
 
     if (waterLevel == 0) updatePairs2(pop, pairs); // low water
 
-    float Pa = (1 - waterLevel) * allopatric_spec_rate * (pairs.size() * 2);
+    double Pa = (1 - waterLevel) * allopatric_spec_rate * (pairs.size() * 2);
 
-    float rate = Pe + Ps + Pa;
+    double rate = Pe + Ps + Pa;
 
-    float timestep = rndgen.Expon(rate);
+    double timestep = rndgen.Expon(rate);
 
     time += timestep;
 

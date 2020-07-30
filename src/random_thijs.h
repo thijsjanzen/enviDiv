@@ -30,9 +30,9 @@ struct rnd_t {
     return unif_dist(rndgen);
   }
 
-  float Expon(float lambda) {
+  double Expon(double lambda) {
     if (lambda == 0.0) return 1e20f;
-    return std::exponential_distribution<float>(lambda)(rndgen);
+    return std::exponential_distribution<double>(lambda)(rndgen);
   }
 
   float normal(float m, float s) {
