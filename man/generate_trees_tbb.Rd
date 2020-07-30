@@ -12,7 +12,8 @@ generate_trees_tbb(
   crown_age = NULL,
   file_name_trees = "trees.txt",
   file_name_stats = "stats.txt",
-  num_threads = -1
+  num_threads = -1,
+  block_size = 10000
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ generate_trees_tbb(
 \item{file_name_stats}{file name to write stats}
 
 \item{num_threads}{number of threads}
+
+\item{block_size}{maximum number of trees for which summary statistics are
+calculated in parallel. Should fit in memory so should not be too big.
+Default is 10000}
 }
 \value{
 a matrix with parameter values and the associated summary statistics

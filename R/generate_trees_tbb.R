@@ -7,16 +7,20 @@
 #' @param file_name_trees file name to write trees
 #' @param file_name_stats file name to write stats
 #' @param num_threads number of threads
+#' @param block_size maximum number of trees for which summary statistics are
+#' calculated in parallel. Should fit in memory so should not be too big.
+#' Default is 10000
 #' @return a matrix with parameter values and the associated summary statistics
 #' @export
 generate_trees_tbb <- function(number_of_trees = 1000,
-                                min_tips = 50,
-                                max_tips = 150,
-                                model = NULL,
-                                crown_age = NULL,
-                                file_name_trees = "trees.txt",
-                                file_name_stats = "stats.txt",
-                                num_threads = -1) {
+                               min_tips = 50,
+                               max_tips = 150,
+                               model = NULL,
+                               crown_age = NULL,
+                               file_name_trees = "trees.txt",
+                               file_name_stats = "stats.txt",
+                               num_threads = -1,
+                               block_size = 10000) {
 
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
@@ -45,32 +49,43 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   # now we calculate stats
   cat("calculating summary statistics for all trees...\n")
 
-  indices <- seq_along(phylo_trees)
+  start_indices <- seq(1, length(trees_for_writing), by = 10000)
 
-  progressr::with_progress({
-    p <- progressr::progressor(along = phylo_trees)
-    stats <- future.apply::future_lapply(indices, function(x, ...) {
-      p(sprintf("x=%g", x))
-      calc_sum_stats(phylo_trees[[x]])
+  for (i in start_indices) {
+
+    indices <- i:(i + 10000)
+
+    progressr::with_progress({
+      p <- progressr::progressor(along = phylo_trees)
+      stats <- future.apply::future_lapply(indices, function(x, ...) {
+        p(sprintf("x=%g", x))
+        calc_sum_stats(phylo_trees[[x]])
+      })
     })
-  })
 
-  stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                        ncol = 15,
-                        byrow = TRUE)
+    stat_matrix <- matrix(unlist(stats, use.names = FALSE),
+                          ncol = 15,
+                          byrow = TRUE)
 
-  results <- cbind(sim_result$parameters, stat_matrix)
+    results <- cbind(sim_result$parameters[indices], stat_matrix)
 
-  colnames(results) <-
-    c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-      "nltt", "gamma", "mbr", "num_lin",
-      "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
-      "pitchforks", "stairs",
-      "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
+    colnames(results) <-
+      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+        "nltt", "gamma", "mbr", "num_lin",
+        "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
+        "pitchforks", "stairs",
+        "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
 
-  results <- tibble::as_tibble(results)
+    results <- tibble::as_tibble(results)
 
-  readr::write_tsv(results, path = file_name_stats)
+    if(i == 1) {
+      readr::write_tsv(results, path = file_name_stats)
+    } else {
+      readr::write_tsv(results, path = file_name_stats, append = T)
+    }
+
+  }
+
   cat(paste("reference table written to:", file_name_stats))
   return(results)
 }
