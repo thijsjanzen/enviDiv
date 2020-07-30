@@ -12,19 +12,19 @@ test_that("get_from_prior", {
 
   testthat::expect_gt(max(v1), 0)
 
-  testthat::expect_true(log10(extinct) >= -3)
+  testthat::expect_true(log10(extinct) >= -4)
   testthat::expect_true(log10(extinct) < 2)
 
-  testthat::expect_true(log10(sym_high) >= -3)
+  testthat::expect_true(log10(sym_high) >= -4)
   testthat::expect_true(log10(sym_high) < 2)
 
-  testthat::expect_true(log10(sym_low) >= -3)
+  testthat::expect_true(log10(sym_low) >= -4)
   testthat::expect_true(log10(sym_low) < 2)
 
-  testthat::expect_true(log10(allo) >= -3)
+  testthat::expect_true(log10(allo) >= -4)
   testthat::expect_true(log10(allo) < 2)
 
-  testthat::expect_true(log10(jiggle) >= -3)
+  testthat::expect_true(log10(jiggle) >= -4)
   testthat::expect_true(log10(jiggle) < 0)
 
   testthat::expect_true(model %in% 1:3)
