@@ -49,7 +49,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   # now we calculate stats
   cat("calculating summary statistics for all trees...\n")
 
-  start_indices <- seq(1, length(trees_for_writing), by = 10000)
+  start_indices <- seq(1, length(phylo_trees), by = 10000)
 
   for (i in start_indices) {
 
