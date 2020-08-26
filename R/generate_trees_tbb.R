@@ -65,6 +65,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     indices <- seq_along(phylo_trees)
 
+    future::plan(future::multisession())
+
     progressr::with_progress({
       p <- progressr::progressor(along = phylo_trees)
       stats <- future.apply::future_lapply(indices, function(x, ...) {
