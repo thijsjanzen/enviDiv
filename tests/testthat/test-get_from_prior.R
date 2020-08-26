@@ -25,7 +25,7 @@ test_that("get_from_prior", {
   testthat::expect_true(log10(allo) < 2)
 
   testthat::expect_true(log10(jiggle) >= -4)
-  testthat::expect_true(log10(jiggle) < 0)
+  testthat::expect_true(log10(jiggle) < 1)
 
   testthat::expect_true(model %in% 1:3)
 })
