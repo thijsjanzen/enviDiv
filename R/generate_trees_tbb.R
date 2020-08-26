@@ -26,34 +26,40 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     stop("Please either provide a reference tree, or provide the crown age")
   }
 
-  sim_result <- enviDiv::create_ref_table_tbb_par(model = model,
-                                                  num_repl = number_of_trees,
-                                                  crown_age = crown_age,
-                                                  min_lin = min_tips,
-                                                  max_lin = max_tips,
-                                                  num_threads = num_threads)
 
   convert_to_phylo <- function(newick_string) {
     phylo_tree <- ape::read.tree(text = newick_string)
     return(phylo_tree)
   }
 
-  phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
+  num_blocks <- 1 + floor(number_of_trees / block_size)
 
-  cat("simulating trees is done\n")
-  trees_for_writing <- phylo_trees
-  class(trees_for_writing) <- "multiPhylo"
+  for (i in seq_len(num_blocks)) {
+    total_sampled <- i * block_size
+    if (total_sampled > number_of_trees) {
+      overshoot <- total_sampled - number_of_trees
+      block_size <- block_size - overshoot
+    }
 
-  ape::write.tree(trees_for_writing, file_name_trees)
-  rm(trees_for_writing)
-  # now we calculate stats
-  cat("calculating summary statistics for all trees...\n")
+    sim_result <- enviDiv::create_ref_table_tbb_par(model = model,
+                                                    num_repl = block_size,
+                                                    crown_age = crown_age,
+                                                    min_lin = min_tips,
+                                                    max_lin = max_tips,
+                                                    num_threads = num_threads)
 
-  start_indices <- seq(1, length(phylo_trees), by = 10000)
+    phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
 
-  for (i in start_indices) {
+    cat("simulating trees is done\n")
+    trees_for_writing <- phylo_trees
+    class(trees_for_writing) <- "multiPhylo"
 
-    indices <- i:(i + 10000)
+    ape::write.tree(trees_for_writing, file_name_trees, append = T)
+    rm(trees_for_writing)
+    # now we calculate stats
+    cat("calculating summary statistics \n")
+
+    indices <- seq_along(phylo_trees)
 
     progressr::with_progress({
       p <- progressr::progressor(along = phylo_trees)
@@ -83,7 +89,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     } else {
       readr::write_tsv(results, path = file_name_stats, append = T)
     }
-
   }
 
   cat(paste("reference table written to:", file_name_stats))
