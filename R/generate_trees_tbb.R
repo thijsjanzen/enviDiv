@@ -22,6 +22,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                num_threads = -1,
                                block_size = 10000) {
 
+  `%dopar%` <- foreach::`%dopar%`
+
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
   }
@@ -65,15 +67,24 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     indices <- seq_along(phylo_trees)
 
-    future::plan(future::multisession())
 
-    progressr::with_progress({
-      p <- progressr::progressor(along = phylo_trees)
-      stats <- future.apply::future_lapply(indices, function(x, ...) {
-        p(sprintf("x=%g", x))
-        calc_sum_stats(phylo_trees[[x]])
-      })
-    })
+    num_cl <- num_threads
+    if (num_threads == -1) num_cl <- parallel::detectCores()
+
+    cl <- parallel::makeCluster(num_cl)
+    doSNOW::registerDoSNOW(cl)
+
+    pb <- utils::txtProgressBar(max = length(indices), style = 3)
+    progress <- function(n) utils::setTxtProgressBar(pb, n)
+    opts <- list(progress = progress)
+
+    stats <- foreach::foreach(i = indices,
+                              .combine = 'rbind',
+                              .options.snow = opts)  %dopar% {
+      enviDiv::calc_sum_stats(phylo_trees[[i]])
+    }
+    close(pb)
+    parallel::stopCluster(cl)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
                           ncol = 15,
