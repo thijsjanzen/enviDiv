@@ -32,5 +32,7 @@ Imports:
     abcrf,
     doSNOW,
     parallel,
-    foreach
+    foreach,
+    future.apply,
+    future
 SystemRequirements: GNU make
