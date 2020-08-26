@@ -23,6 +23,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                block_size = 10000) {
 
   `%dopar%` <- foreach::`%dopar%`
+  `%do%` <- foreach::`%do%`
+
 
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
@@ -80,7 +82,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     stats <- foreach::foreach(i = indices,
                               .combine = 'rbind',
-                              .options.snow = opts)  %dopar% {
+                              .options.snow = opts)  %do% {
       enviDiv::calc_sum_stats(phylo_trees[[i]])
     }
     close(pb)
