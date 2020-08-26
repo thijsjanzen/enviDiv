@@ -34,6 +34,10 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
   num_blocks <- 1 + floor(number_of_trees / block_size)
 
+  num_done <- 0
+
+  start_time <- Sys.time()
+
   for (i in seq_len(num_blocks)) {
     total_sampled <- i * block_size
     if (total_sampled > number_of_trees) {
@@ -89,6 +93,14 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     } else {
       readr::write_tsv(results, path = file_name_stats, append = T)
     }
+    num_done <- num_done + block_size
+    current_time <- Sys.time()
+    num_left <- number_of_trees - num_done
+    time_per_tree <- (current_time - start_time)[[1]] / num_done
+    time_remaining <- time_per_tree * num_left
+
+    cat("now done: ", num_done, "trees\n")
+    cat("time remaining: ", time_remaining, "seconds \n")
   }
 
   cat(paste("reference table written to:", file_name_stats))
