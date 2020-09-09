@@ -1,4 +1,4 @@
-# enviDiv
+# enviDiv <img src="pics/evidiv_sticker2.png" align="right" width="180" />
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/enviDiv)](https://cran.r-project.org/package=enviDiv)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/enviDiv)](https://cran.r-project.org/package=enviDiv)
