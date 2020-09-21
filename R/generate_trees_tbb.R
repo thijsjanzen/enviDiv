@@ -71,7 +71,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
 
     num_cl <- num_threads
-    if (num_threads == -1) num_cl <- parallel::detectCores() - 1
+    if (num_threads == -1) num_cl <- parallel::detectCores()
 
     cl <- parallel::makeCluster(num_cl)
     doSNOW::registerDoSNOW(cl)
@@ -92,10 +92,9 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                           ncol = 15,
                           byrow = TRUE)
 
-    results <- cbind(sim_result$parameters[indices], stat_matrix)
+    results <- cbind(sim_result$parameters[indices, ], stat_matrix)
 
-    colnames(results) <-
-      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+    colnames(results) <- c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
         "pitchforks", "stairs",

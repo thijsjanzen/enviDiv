@@ -197,7 +197,7 @@ List create_ref_table_tbb_par(int model,
     Rcout << "trees remaining: " << loop_size   <<
              " accept rate: "    << accept_rate << "\n";
 
-    if (loop_size < 1000) loop_size = 1000;
+    if (loop_size < 10) loop_size = 10;
     loop_size *= 1.0 / accept_rate;
     if (loop_size > 1e6) loop_size = 1e6;
 
