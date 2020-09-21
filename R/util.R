@@ -85,5 +85,3 @@ ltab_to_ltable_to_phylo <- function(ltab,
   newick_string <- ltable_to_phylo(local_l_table, dropextinct)
   return(newick_string)
 }
-
-

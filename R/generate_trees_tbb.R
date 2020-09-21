@@ -69,6 +69,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     indices <- seq_along(phylo_trees)
 
+    phylo_trees_size <- object.size(phylo_trees)
+    print(phylo_trees_size, standard = "SI", units = "Gb")
 
     num_cl <- num_threads
     if (num_threads == -1) num_cl <- parallel::detectCores()
@@ -94,6 +96,10 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     results <- cbind(sim_result$parameters[indices, ], stat_matrix)
 
+    results_size <- object.size(results)
+    print(results_size, standard = "SI", units = "Gb")
+
+
     colnames(results) <- c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
@@ -102,7 +108,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     results <- tibble::as_tibble(results)
 
-    if(i == 1) {
+    if (i == 1) {
       readr::write_tsv(results, path = file_name_stats)
     } else {
       readr::write_tsv(results, path = file_name_stats, append = T)
