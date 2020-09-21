@@ -76,18 +76,17 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     if (num_threads == -1) num_cl <- parallel::detectCores()
 
     cl <- parallel::makeCluster(num_cl)
-    doSNOW::registerDoSNOW(cl)
+   # doSNOW::registerDoSNOW(cl)
+    doParallel::registerDoParallel(cl)
 
-    pb <- utils::txtProgressBar(max = length(indices), style = 3)
-    progress <- function(n) utils::setTxtProgressBar(pb, n)
-    opts <- list(progress = progress)
+  #  pb <- utils::txtProgressBar(max = length(indices), style = 3)
+  #  progress <- function(n) utils::setTxtProgressBar(pb, n)
+  #  opts <- list(progress = progress)
 
     stats <- foreach::foreach(i = indices,
-                              .combine = 'rbind',
-                              .options.snow = opts)  %dopar% {
+                              .combine = 'rbind')  %dopar% {
       enviDiv::calc_sum_stats(phylo_trees[[i]])
     }
-    close(pb)
     parallel::stopCluster(cl)
 
     stat_matrix <- matrix(unlist(stats, use.names = FALSE),
