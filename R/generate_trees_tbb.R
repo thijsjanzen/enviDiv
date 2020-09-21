@@ -75,7 +75,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     num_cl <- num_threads
     if (num_threads == -1) num_cl <- parallel::detectCores()
 
-    cl <- parallel::makeCluster(num_cl)
+    cl <- parallel::makeForkCluster(num_cl)
    # doSNOW::registerDoSNOW(cl)
     doParallel::registerDoParallel(cl)
 
