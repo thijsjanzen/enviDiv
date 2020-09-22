@@ -107,6 +107,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                           ncol = 15,
                           byrow = TRUE)
 
+    indices <- seq_along(phylo_trees)
     results <- cbind(sim_result$parameters[indices, ], stat_matrix)
 
     results_size <- object.size(results)
