@@ -39,7 +39,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   num_blocks <- 1 + floor(number_of_trees / block_size)
 
   num_done <- 0
-
   start_time <- Sys.time()
 
   for (i in seq_len(num_blocks)) {
@@ -67,19 +66,13 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     # now we calculate stats
     cat("calculating summary statistics \n")
 
-
-   # phylo_trees_size <- object.size(phylo_trees)
-  #  print(phylo_trees_size, standard = "SI", units = "Gb")
-
     num_cl <- num_threads
     if (num_threads == -1) num_cl <- parallel::detectCores()
 
-    indices <- seq_along(phylo_trees)
-
     cl <- parallel::makeForkCluster(num_cl)
     doParallel::registerDoParallel(cl)
-    # now we split everything up across threads:
 
+    # now we split everything up across threads:
     index_matrix <- split_into_blocks(m = length(phylo_trees),
                                       block.size = 100)
 
@@ -96,10 +89,9 @@ generate_trees_tbb <- function(number_of_trees = 1000,
         }
         return(output)
     }
-    indices <- seq_along(index_matrix$upper)
 
+    indices <- seq_along(index_matrix$upper)
     stats <- foreach::foreach(i = indices)  %dopar% {
-      #enviDiv::calc_sum_stats(phylo_trees[[i]])
       do_analysis(phylo_trees, index_matrix, i)
     }
     parallel::stopCluster(cl)
@@ -108,14 +100,11 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                           ncol = 15,
                           byrow = TRUE)
 
-    indices <- seq_along(phylo_trees)
-    results <- cbind(sim_result$parameters[indices, ], stat_matrix)
+    results <- cbind(sim_result$parameters[seq_along(phylo_trees), ],
+                     stat_matrix)
 
-   # results_size <- object.size(results)
-   #  print(results_size, standard = "SI", units = "Gb")
-
-
-    colnames(results) <- c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
+    colnames(results) <-
+      c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
         "pitchforks", "stairs",
@@ -128,6 +117,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     } else {
       readr::write_tsv(results, path = file_name_stats, append = T)
     }
+
     num_done <- num_done + block_size
     current_time <- Sys.time()
     num_left <- number_of_trees - num_done
@@ -135,7 +125,9 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     time_remaining <- time_per_tree * num_left
 
     cat("now done: ", num_done, "trees\n")
-    cat("time remaining: ", time_remaining, "seconds \n")
+    cat("Time taken per tree: ", time_per_tree, " seconds\n")
+    cat("time remaining: ", time_remaining, " seconds for ",
+        num_left, " trees\n")
   }
 
   cat(paste("reference table written to:", file_name_stats))
