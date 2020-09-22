@@ -121,10 +121,14 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     num_done <- num_done + block_size
     current_time <- Sys.time()
     num_left <- number_of_trees - num_done
-    time_per_tree <- (current_time - start_time)[[1]] / num_done
+
+    total_time <- difftime(current_time, start_time, units = "secs")[[1]]
+    time_per_tree <- total_time / num_done
     time_remaining <- time_per_tree * num_left
 
-    cat("now done: ", num_done, "trees\n")
+
+
+    cat("Now done: ", num_done, "trees in ", total_time, " seconds\n")
     cat("Time taken per tree: ", time_per_tree, " seconds\n")
     cat("time remaining: ", time_remaining, " seconds for ",
         num_left, " trees\n")
