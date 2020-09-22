@@ -85,3 +85,17 @@ ltab_to_ltable_to_phylo <- function(ltab,
   newick_string <- ltable_to_phylo(local_l_table, dropextinct)
   return(newick_string)
 }
+
+
+#' @keywords internal
+split_into_blocks <- function (m,
+                               block.size,
+                               nb = ceiling(m/block.size))  {
+       if (nb > m)
+           nb <- m
+       int <- m/nb
+       upper <- round(1:nb * int)
+       lower <- c(1, upper[-nb] + 1)
+       size <- c(upper[1], diff(upper))
+       cbind(lower, upper, size)
+}

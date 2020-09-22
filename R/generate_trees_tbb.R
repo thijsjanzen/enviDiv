@@ -67,7 +67,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     # now we calculate stats
     cat("calculating summary statistics \n")
 
-    indices <- seq_along(phylo_trees)
 
     phylo_trees_size <- object.size(phylo_trees)
     print(phylo_trees_size, standard = "SI", units = "Gb")
@@ -75,17 +74,32 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     num_cl <- num_threads
     if (num_threads == -1) num_cl <- parallel::detectCores()
 
+    indices <- seq_along(phylo_trees)
+
     cl <- parallel::makeForkCluster(num_cl)
-   # doSNOW::registerDoSNOW(cl)
     doParallel::registerDoParallel(cl)
+    # now we split everything up across threads:
 
-  #  pb <- utils::txtProgressBar(max = length(indices), style = 3)
-  #  progress <- function(n) utils::setTxtProgressBar(pb, n)
-  #  opts <- list(progress = progress)
+    index_matrix <- split_into_blocks(m = length(phylo_trees),
+                                      block.size = 100)
+    index_matrix <- tibble::as_tibble(index_matrix)
 
-    stats <- foreach::foreach(i = indices,
-                              .combine = 'rbind')  %dopar% {
-      enviDiv::calc_sum_stats(phylo_trees[[i]])
+    do_analysis <- function(phylo_trees, indices_matrix, i) {
+        output <- list()
+        cnt <- 1
+        start <- indices_matrix$lower[[i]]
+        end   <- indices_matrix$upper[[i]]
+        for (j in start:end) {
+          output[[cnt]] <- enviDiv::calc_sum_stats(phylo_trees[[j]])
+          cnt <- cnt + 1
+        }
+        return(output)
+    }
+    indices <- seq_along(index_matrix$upper)
+
+    stats <- foreach::foreach(i = indices)  %dopar% {
+      #enviDiv::calc_sum_stats(phylo_trees[[i]])
+      do_analysis(phylo_trees, index_matrix, i)
     }
     parallel::stopCluster(cl)
 
