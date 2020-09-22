@@ -20,7 +20,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                file_name_trees = "trees.txt",
                                file_name_stats = "stats.txt",
                                num_threads = -1,
-                               block_size = 10000) {
+                               block_size = 1000,
+                               foreach_blocksize = 100) {
 
   `%dopar%` <- foreach::`%dopar%`
   `%do%` <- foreach::`%do%`
@@ -74,7 +75,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     # now we split everything up across threads:
     index_matrix <- split_into_blocks(m = length(phylo_trees),
-                                      block.size = 100)
+                                      block_size = foreach_blocksize)
 
     index_matrix <- tibble::as_tibble(index_matrix)
 

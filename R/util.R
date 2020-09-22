@@ -88,9 +88,9 @@ ltab_to_ltable_to_phylo <- function(ltab,
 
 
 #' @keywords internal
-split_into_blocks <- function (m,
-                               block.size,
-                               nb = ceiling(m/block.size))  {
+split_into_blocks <- function(m,
+                              block_size,
+                              nb = ceiling(m / block_size))  {
        if (nb > m)
            nb <- m
        int <- m/nb
