@@ -14,7 +14,6 @@ read_reference_table <- function(path,
     vy <- readr::read_tsv(file_name, col_names = F)
     colnames(vy)  <-
       c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-        "weight",
         "nltt", "gamma", "mbr", "num_lin",
         "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
         "pitchforks", "stairs",
