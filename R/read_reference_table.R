@@ -27,8 +27,8 @@ read_reference_table <- function(path,
       vy <- sample_subset(vy, num_rows, random_rows)
     }
 
-
     reference_table <- rbind(reference_table, vy)
+    rm(vy)
   }
 
   focal_models <- as.factor(reference_table$model)
