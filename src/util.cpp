@@ -11,11 +11,11 @@ std::vector<float> parameters_from_prior(rnd_t& rndgen_,
                                          int model) {
   std::vector<float> output(6, 0.f);
 
-  output[0] = powf(10, (-4 + 5 * rndgen_.uniform()));  // extinction
-  output[1] = powf(10, (-4 + 5 * rndgen_.uniform()));  // symp spec high
-  output[2] = powf(10, (-4 + 5 * rndgen_.uniform()));  // symp spec low
-  output[3] = powf(10, (-4 + 5 * rndgen_.uniform()));  // allo spec
-  output[4] = powf(10, (-4 + 5 * rndgen_.uniform()));  // jiggle
+  output[0] = powf(10, (-4 + 6 * rndgen_.uniform()));  // extinction
+  output[1] = powf(10, (-4 + 6 * rndgen_.uniform()));  // symp spec high
+  output[2] = powf(10, (-4 + 6 * rndgen_.uniform()));  // symp spec low
+  output[3] = powf(10, (-4 + 6 * rndgen_.uniform()));  // allo spec
+  output[4] = powf(10, (-4 + 6 * rndgen_.uniform()));  // jiggle
   output[5] = model; // model
 
   return(output);
@@ -24,11 +24,11 @@ std::vector<float> parameters_from_prior(rnd_t& rndgen_,
 std::vector<float> parameters_from_prior(rnd_t& rndgen_) {
   std::vector<float> output(6, 0.f);
 
-  output[0] = powf(10, (-4 + 5 * rndgen_.uniform()));  // extinction
-  output[1] = powf(10, (-4 + 5 * rndgen_.uniform()));  // symp spec high
-  output[2] = powf(10, (-4 + 5 * rndgen_.uniform()));  // symp spec low
-  output[3] = powf(10, (-4 + 5 * rndgen_.uniform()));  // allo spec
-  output[4] = powf(10, (-4 + 5 * rndgen_.uniform()));  // jiggle
+  output[0] = powf(10, (-4 + 6 * rndgen_.uniform()));  // extinction
+  output[1] = powf(10, (-4 + 6 * rndgen_.uniform()));  // symp spec high
+  output[2] = powf(10, (-4 + 6 * rndgen_.uniform()));  // symp spec low
+  output[3] = powf(10, (-4 + 6 * rndgen_.uniform()));  // allo spec
+  output[4] = powf(10, (-4 + 6 * rndgen_.uniform()));  // jiggle
   output[5] = 1 + rndgen_.random_number(3); // model
 
   return(output);
