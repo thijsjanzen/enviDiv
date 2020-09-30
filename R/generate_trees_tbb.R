@@ -10,6 +10,7 @@
 #' @param block_size maximum number of trees for which summary statistics are
 #' calculated in parallel. Should fit in memory so should not be too big.
 #' Default is 10000
+#' @param foreach_blocksize size of blocks used in parallel foreach code
 #' @return a matrix with parameter values and the associated summary statistics
 #' @export
 generate_trees_tbb <- function(number_of_trees = 1000,

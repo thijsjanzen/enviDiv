@@ -4,6 +4,7 @@
 #' @return newick
 #' @rawNamespace useDynLib(enviDiv)
 #' @rawNamespace importFrom(RcppParallel, RcppParallelLibs)
+#' @rawNamespace import(Rcpp)
 #' @export
 ltable_to_phylo <- function(L, dropextinct = T) {
   L <- L[order(abs(L[, 3])), 1:4]

@@ -5,13 +5,22 @@
 \title{collect reference table based on previously generated reference tables for
 each model}
 \usage{
-read_reference_table(path, return_full_table = FALSE)
+read_reference_table(
+  path,
+  return_full_table = FALSE,
+  num_rows = NA,
+  random_rows = TRUE
+)
 }
 \arguments{
 \item{path}{path of directory where each subdirectory [1, 2, 3] is located}
 
 \item{return_full_table}{should the function only return summary stats, or
 also parameters?}
+
+\item{num_rows}{number of samples to be taken}
+
+\item{random_rows}{should these rows be sampled randomly?}
 }
 \value{
 reference table

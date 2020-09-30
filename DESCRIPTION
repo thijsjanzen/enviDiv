@@ -30,8 +30,7 @@ Imports:
     dplyr,
     TreeSim,
     abcrf,
-    doSNOW,
-    parallel,
+    doParallel,
     foreach,
     future.apply,
     future
