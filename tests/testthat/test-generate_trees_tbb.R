@@ -6,7 +6,7 @@ test_that("usage", {
                            min_tips = 2,
                            max_tips = 200,
                            model = 1,
-                           crown_age= 4,
+                           crown_age = 4,
                            num_threads = 1)
 
   testthat::expect_true(length(v1$extinct) >= 100)
@@ -17,7 +17,7 @@ test_that("usage", {
                            min_tips = 2,
                            max_tips = 200,
                            model = -1,
-                           crown_age= 4,
+                           crown_age = 4,
                            num_threads = 3)
 
   testthat::expect_true(length(v1$extinct) >= 100)

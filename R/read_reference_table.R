@@ -48,20 +48,22 @@ read_reference_table <- function(path,
   }
 }
 
-
-sample_subset <- function(vy, num_rows, random_rows) {
+#' @keywords internal
+sample_subset <- function(vy,
+                          num_rows,
+                          random_rows) {
   output <- c()
   remaining_indices <- seq_along(vy$extinct)
   num_selected <- 0
 
-  while(length(remaining_indices) > 0 && num_selected < num_rows) {
+  while (length(remaining_indices) > 0 && num_selected < num_rows) {
     num_remaining <- num_rows - num_selected
     indices <- sample(remaining_indices, num_remaining)
-    remaining_indices <- remaining_indices[ -match(indices,remaining_indices)]
+    remaining_indices <- remaining_indices[-match(indices, remaining_indices)]
 
     vz <- vy[indices, ]
     to_remove <- c()
-    for(i in seq_along(vz$extinct)) {
+    for (i in seq_along(vz$extinct)) {
       a <- as.numeric(vz[i, ])
       if (sum(is.infinite(a)) || sum(is.na(a)) || sum(is.nan(a))) {
         to_remove <- c(to_remove, i)

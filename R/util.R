@@ -6,8 +6,8 @@
 #' @rawNamespace importFrom(RcppParallel, RcppParallelLibs)
 #' @rawNamespace import(Rcpp)
 #' @export
-ltable_to_phylo <- function(L, dropextinct = T) {
-  L <- L[order(abs(L[, 3])), 1:4]
+ltable_to_phylo <- function(L, dropextinct = T) { # nolint
+  L <- L[order(abs(L[, 3])), 1:4] # nolint
   age <- L[1, 1]
   L[, 1] <- age - L[, 1]
   L[1, 1] <- -1
@@ -20,7 +20,7 @@ ltable_to_phylo <- function(L, dropextinct = T) {
     sall <- which(L[, 4] >= -1)
     tend <- (L[, 4] == -1) * age + (L[, 4] > -1) * L[, 4]
   }
-  L <- L[, -4]
+  L <- L[, -4]  # nolint
   linlist <- cbind(data.frame(L[sall, ]), paste("t", abs(L[sall,
                                                            3]), sep = ""), tend)
   linlist[, 4] <- as.character(linlist[, 4])
@@ -94,7 +94,7 @@ split_into_blocks <- function(m,
                               nb = ceiling(m / block_size))  {
        if (nb > m)
            nb <- m
-       int <- m/nb
+       int <- m / nb
        upper <- round(1:nb * int)
        lower <- c(1, upper[-nb] + 1)
        size <- c(upper[1], diff(upper))
