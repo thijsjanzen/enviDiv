@@ -114,13 +114,7 @@ std::vector<float> param_from_prior_cpp() {
 std::vector<float> param_from_prior_exp_cpp() {
   rnd_t rndgen;
 
-  std::vector<float> output(6, 0.f);
-  output[0] = rndgen.Expon(20); // extinction
-  output[1] = rndgen.Expon(10);  // symp spec high
-  output[2] = rndgen.Expon(10);  // symp spec low
-  output[3] = rndgen.Expon(10);  // allo spec
-  output[4] = rndgen.Expon(20);  // jiggle
-  output[5] = 1 + rndgen.random_number(3);
+  std::vector<float> output = parameters_from_prior(rndgen);
 
   return(output);
 }
