@@ -39,7 +39,6 @@ struct species
   bool extant_offspring;
   bool checked;
 
-  void updateHistory(float t);
   bool check_has_viable_offspring(std::vector<species>& v);
 
   bool operator< (const species& other) const {return       ID < other.ID; }
@@ -52,16 +51,16 @@ struct species
 
   species& operator=(const species& other);
 
-  void set_ID(int id_number) {
+  void set_ID(int id_number) noexcept {
     ID = id_number;
   }
-  int get_ID() const {
+  int get_ID() const noexcept{
     return(ID);
   }
-  void set_parent(int parent_number) {
+  void set_parent(int parent_number) noexcept {
     parent = parent_number;
   }
-  int get_parent() const {
+  int get_parent() const noexcept {
     return parent;
   }
 
@@ -93,7 +92,6 @@ struct allo_pair
                                                 index_b(index_B)
   {
   }
-
 };
 
 int drawEvent(float E, float W, float S, float A);

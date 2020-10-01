@@ -179,102 +179,110 @@ List create_ref_table_tbb_par(int model,
                               int max_lin,
                               int num_threads) {
 
-  std::vector< std::string > trees;
-  std::vector< std::vector < float > > parameter_list;
+  try {
 
-  auto T0 = std::chrono::high_resolution_clock::now();
-  int loop_size = num_repl - trees.size();
+    std::vector< std::string > trees;
+    std::vector< std::vector < float > > parameter_list;
 
-  float accept_rate = 1.0;
-  int num_tried = 0;
-  int num_accepted = 0;
+    auto T0 = std::chrono::high_resolution_clock::now();
+    int loop_size = num_repl - trees.size();
 
-  while(trees.size() < num_repl) {
-    // loop size can be optimized further, depending on the average success rate
-    // e.g. loop_size = loop_size * 1.0f / success_rate
-    // this is especially interesting once only a few are left.
-    loop_size = num_repl - trees.size();
-    Rcout << "trees remaining: " << loop_size   <<
-             " accept rate: "    << accept_rate << "\n";
+    float accept_rate = 1.0;
+    int num_tried = 0;
+    int num_accepted = 0;
 
-    if (loop_size < 10) loop_size = 10;
-    if (accept_rate > 0) loop_size *= 1.0 / accept_rate;
-    if (loop_size > 1e6) loop_size = 1e6;
+    while(trees.size() < num_repl) {
+      // loop size can be optimized further, depending on the average success rate
+      // e.g. loop_size = loop_size * 1.0f / success_rate
+      // this is especially interesting once only a few are left.
+      loop_size = num_repl - trees.size();
+      Rcout << "trees remaining: " << loop_size   <<
+               " accept rate: "    << accept_rate << "\n";
 
-
-    std::vector< std::string > add(loop_size);
-    std::vector< float > temp_filler(6);
-    std::vector< std::vector< float > > add_params(loop_size, temp_filler);
-    std::vector< bool > add_flag(loop_size, false);
-
-    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+      if (loop_size < 10) loop_size = 10;
+      if (accept_rate > 0) loop_size *= 1.0 / accept_rate;
+      if (loop_size > 1e6) loop_size = 1e6;
 
 
-    tbb::parallel_for(
-      tbb::blocked_range<unsigned>(0, loop_size - 1),
-      [&](const tbb::blocked_range<unsigned>& r) {
-        rnd_t reng;
+      std::vector< std::string > add(loop_size);
+      std::vector< float > temp_filler(6);
+      std::vector< std::vector< float > > add_params(loop_size, temp_filler);
+      std::vector< bool > add_flag(loop_size, false);
 
-        for (unsigned i = r.begin(); i < r.end(); ++i) {
-          std::vector<float> parameters = parameters_from_prior(reng, model);
-          std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
-                                                                         crown_age,
-                                                                         reng);
+      tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
 
-          std::vector< std::vector< float > > l_table;
 
-          std::string code = do_run_tbb(parameters,
-                                        waterlevel_changes,
-                                        crown_age,
-                                        max_lin,
-                                        l_table,
-                                        reng);
+      tbb::parallel_for(
+        tbb::blocked_range<unsigned>(0, loop_size - 1),
+        [&](const tbb::blocked_range<unsigned>& r) {
+          rnd_t reng;
 
-          int num_lin = 0;
-          for(int k = 0; k < l_table.size(); ++k) {
-            if(l_table[k][3] == -1) num_lin++;
+          for (unsigned i = r.begin(); i < r.end(); ++i) {
+            std::vector<float> parameters = parameters_from_prior(reng, model);
+            std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+                                                                           crown_age,
+                                                                           reng);
+
+            std::vector< std::vector< float > > l_table;
+
+            std::string code = do_run_tbb(parameters,
+                                          waterlevel_changes,
+                                          crown_age,
+                                          max_lin,
+                                          l_table,
+                                          reng);
+
+            int num_lin = 0;
+            for(int k = 0; k < l_table.size(); ++k) {
+              if(l_table[k][3] == -1) num_lin++;
+            }
+
+            if(num_lin >= min_lin && num_lin <= max_lin) {
+              add[i]        = ltable_to_newick(l_table, crown_age);
+              add_params[i] = parameters;
+              add_flag[i]   = true;
+            }
           }
+        });
 
-          if(num_lin >= min_lin && num_lin <= max_lin) {
-            add[i]        = ltable_to_newick(l_table, crown_age);
-            add_params[i] = parameters;
-            add_flag[i]   = true;
-          }
+      for(int j = 0; j < add_flag.size(); ++j) {
+        if(add_flag[j]) {
+          trees.push_back(add[j]);
+          parameter_list.push_back(add_params[j]);
         }
-      });
+      }
 
-    for(int j = 0; j < add_flag.size(); ++j) {
-      if(add_flag[j]) {
-        trees.push_back(add[j]);
-        parameter_list.push_back(add_params[j]);
+      num_accepted  =  trees.size();
+      num_tried    += loop_size;
+      accept_rate = 1.0f * num_accepted / num_tried;
+    }
+
+    force_output("now converting to R objects\n");
+
+    Rcpp::List output(trees.size());
+    for(int k = 0; k < trees.size(); ++k) {
+      output[k] = trees[k];
+    }
+
+    Rcpp::NumericMatrix parameter_matrix(parameter_list.size(), 6);
+    for(int k = 0; k < parameter_list.size(); ++k) {
+      for(int j = 0; j < parameter_list[0].size(); ++j) {
+        parameter_matrix(k, j) = parameter_list[k][j];
       }
     }
 
-    num_accepted  =  trees.size();
-    num_tried    += loop_size;
-    accept_rate = 1.0f * num_accepted / num_tried;
+
+    auto T1 = std::chrono::high_resolution_clock::now();
+    auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(T1 - T0).count());
+    Rcout << "trees simulated in: " << elapsed << "seconds\n";
+    return List::create(Named("trees") = trees,
+                        Named("parameters") = parameter_matrix);
+  } catch(std::exception &ex) {
+    forward_exception_to_r(ex);
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
   }
-
-  force_output("now converting to R objects\n");
-
-  Rcpp::List output(trees.size());
-  for(int k = 0; k < trees.size(); ++k) {
-    output[k] = trees[k];
-  }
-
-  Rcpp::NumericMatrix parameter_matrix(parameter_list.size(), 6);
-  for(int k = 0; k < parameter_list.size(); ++k) {
-    for(int j = 0; j < parameter_list[0].size(); ++j) {
-      parameter_matrix(k, j) = parameter_list[k][j];
-    }
-  }
-
-
-  auto T1 = std::chrono::high_resolution_clock::now();
-  auto elapsed = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(T1 - T0).count());
-  Rcout << "trees simulated in: " << elapsed << "seconds\n";
-  return List::create(Named("trees") = trees,
-                      Named("parameters") = parameter_matrix);
+  return NA_REAL;
 }
 
 
