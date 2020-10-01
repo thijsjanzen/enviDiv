@@ -8,7 +8,7 @@ beta_stat <- function(tree) {
 colless_stat <- function(tree)  {
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
 
-  x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = NULL)
+  x <- apTreeshape::colless(apTreeshape::as.treeshape(tree), norm = "yule")
   return(x)
 }
 
@@ -16,7 +16,7 @@ colless_stat <- function(tree)  {
 sackin_stat <- function(tree)  {
   if (tree$Nnode + 1 < 3) return(Inf) # 2 nodes doesn't work here
 
-  x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = NULL)
+  x <- apTreeshape::sackin(apTreeshape::as.treeshape(tree), norm = "yule")
   return(x)
 }
 
