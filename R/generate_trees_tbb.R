@@ -4,7 +4,10 @@
 #' @param max_tips maximum number of tips (inclusive)
 #' @param model used water model
 #' @param crown_age crown age
-#' @param file_name_trees file name to write trees
+#' @param write_to_file write output to file, or not. Should always be TRUE,
+#' because when chopping up in blocks, only the last block is returned if FALSE.
+#' Can be used for file-free debugging.
+#' @param file_name_trees_prefix prefix of file name to write trees to
 #' @param file_name_stats file name to write stats
 #' @param num_threads number of threads
 #' @param block_size maximum number of trees for which summary statistics are
@@ -18,7 +21,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                max_tips = 150,
                                model = NULL,
                                crown_age = NULL,
-                               file_name_trees = "trees.txt",
+                               write_to_file = TRUE,
+                               file_name_trees_prefix = "trees",
                                file_name_stats = "stats.txt",
                                num_threads = -1,
                                block_size = 1000,
@@ -58,11 +62,19 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     phylo_trees <- lapply(sim_result$trees, convert_to_phylo)
 
     cat("simulating trees is done\n")
-    trees_for_writing <- phylo_trees
-    class(trees_for_writing) <- "multiPhylo"
+    # next code is wrapped in tryCatch, just for security
+    if (write_to_file) {
+      tryCatch( {
 
-    ape::write.tree(trees_for_writing, file_name_trees, append = T)
-    rm(trees_for_writing)
+        trees_for_writing <- phylo_trees
+        class(trees_for_writing) <- "multiPhylo"
+        file_name_trees <- paste0(file_name_trees_prefix, "_", i, ".txt")
+
+        ape::write.tree(trees_for_writing, file_name_trees, append = T)
+        rm(trees_for_writing)
+      }, error = function(e) NA)
+    }
+
     # now we calculate stats
     cat("calculating summary statistics \n")
 
@@ -112,10 +124,12 @@ generate_trees_tbb <- function(number_of_trees = 1000,
 
     results <- tibble::as_tibble(results)
 
-    if (i == 1) {
-      readr::write_tsv(results, path = file_name_stats)
-    } else {
-      readr::write_tsv(results, path = file_name_stats, append = T)
+    if (write_to_file) {
+      if (i == 1) {
+        readr::write_tsv(results, path = file_name_stats)
+      } else {
+        readr::write_tsv(results, path = file_name_stats, append = T)
+      }
     }
 
     num_done <- num_done + block_size
