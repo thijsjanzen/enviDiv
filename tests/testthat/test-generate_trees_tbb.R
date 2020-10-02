@@ -18,7 +18,8 @@ test_that("usage", {
                            max_tips = 200,
                            model = -1,
                            crown_age = 4,
-                           num_threads = 3)
+                           num_threads = 3,
+                           write_to_file = FALSE)
 
   testthat::expect_true(length(v1$extinct) >= 100)
   testthat::expect_true(min(v1$num_lin) >= 2)
