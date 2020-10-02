@@ -52,6 +52,9 @@ generate_trees_tbb <- function(number_of_trees = 1000,
       block_size <- block_size - overshoot
     }
 
+    if (block_size <= 0) break
+
+
     sim_result <- enviDiv::create_ref_table_tbb_par(model = model,
                                                     num_repl = block_size,
                                                     crown_age = crown_age,
