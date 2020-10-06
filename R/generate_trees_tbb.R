@@ -67,8 +67,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     cat("simulating trees is done\n")
     # next code is wrapped in tryCatch, just for security
     if (write_to_file) {
-      tryCatch( {
-
+      tryCatch({
         trees_for_writing <- phylo_trees
         class(trees_for_writing) <- "multiPhylo"
         file_name_trees <- paste0(file_name_trees_prefix, "_", i, ".txt")

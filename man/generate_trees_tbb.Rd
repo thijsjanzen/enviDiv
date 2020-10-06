@@ -10,7 +10,8 @@ generate_trees_tbb(
   max_tips = 150,
   model = NULL,
   crown_age = NULL,
-  file_name_trees = "trees.txt",
+  write_to_file = TRUE,
+  file_name_trees_prefix = "trees",
   file_name_stats = "stats.txt",
   num_threads = -1,
   block_size = 1000,
@@ -28,7 +29,11 @@ generate_trees_tbb(
 
 \item{crown_age}{crown age}
 
-\item{file_name_trees}{file name to write trees}
+\item{write_to_file}{write output to file, or not. Should always be TRUE,
+because when chopping up in blocks, only the last block is returned if FALSE.
+Can be used for file-free debugging.}
+
+\item{file_name_trees_prefix}{prefix of file name to write trees to}
 
 \item{file_name_stats}{file name to write stats}
 
