@@ -8,10 +8,12 @@
 using namespace Rcpp;
 
 
-std::vector<float> parameters_from_prior(rnd_t& rndgen_) {
+std::vector<float> parameters_from_prior(rnd_t& rndgen_,
+                                         int model = -1) {
   std::vector<float> output(6, 0.f);
 
-  output[5] = 1 + rndgen_.random_number(3); // model
+  output[5] = model;
+  if (model == -1) output[5] = 1 + rndgen_.random_number(3); // model
 
   if (output[5] == 1) {                                  // birth death model
     output[0] = powf(10, (-4 + 6 * rndgen_.uniform()));  // extinction
@@ -21,7 +23,7 @@ std::vector<float> parameters_from_prior(rnd_t& rndgen_) {
     output[4] = powf(10, (-4 + 6 * rndgen_.uniform()));  // jiggle
   }
 
-  if (output[5] != 1) {                                 // water models
+  if (output[5] != 1) {                                  // water models
     output[0] = powf(10, (-4 + 6 * rndgen_.uniform()));  // extinction
     output[1] = powf(10, (-4 + 6 * rndgen_.uniform()));  // symp spec high
     output[2] = powf(10, (-2 + 4 * rndgen_.uniform()));  // symp spec low
@@ -32,13 +34,14 @@ std::vector<float> parameters_from_prior(rnd_t& rndgen_) {
   return(output);
 }
 
+/*
 std::vector<float> parameters_from_prior(rnd_t& rndgen_,
                                          int model) {
   std::vector<float> output = parameters_from_prior(rndgen_);
   output[5] = model; // model
 
   return(output);
-}
+                                         }*/
 
 
 std::vector<float> get_waterlevel_changes(int water_model,
@@ -103,7 +106,6 @@ std::vector<float> get_waterlevel_changes(int water_model,
 std::vector<float> param_from_prior_cpp() {
 
   rnd_t rndgen;
-
   std::vector<float> output = parameters_from_prior(rndgen);
 
   return(output);
@@ -117,7 +119,6 @@ std::vector<float> param_from_prior_cpp() {
 // [[Rcpp::export]]
 std::vector<float> param_from_prior_exp_cpp() {
   rnd_t rndgen;
-
   std::vector<float> output = parameters_from_prior(rndgen);
 
   return(output);

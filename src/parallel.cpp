@@ -38,7 +38,7 @@ Rcpp::List test_envidiv_tbb(int model,
 
   rnd_t reng;
 
-  std::vector<float> parameters = parameters_from_prior(reng);
+  std::vector<float> parameters = parameters_from_prior(reng, -1);
 
   parameters[0] = 0.0;
   parameters[1] = 0.3;
@@ -115,9 +115,9 @@ List create_ref_table_tbb_serial(int model,
     std::vector< bool > add_flag(loop_size, false);
 
      for(int i = 0; i < loop_size; ++i) {
-     rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
+      rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
-      std::vector<float> parameters = parameters_from_prior(reng);
+      std::vector<float> parameters = parameters_from_prior(reng, -1);
       std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
                                                                      crown_age,
                                                                      reng);

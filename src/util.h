@@ -19,7 +19,7 @@ std::vector<float> param_from_prior_exp_cpp();
 std::vector<float> get_waterlevel_cpp(int water_model,
                                       float maximum_time);
 
-std::vector<float> parameters_from_prior(rnd_t& rndgen_);
+// std::vector<float> parameters_from_prior(rnd_t& rndgen_);
 std::vector<float> parameters_from_prior(rnd_t& rndgen_,
                                          int model);
 std::vector<float> get_waterlevel_changes(int water_model,
