@@ -55,8 +55,8 @@ std::string do_run_r(const std::vector<float>& parameters,
   //int idCount = 0;
   std::vector < std::vector < float > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
-                        s1, maximum_time, max_lin,
-                        rndgen);
+                       s1, maximum_time, max_lin,
+                       rndgen);
 
   if (error_code == 0) {
     return "extinction";
@@ -69,9 +69,9 @@ std::string do_run_r(const std::vector<float>& parameters,
   std::vector<species> s2;
 
   int error_code2 = run(parameters,
-      waterlevel_changes,
-      s2, maximum_time, max_lin,
-      rndgen);
+                        waterlevel_changes,
+                        s2, maximum_time, max_lin,
+                        rndgen);
 
   if (error_code2 == 0) {
     return "extinction";
@@ -325,7 +325,7 @@ bool verify_consistency(const std::vector<species>& pop,
                         const std::string stage)
 {
   // pre-emptive return, disable if you want to debug!
-   return true;
+  return true;
 
   std::vector< species > all_species;
   all_species.insert(all_species.end(), pop.begin(), pop.end());
@@ -342,7 +342,7 @@ bool verify_consistency(const std::vector<species>& pop,
       if (index_parent == -1) {
         Rcout << stage.c_str() << "\n";
         Rcpp::stop(stage);
-       // return false;
+        // return false;
       }
 
     }
@@ -420,20 +420,20 @@ int run(const std::vector<float>& parameters,
 
       switch(event_chosen)
       {
-        case 0:
-          extinction(pop, extinct_species, time, waterLevel, rndgen);
-          numberExtinctions++;
-          // verify_consistency(pop, extinct_species, "extinction");
-          break;
-        case 1:
-          Symp_speciation(pop, id_count, extinct_species, time, time_of_previous_waterlevelchange, waterLevel, rndgen);
-          // verify_consistency(pop, extinct_species, "symp_spec");
-          break;
-        case 2:
-          Allo_speciation(pop, id_count,time, time_of_previous_waterlevelchange,pairs, extinct_species, rndgen);
-          // verify_consistency(pop, extinct_species, "allo_spec");
-          break;
-        }
+      case 0:
+        extinction(pop, extinct_species, time, waterLevel, rndgen);
+        numberExtinctions++;
+        // verify_consistency(pop, extinct_species, "extinction");
+        break;
+      case 1:
+        Symp_speciation(pop, id_count, extinct_species, time, time_of_previous_waterlevelchange, waterLevel, rndgen);
+        // verify_consistency(pop, extinct_species, "symp_spec");
+        break;
+      case 2:
+        Allo_speciation(pop, id_count,time, time_of_previous_waterlevelchange,pairs, extinct_species, rndgen);
+        // verify_consistency(pop, extinct_species, "allo_spec");
+        break;
+      }
     }
 
     if (pop.size() < 1) //everything is extinct
@@ -441,7 +441,7 @@ int run(const std::vector<float>& parameters,
       return 0;
     }
 
-    if (pop.size() > max_lin * 2) { // too many species
+    if (pop.size() > max_lin) { // too many species
       return 1e6;
     }
   }
@@ -740,4 +740,4 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
  }
  return true;
  }
-*/
+ */

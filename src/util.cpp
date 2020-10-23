@@ -91,6 +91,100 @@ std::vector<float> get_waterlevel_changes(int water_model,
   return(output);
 }
 
+
+std::vector< std::vector< float >> create_l_table_float(
+    const std::vector< species > & s1,
+    const std::vector< species > & s2) {
+
+  std::vector< std::vector< float > > output;
+  int num_rows = s1.size() + s2.size();
+  int num_cols = 4;
+  for(int i = 0; i < num_rows; ++i) {
+    std::vector< float > row(num_cols);
+    output.push_back(row);
+  }
+
+  int i = 0;
+  for (auto it = s1.begin(); it != s1.end(); ++it, ++i) {
+    output[i][0] = (*it).birth_time;
+    output[i][1] = (*it).get_parent();
+    output[i][2] = (*it).get_ID();
+    output[i][3] = (*it).death_time;
+  }
+
+  for (auto it = s2.begin(); it != s2.end(); ++it, ++i) {
+    output[i][0]  = (*it).birth_time;
+    output[i][1]  = -1 * ((*it).get_parent());
+    output[i][2]  = -1 * ((*it).get_ID());
+    output[i][3]  = (*it).death_time;
+  }
+
+  return output;
+}
+
+void force_output(std::string s) {
+  Rcout << s << "\n";
+  R_FlushConsole();
+  R_ProcessEvents();
+  R_CheckUserInterrupt();
+}
+
+
+float calc_nltt(const std::vector< float >& emp_brts,
+                const std::vector< std::vector< float > >& ltab) {
+
+  std::vector< float > b1(emp_brts.size());
+  std::vector< float > b2(ltab.size());
+  for(int i = 0; i < emp_brts.size(); ++i) {
+    b1[i] = -1 * emp_brts[i];
+  }
+  for(int i = 0; i < ltab.size(); ++i) {
+    b2[i] = -1 * ltab[i][0];
+  }
+  b1.push_back(0.f);
+  b2.push_back(0.f);
+  std::sort(b1.begin(), b1.end(), std::greater<float>());
+  std::sort(b2.begin(), b2.end(), std::greater<float>());
+  return 0.f;
+
+
+  /*
+   * b1 <- -1 * c(rev(sort(unique(ltab1[, 1]))), 0)
+   b2 <- -1 * c(rev(sort(unique(ltab2[, 1]))), 0)
+
+   num_lin1 <- 2:length(b1)
+   num_lin2 <- 2:length(b2)
+   b1 <- 1 - b1 / min(b1)
+   b2 <- 1 - b2 / min(b2)
+   num_lin1 <- num_lin1 / max(num_lin1)
+   num_lin2 <- num_lin2 / max(num_lin2)
+
+   all_b_times <- unique(sort(c(b1, b2)))
+   diff <- 0
+   for (k in 2:length(all_b_times)) {
+   tim <- all_b_times[k]
+   index1 <- max(which(b1 < tim))
+   index2 <- max(which(b2 < tim))
+   lins1 <- num_lin1[max(index1, 1)]
+   lins2 <- num_lin2[max(index2, 1)]
+   dt <- all_b_times[k] - all_b_times[k - 1]
+   diff <- diff + dt * abs(lins1 - lins2)
+   }
+   return(diff)
+   *
+   *
+   *
+   */
+
+
+
+}
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 ////////////// some cpp functions to retain functionality in R  //////////////

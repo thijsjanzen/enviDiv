@@ -11,7 +11,10 @@
 #include <algorithm>
 
 #include "random_thijs.h"
-#include "Rcpp.h"
+#include "Gillespie.h"
+
+#include <Rcpp.h>
+using namespace Rcpp;
 
 
 std::vector<float> param_from_prior_cpp();
@@ -46,6 +49,15 @@ struct ltable_entry {
 
 std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
                              float crown_age);
+
+std::vector< std::vector< float >> create_l_table_float(
+    const std::vector< species > & s1,
+    const std::vector< species > & s2);
+
+float calc_nltt(const std::vector< float >& b1,
+                const std::vector< std::vector< float > >& ltab);
+
+void force_output(std::string s);
 
 // returns low-entropy 512 bit array for seed sequence
 // based on std::chrono::high_resolution_clock.

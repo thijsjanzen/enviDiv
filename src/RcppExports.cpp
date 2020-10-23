@@ -20,6 +20,47 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// smc_abc_batch
+List smc_abc_batch(const NumericMatrix& m1, const NumericMatrix& m2, const NumericMatrix& m3, const NumericVector& m_weights, const NumericVector& max_w, int batch_size, float crown_age, int num_lin, int num_threads, double sd_p, double self_prob_m);
+RcppExport SEXP _enviDiv_smc_abc_batch(SEXP m1SEXP, SEXP m2SEXP, SEXP m3SEXP, SEXP m_weightsSEXP, SEXP max_wSEXP, SEXP batch_sizeSEXP, SEXP crown_ageSEXP, SEXP num_linSEXP, SEXP num_threadsSEXP, SEXP sd_pSEXP, SEXP self_prob_mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m2(m2SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m3(m3SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type m_weights(m_weightsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type max_w(max_wSEXP);
+    Rcpp::traits::input_parameter< int >::type batch_size(batch_sizeSEXP);
+    Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type num_lin(num_linSEXP);
+    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_p(sd_pSEXP);
+    Rcpp::traits::input_parameter< double >::type self_prob_m(self_prob_mSEXP);
+    rcpp_result_gen = Rcpp::wrap(smc_abc_batch(m1, m2, m3, m_weights, max_w, batch_size, crown_age, num_lin, num_threads, sd_p, self_prob_m));
+    return rcpp_result_gen;
+END_RCPP
+}
+// smc_abc_par
+int smc_abc_par(int num_particles, float crown_age, int num_lin, int num_threads, int batch_size, double sd_p, double self_prob_m, const std::vector<float>& emp_stats, const std::vector<float>& thresholds, const std::vector<float>& emp_brts);
+RcppExport SEXP _enviDiv_smc_abc_par(SEXP num_particlesSEXP, SEXP crown_ageSEXP, SEXP num_linSEXP, SEXP num_threadsSEXP, SEXP batch_sizeSEXP, SEXP sd_pSEXP, SEXP self_prob_mSEXP, SEXP emp_statsSEXP, SEXP thresholdsSEXP, SEXP emp_brtsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type num_particles(num_particlesSEXP);
+    Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type num_lin(num_linSEXP);
+    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
+    Rcpp::traits::input_parameter< int >::type batch_size(batch_sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_p(sd_pSEXP);
+    Rcpp::traits::input_parameter< double >::type self_prob_m(self_prob_mSEXP);
+    Rcpp::traits::input_parameter< const std::vector<float>& >::type emp_stats(emp_statsSEXP);
+    Rcpp::traits::input_parameter< const std::vector<float>& >::type thresholds(thresholdsSEXP);
+    Rcpp::traits::input_parameter< const std::vector<float>& >::type emp_brts(emp_brtsSEXP);
+    rcpp_result_gen = Rcpp::wrap(smc_abc_par(num_particles, crown_age, num_lin, num_threads, batch_size, sd_p, self_prob_m, emp_stats, thresholds, emp_brts));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_envidiv_tbb
 Rcpp::List test_envidiv_tbb(int model, float crown_age);
 RcppExport SEXP _enviDiv_test_envidiv_tbb(SEXP modelSEXP, SEXP crown_ageSEXP) {
@@ -111,6 +152,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
+    {"_enviDiv_smc_abc_batch", (DL_FUNC) &_enviDiv_smc_abc_batch, 11},
+    {"_enviDiv_smc_abc_par", (DL_FUNC) &_enviDiv_smc_abc_par, 10},
     {"_enviDiv_test_envidiv_tbb", (DL_FUNC) &_enviDiv_test_envidiv_tbb, 2},
     {"_enviDiv_create_ref_table_tbb_serial", (DL_FUNC) &_enviDiv_create_ref_table_tbb_serial, 6},
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},

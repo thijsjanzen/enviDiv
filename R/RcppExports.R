@@ -13,6 +13,28 @@ create_tree_cpp <- function(parameters, waterlevel_changes, seed, crown_age, max
     .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, seed, crown_age, max_lin)
 }
 
+#' simulate a tree using environmental diversification
+#' @param m1 a matrix with particles of model 1
+#' @param m2 a matrix with particles of model 2
+#' @param m3 a matrix with particles of model 3
+#' @param m_weights a vector with weight of each model
+#' @param max_w a vector with the maximum weights of particles in each model
+#' @param batch_size number of particles to generate
+#' @param crown_age crown age
+#' @param num_lin number of lineages to condition on
+#' @param num_threads number of threads to use
+#' @param sd_p standard deviation of parameter perturbation
+#' @param self_prob_m probability of staying in the same model
+#' @return list with generated particles
+#' @export
+smc_abc_batch <- function(m1, m2, m3, m_weights, max_w, batch_size, crown_age, num_lin, num_threads, sd_p, self_prob_m) {
+    .Call('_enviDiv_smc_abc_batch', PACKAGE = 'enviDiv', m1, m2, m3, m_weights, max_w, batch_size, crown_age, num_lin, num_threads, sd_p, self_prob_m)
+}
+
+smc_abc_par <- function(num_particles, crown_age, num_lin, num_threads, batch_size, sd_p, self_prob_m, emp_stats, thresholds, emp_brts) {
+    .Call('_enviDiv_smc_abc_par', PACKAGE = 'enviDiv', num_particles, crown_age, num_lin, num_threads, batch_size, sd_p, self_prob_m, emp_stats, thresholds, emp_brts)
+}
+
 #' function to test table conversion
 #' @param model a vector of the four parameters of the model
 #' @param crown_age crown age of the tree to be simulated

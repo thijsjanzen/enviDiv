@@ -12,12 +12,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-void force_output(std::string s) {
-  Rcout << s << "\n";
-  R_FlushConsole();
-  R_ProcessEvents();
-  R_CheckUserInterrupt();
-}
+
 
 
 std::string do_run_tbb(const std::vector<float>& parameters,
@@ -356,6 +351,7 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
   }
   ltab[0].bt = -1;
 
+  // remove extinct branches:
   for(auto& i : ltab) {
     if(i.extant == -1) {
       i.tend = tend;
@@ -445,40 +441,6 @@ NumericVector sq_numbers_cpp_tbb(int n,
 
   return results;
 }
-
-
-std::vector< std::vector< float >> create_l_table_float(
-    const std::vector< species > & s1,
-    const std::vector< species > & s2) {
-
-  std::vector< std::vector< float > > output;
-  int num_rows = s1.size() + s2.size();
-  int num_cols = 4;
-  for(int i = 0; i < num_rows; ++i) {
-    std::vector< float > row(num_cols);
-    output.push_back(row);
-  }
-
-  int i = 0;
-  for (auto it = s1.begin(); it != s1.end(); ++it, ++i) {
-    output[i][0] = (*it).birth_time;
-    output[i][1] = (*it).get_parent();
-    output[i][2] = (*it).get_ID();
-    output[i][3] = (*it).death_time;
-  }
-
-  for (auto it = s2.begin(); it != s2.end(); ++it, ++i) {
-    output[i][0]  = (*it).birth_time;
-    output[i][1]  = -1 * ((*it).get_parent());
-    output[i][2]  = -1 * ((*it).get_ID());
-    output[i][3]  = (*it).death_time;
-  }
-
-  return output;
-}
-
-
-
 
 std::string do_run_tbb(const std::vector<float>& parameters,
                        const std::vector<float>& waterlevel_changes,
