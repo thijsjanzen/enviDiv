@@ -182,6 +182,16 @@ struct particle {
    //    summary_statistics[0] = calc_gamma(l_table);
    // summary_statistics[6] = calc_nltt(l_table, emp_brts);
   }
+
+  size_t count_num_lin() {
+    size_t num_lin = 0;
+    for(auto i : l_table) {
+      if (i[3] == -1) num_lin++;
+    }
+    return num_lin;
+  }
+
+
 };
 
 int sample_model(const std::vector<float>& w,

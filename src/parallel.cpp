@@ -454,8 +454,6 @@ std::string do_run_tbb(const std::vector<float>& parameters,
   float jiggle_amount = parameters[4];
   rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
-  //int idCount = 0;
-  std::vector < std::vector < float > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
                        s1, maximum_time, max_lin,
                        rndgen);

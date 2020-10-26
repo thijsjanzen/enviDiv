@@ -10,12 +10,14 @@
 #include <numeric>
 #include <algorithm>
 
+
 #include "random_thijs.h"
 #include "Gillespie.h"
 
 #include <Rcpp.h>
 using namespace Rcpp;
 
+void make_sleep(size_t ms);
 
 std::vector<float> param_from_prior_cpp();
 std::vector<float> param_from_prior_exp_cpp();

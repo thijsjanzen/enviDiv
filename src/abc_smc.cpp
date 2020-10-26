@@ -6,10 +6,161 @@
 #include "statistics.h"
 #include "particle.h"
 
+#include <tbb/tbb.h>
+
 #include <Rcpp.h>
 using namespace Rcpp;
 
 // Function get_accepted_from_R = Environment::global_env()["accept_from_R"];
+
+std::string do_run(const std::vector<float>& parameters,
+                   const std::vector<float>& waterlevel_changes,
+                   float maximum_time,
+                   int max_lin,
+                   std::vector< std::vector< float > >& l_table,
+                   rnd_t& rndgen);
+
+std::vector<particle> convert_matrix(const NumericMatrix& m);
+NumericMatrix convert_to_matrix(const std::vector<particle>& v);
+
+
+
+//' simulate a tree using environmental diversification
+//' @param m1 a matrix with particles of model 1
+//' @param m2 a matrix with particles of model 2
+//' @param m3 a matrix with particles of model 3
+//' @param m_weights a vector with weight of each model
+//' @param max_w a vector with the maximum weights of particles in each model
+//' @param batch_size number of particles to generate
+//' @param crown_age crown age
+//' @param min_lin minimum number of lineages to condition on
+//' @param max_lin maximum number of lineages to condition on
+//' @param num_threads number of threads to use
+//' @param sd_p standard deviation of parameter perturbation
+//' @param self_prob_m probability of staying in the same model
+//' @return list with generated particles
+//' @export
+// [[Rcpp::export]]
+List smc_abc_batch(const NumericMatrix& m1,
+                   const NumericMatrix& m2,
+                   const NumericMatrix& m3,
+                   const NumericVector& m_weights,
+                   const NumericVector& max_w,
+                   int batch_size,
+                   float crown_age,
+                   int min_lin,
+                   int max_lin,
+                   int num_threads,
+                   double sd_p,
+                   double self_prob_m) {
+
+  std::vector< particle > temp;
+  std::vector< std::vector< particle > > pop(3, temp);
+
+  pop[0] = convert_matrix(m1);
+  pop[1] = convert_matrix(m2);
+  pop[2] = convert_matrix(m3);
+
+  std::vector< std::vector < particle > > new_pop(3, temp);
+
+  std::vector<float> model_weights(m_weights.begin(), m_weights.end());
+
+  std::vector< float > max_weights(max_w.begin(), max_w.end());
+
+  int num_accepted = 0;
+  int num_tried = 0;
+  float accept_rate = 1.0;
+
+  while(num_accepted < batch_size) {
+
+    int loop_size = batch_size - num_accepted;
+    if (loop_size < 10) loop_size = 10;
+    if (accept_rate > 0) loop_size *= 1.0 / accept_rate;
+    if (accept_rate == 0) loop_size *= 10;
+
+    if (loop_size > 1e3) loop_size = 1e6;
+
+
+    std::vector< particle > add(loop_size);
+    std::vector< bool > add_flag(loop_size, false);
+
+    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+
+    tbb::parallel_for(
+      tbb::blocked_range<unsigned>(0, loop_size - 1),
+      [&](const tbb::blocked_range<unsigned>& r) {
+
+        rnd_t reng;
+        for (unsigned i = r.begin(); i < r.end(); ++i) {
+          //for (unsigned i = 0; i < loop_size; ++i) {
+          int model = sample_model(model_weights, reng);
+
+          int param_index = sample_param(pop[model], max_weights[model], reng);
+
+          particle new_particle = pop[model][param_index];
+          new_particle.perturb(reng);
+          new_particle.update_waterlevel_changes(reng, crown_age);
+
+          std::vector< std::vector< float > > temp_ltable;
+          /*
+           std::string code = do_run(new_particle.parameters,
+           new_particle.waterlevel_changes,
+           temp_ltable,
+           crown_age,
+           num_lin,
+           reng);
+        */
+
+          Rcout << new_particle << "\n";
+          R_FlushConsole();
+          R_ProcessEvents();
+          R_CheckUserInterrupt();
+          make_sleep(1);
+
+          std::string code = do_run(new_particle.parameters,
+                                    new_particle.waterlevel_changes,
+                                    crown_age,
+                                    max_lin,
+                                    temp_ltable,
+                                    reng);
+
+          new_particle.l_table = temp_ltable;
+
+          if (code == "success") {
+            int num_lin = new_particle.count_num_lin();
+            if (num_lin >= min_lin && num_lin <= max_lin) {
+              new_particle.newick_string = ltable_to_newick(new_particle.l_table,
+                                                            crown_age);
+              add[i] = new_particle;
+              add_flag[i] = true;
+            }
+          }
+        }
+      });
+    force_output("adding particles to found models");
+
+    for (int k = 0; k < add_flag.size(); ++k) {
+      if (add_flag[k]) {
+        pop[ add[k].model ].push_back(add[k]);
+        num_accepted++;
+      }
+    }
+
+    num_tried    += loop_size;
+    accept_rate = 1.0f * num_accepted / num_tried;
+    Rcout << loop_size << " " << num_tried << " " << accept_rate << "\n";
+  }
+
+  Rcout << "done, converting back to R format\n";
+  NumericMatrix o1, o2, o3;
+  o1 = convert_to_matrix(new_pop[0]);
+  o2 = convert_to_matrix(new_pop[1]);
+  o3 = convert_to_matrix(new_pop[2]);
+
+  return List::create( Named("m1") = o1,
+                       Named("m2") = o2,
+                       Named("m3") = o3);
+}
 
 void update_weights(std::vector< std::vector< particle >>& p,
                     std::vector< float >& max_weights,
@@ -38,147 +189,6 @@ void update_weights(std::vector< std::vector< particle >>& p,
   return;
 }
 
-std::string do_run(particle& p,
-                   float maximum_time,
-                   int max_lin,
-                   rnd_t& rndgen);
-
-std::vector<particle> convert_matrix(const NumericMatrix& m);
-NumericMatrix convert_to_matrix(const std::vector<particle>& v);
-
-
-
-//' simulate a tree using environmental diversification
-//' @param m1 a matrix with particles of model 1
-//' @param m2 a matrix with particles of model 2
-//' @param m3 a matrix with particles of model 3
-//' @param m_weights a vector with weight of each model
-//' @param max_w a vector with the maximum weights of particles in each model
-//' @param batch_size number of particles to generate
-//' @param crown_age crown age
-//' @param num_lin number of lineages to condition on
-//' @param num_threads number of threads to use
-//' @param sd_p standard deviation of parameter perturbation
-//' @param self_prob_m probability of staying in the same model
-//' @return list with generated particles
-//' @export
-// [[Rcpp::export]]
-List smc_abc_batch(const NumericMatrix& m1,
-                   const NumericMatrix& m2,
-                   const NumericMatrix& m3,
-                   const NumericVector& m_weights,
-                   const NumericVector& max_w,
-                   int batch_size,
-                   float crown_age,
-                   int num_lin,
-                   int num_threads,
-                   double sd_p,
-                   double self_prob_m) {
-
-  rnd_t reng;
-  std::vector< particle > temp;
-  std::vector< std::vector< particle > > pop(3, temp);
-
-  force_output("conversion of input matrices to particles");
-
-  pop[0] = convert_matrix(m1); force_output("m1 done");
-  pop[1] = convert_matrix(m2); force_output("m2 done");
-  pop[2] = convert_matrix(m3); force_output("m3 done");
-
-  std::vector< std::vector < particle > > new_pop(3, temp);
-
-  Rcout << "calculate max weights\n";
-  std::vector<float> model_weights(m_weights.begin(), m_weights.end());
-
-  Rcout << "model weights are:\n";
-  for(int i = 0; i < 3; ++i) {
-    Rcout << model_weights[i] << " ";
-  }
-  Rcout << "\n";
-
-  std::vector< float > max_weights(max_w.begin(), max_w.end());
-  Rcout << "max weights are:\n";
-  for(int i = 0; i < 3; ++i) {
-    Rcout << max_weights[i] << " ";
-  }
-  Rcout << "\n";
-
-  Rcout << "first particle for each model is:\n";
-  for(int i = 0; i < 3; ++i) {
-    for(int j = 0; j < pop[i][0].parameters.size(); ++j) {
-      Rcout << pop[i][0].parameters[j] << " ";
-    }
-    Rcout << "\n";
-  }
-
-
-  if(1 == 2) {
-    NumericMatrix o1, o2, o3;
-    o1 = convert_to_matrix(pop[0]);
-    o2 = convert_to_matrix(pop[1]);
-    o3 = convert_to_matrix(pop[2]);
-
-    //return List::create(Named("test") = 1);
-    return List::create( Named("m1") = o1,
-                         Named("m2") = o2,
-                         Named("m3") = o3);
-  }
-
-  int num_accepted = 0;
-
-  while(num_accepted < batch_size) {
-
-    int model = sample_model(model_weights, reng);
-   //  Rcout << "model drawn: " << model << "\n";
-
-    int param_index = sample_param(pop[model], max_weights[model], reng);
-    // Rcout << "param_index drawn: " << param_index << "\n";
-
-    particle new_particle = pop[model][param_index];
-    new_particle.perturb(reng);
-    new_particle.update_waterlevel_changes(reng, crown_age);
-
-
-    //force_output("after perturbation:");
-    //Rcout << new_particle << " " << new_particle.model << "\n";
-
-    //::sleep(1);
-    //Rcpp::checkUserInterrupt();
-
-
-    std::string code = do_run(new_particle,
-                              crown_age,
-                              num_lin,
-                              reng);
-
-    //force_output("simulation done");
-
-    if (code != "extinction" &&
-        code != "overflow") {
-      num_accepted++;
-      new_particle.newick_string = ltable_to_newick(new_particle.l_table,
-                                                    crown_age);
-
-      //force_output("ltable to newick done");
-
-      new_pop[new_particle.model].push_back(new_particle);
-      Rcout << num_accepted << "\n";
-    }
-  }
-
-  Rcout << "done, converting back to R format\n";
-  NumericMatrix o1, o2, o3;
-  o1 = convert_to_matrix(new_pop[0]);
-  o2 = convert_to_matrix(new_pop[1]);
-  o3 = convert_to_matrix(new_pop[2]);
-
-  return List::create( Named("m1") = o1,
-                       Named("m2") = o2,
-                       Named("m3") = o3);
-}
-
-
-
 // [[Rcpp::export]]
 int smc_abc_par(int num_particles,
                 float crown_age,
@@ -190,10 +200,6 @@ int smc_abc_par(int num_particles,
                 const std::vector<float>& emp_stats,
                 const std::vector<float>& thresholds,
                 const std::vector<float>& emp_brts) {
-
-
-
-
 
   // we first do serial, to be safe
 
@@ -221,7 +227,6 @@ int smc_abc_par(int num_particles,
     int num_accepted = 0;
     while(num_accepted < num_particles) {
 
-
       std::vector< particle > new_batch(batch_size);
       std::vector< std::string > newick_batch(batch_size);
 
@@ -230,14 +235,17 @@ int smc_abc_par(int num_particles,
         int model = sample_model(model_weights, reng);
         int param_index = sample_param(pop[model],
                                        max_weights[model],
-                                       reng);
+                                                  reng);
 
         particle new_particle = pop[model][param_index];
+        new_particle.update_waterlevel_changes(reng, crown_age);
 
 
-        std::string code = do_run(new_particle,
+        std::string code = do_run(new_particle.parameters,
+                                  new_particle.waterlevel_changes,
                                   crown_age,
                                   num_lin,
+                                  new_particle.l_table,
                                   reng);
 
         new_particle.newick_string = ltable_to_newick(new_particle.l_table,
@@ -285,30 +293,20 @@ int count_extant(const std::vector<species>& s) {
   return num_extant;
 }
 
-std::string do_run(particle& p,
+std::string do_run(const std::vector<float>& parameters,
+                   const std::vector<float>& waterlevel_changes,
                    float maximum_time,
-                   int num_lin,
+                   int max_lin,
+                   std::vector< std::vector< float > >& l_table,
                    rnd_t& rndgen)
 {
-
-  Rcout << p << "\n";
-
-
-  //force_output("starting simulation of:");
-  //for(int i = 0; i < p.parameters.size(); ++i) {
-  //  Rcout << p.parameters[i] << " ";
-  //}
-  //Rcout << "\n";
-  //::sleep(1);
-  //Rcpp::checkUserInterrupt();
-
   std::vector< species > s1;
 
-  float jiggle_amount = p.parameters[4];
+  float jiggle_amount = parameters[4];
   rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
-  int error_code = run(p.parameters, p.waterlevel_changes,
-                       s1, maximum_time, num_lin,
+  int error_code = run(parameters, waterlevel_changes,
+                       s1, maximum_time, max_lin,
                        rndgen);
 
   if (error_code == 0) {
@@ -319,13 +317,11 @@ std::string do_run(particle& p,
     return "overflow";
   }
 
-  int extant_species = count_extant(s1);
-  num_lin -= extant_species;
-
   std::vector<species> s2;
-  int error_code2 = run(p.parameters,
-                        p.waterlevel_changes,
-                        s2, maximum_time, num_lin,
+
+  int error_code2 = run(parameters,
+                        waterlevel_changes,
+                        s2, maximum_time, max_lin,
                         rndgen);
 
   if (error_code2 == 0) {
@@ -337,11 +333,12 @@ std::string do_run(particle& p,
 
   jiggle(s1, s2, maximum_time, jiggle_amount, rndgen);
 
-  p.l_table = create_l_table_float(s1, s2);
+  l_table = create_l_table_float(s1, s2);
 
   std::string output = "success";
   return output;
 }
+
 
 
 std::vector<particle> convert_matrix(const NumericMatrix& m) {

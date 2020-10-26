@@ -7,6 +7,10 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+void make_sleep(size_t ms) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
 
 std::vector<float> parameters_from_prior(rnd_t& rndgen_,
                                          int model = -1) {
@@ -95,6 +99,10 @@ std::vector<float> get_waterlevel_changes(int water_model,
 std::vector< std::vector< float >> create_l_table_float(
     const std::vector< species > & s1,
     const std::vector< species > & s2) {
+
+//  Rcout << s1.size() << " " << s2.size() << "\n";
+//  make_sleep(1);
+//  force_output("");
 
   std::vector< std::vector< float > > output;
   int num_rows = s1.size() + s2.size();
