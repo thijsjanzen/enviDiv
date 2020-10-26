@@ -1,5 +1,6 @@
 #include "Gillespie.h"
 #include <cmath>
+#include <unistd.h>
 #include "random_thijs.h"
 #include <string>
 

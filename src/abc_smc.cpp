@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "random_thijs.h"
 #include "util.h"
 #include "Gillespie.h"
@@ -78,6 +80,7 @@ List smc_abc_batch(const NumericMatrix& m1,
   std::vector< std::vector< particle > > pop(3, temp);
 
   force_output("conversion of input matrices to particles");
+
   pop[0] = convert_matrix(m1); force_output("m1 done");
   pop[1] = convert_matrix(m2); force_output("m2 done");
   pop[2] = convert_matrix(m3); force_output("m3 done");
@@ -109,34 +112,58 @@ List smc_abc_batch(const NumericMatrix& m1,
   }
 
 
+  if(1 == 2) {
+    NumericMatrix o1, o2, o3;
+    o1 = convert_to_matrix(pop[0]);
+    o2 = convert_to_matrix(pop[1]);
+    o3 = convert_to_matrix(pop[2]);
+
+    //return List::create(Named("test") = 1);
+    return List::create( Named("m1") = o1,
+                         Named("m2") = o2,
+                         Named("m3") = o3);
+  }
 
   int num_accepted = 0;
-  Rcout << "starting generation of new particles\n";
+
   while(num_accepted < batch_size) {
 
     int model = sample_model(model_weights, reng);
-    Rcout << "model drawn: " << model << "\n";
+   //  Rcout << "model drawn: " << model << "\n";
+
     int param_index = sample_param(pop[model], max_weights[model], reng);
-    Rcout << "param_index drawn: " << param_index << "\n";
+    // Rcout << "param_index drawn: " << param_index << "\n";
 
     particle new_particle = pop[model][param_index];
     new_particle.perturb(reng);
+    new_particle.update_waterlevel_changes(reng, crown_age);
 
-    for(int i = 0; i < new_particle.parameters.size(); ++i) {
-      Rcout << new_particle.parameters[i] << " ";
-    }
-    Rcout << new_particle.model << "\n";
+
+    //force_output("after perturbation:");
+    //Rcout << new_particle << " " << new_particle.model << "\n";
+
+    //::sleep(1);
+    //Rcpp::checkUserInterrupt();
+
 
     std::string code = do_run(new_particle,
                               crown_age,
                               num_lin,
                               reng);
 
-    new_particle.newick_string = ltable_to_newick(new_particle.l_table,
-                                                  crown_age);
+    //force_output("simulation done");
 
-    new_pop[new_particle.model].push_back(new_particle);
-    Rcout << num_accepted << "\n";
+    if (code != "extinction" &&
+        code != "overflow") {
+      num_accepted++;
+      new_particle.newick_string = ltable_to_newick(new_particle.l_table,
+                                                    crown_age);
+
+      //force_output("ltable to newick done");
+
+      new_pop[new_particle.model].push_back(new_particle);
+      Rcout << num_accepted << "\n";
+    }
   }
 
   Rcout << "done, converting back to R format\n";
@@ -263,13 +290,23 @@ std::string do_run(particle& p,
                    int num_lin,
                    rnd_t& rndgen)
 {
+
+  Rcout << p << "\n";
+
+
+  //force_output("starting simulation of:");
+  //for(int i = 0; i < p.parameters.size(); ++i) {
+  //  Rcout << p.parameters[i] << " ";
+  //}
+  //Rcout << "\n";
+  //::sleep(1);
+  //Rcpp::checkUserInterrupt();
+
   std::vector< species > s1;
 
   float jiggle_amount = p.parameters[4];
   rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
-  //int idCount = 0;
-  std::vector < std::vector < float > > l_table1;
   int error_code = run(p.parameters, p.waterlevel_changes,
                        s1, maximum_time, num_lin,
                        rndgen);
@@ -286,7 +323,6 @@ std::string do_run(particle& p,
   num_lin -= extant_species;
 
   std::vector<species> s2;
-
   int error_code2 = run(p.parameters,
                         p.waterlevel_changes,
                         s2, maximum_time, num_lin,

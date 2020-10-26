@@ -81,12 +81,24 @@ struct particle {
     return os;
   }
 
+  void set_parameters(const std::vector< float > & p,
+                      float crown_age,
+                      rnd_t& reng) {
+    parameters= p;
+    update_waterlevel_changes(reng, crown_age);
+  }
 
+  void update_waterlevel_changes(rnd_t& reng,
+                                 float crown_age) {
+    model = parameters[5];
+    waterlevel_changes = get_waterlevel_changes(model,
+                                                crown_age,
+                                                reng);
+  }
 
   void random_parameters(rnd_t& reng,
                          float crown_age) {
     parameters = generateprior(reng);
-    model = parameters[5];
     waterlevel_changes = get_waterlevel_changes(model,
                                                 crown_age,
                                                 reng);
@@ -117,9 +129,11 @@ struct particle {
   }
 
   void perturb(rnd_t& reng) {
-    for(auto& i : parameters) {
-      i = param_change.perturb(i, reng);
+    for(int i = 0; i < 5; ++i) {
+      parameters[i] = param_change.perturb(parameters[i], reng);
     }
+    parameters[5] = model_change.perturb(parameters[5], reng);
+    model = parameters[5];
   }
 
   double calc_prob_model(const std::vector<float>& m) {
@@ -187,7 +201,7 @@ int sample_param(const std::vector< particle >& p,
   while(true) {
     int index =  reng.random_number(static_cast<int>(p.size()));
     double prob = 1.0 * p[index].weight / max_p;
-    Rcpp::Rcout << index << " " << prob << " " << max_p << " " << p[index].weight << "\n";
+  //  Rcpp::Rcout << index << " " << prob << " " << max_p << " " << p[index].weight << "\n";
     if (reng.uniform() < prob) {
       return index;
     }
