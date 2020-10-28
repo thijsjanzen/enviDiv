@@ -6,7 +6,15 @@
   statistics are calculated:
   nLTT, gamma, mean branching times and number of lineages}
 \usage{
-accept_from_R(emp_stats, newick, threshold, sd, emp_brts)
+accept_from_R(
+  emp_stats,
+  newick,
+  threshold,
+  sd,
+  emp_brts,
+  foreach_blocksize = 100,
+  num_threads = 1
+)
 }
 \arguments{
 \item{emp_stats}{statistics to compare against}

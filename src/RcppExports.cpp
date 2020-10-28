@@ -62,6 +62,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// abc_smc_2
+List abc_smc_2(const NumericMatrix& m1, const NumericMatrix& m2, const NumericMatrix& m3, const NumericVector& m_weights, const NumericVector& max_w, int batch_size, float crown_age, int min_lin, int max_lin, int num_threads, double sd_p, double self_prob_m);
+RcppExport SEXP _enviDiv_abc_smc_2(SEXP m1SEXP, SEXP m2SEXP, SEXP m3SEXP, SEXP m_weightsSEXP, SEXP max_wSEXP, SEXP batch_sizeSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_threadsSEXP, SEXP sd_pSEXP, SEXP self_prob_mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m2(m2SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m3(m3SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type m_weights(m_weightsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type max_w(max_wSEXP);
+    Rcpp::traits::input_parameter< int >::type batch_size(batch_sizeSEXP);
+    Rcpp::traits::input_parameter< float >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type min_lin(min_linSEXP);
+    Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
+    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_p(sd_pSEXP);
+    Rcpp::traits::input_parameter< double >::type self_prob_m(self_prob_mSEXP);
+    rcpp_result_gen = Rcpp::wrap(abc_smc_2(m1, m2, m3, m_weights, max_w, batch_size, crown_age, min_lin, max_lin, num_threads, sd_p, self_prob_m));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_weights
+NumericVector calc_weights(const NumericMatrix& m1, const NumericMatrix& m2, const NumericMatrix& m3, const NumericMatrix& p, const NumericVector& m_weights, double sd_p, double self_prob_m);
+RcppExport SEXP _enviDiv_calc_weights(SEXP m1SEXP, SEXP m2SEXP, SEXP m3SEXP, SEXP pSEXP, SEXP m_weightsSEXP, SEXP sd_pSEXP, SEXP self_prob_mSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m2(m2SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type m3(m3SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type m_weights(m_weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type sd_p(sd_pSEXP);
+    Rcpp::traits::input_parameter< double >::type self_prob_m(self_prob_mSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_weights(m1, m2, m3, p, m_weights, sd_p, self_prob_m));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_envidiv_tbb
 Rcpp::List test_envidiv_tbb(int model, float crown_age);
 RcppExport SEXP _enviDiv_test_envidiv_tbb(SEXP modelSEXP, SEXP crown_ageSEXP) {
@@ -128,6 +167,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// param_from_prior_model_cpp
+std::vector<float> param_from_prior_model_cpp(int model);
+RcppExport SEXP _enviDiv_param_from_prior_model_cpp(SEXP modelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type model(modelSEXP);
+    rcpp_result_gen = Rcpp::wrap(param_from_prior_model_cpp(model));
+    return rcpp_result_gen;
+END_RCPP
+}
 // param_from_prior_exp_cpp
 std::vector<float> param_from_prior_exp_cpp();
 RcppExport SEXP _enviDiv_param_from_prior_exp_cpp() {
@@ -155,11 +205,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 5},
     {"_enviDiv_smc_abc_batch", (DL_FUNC) &_enviDiv_smc_abc_batch, 12},
     {"_enviDiv_smc_abc_par", (DL_FUNC) &_enviDiv_smc_abc_par, 10},
+    {"_enviDiv_abc_smc_2", (DL_FUNC) &_enviDiv_abc_smc_2, 12},
+    {"_enviDiv_calc_weights", (DL_FUNC) &_enviDiv_calc_weights, 7},
     {"_enviDiv_test_envidiv_tbb", (DL_FUNC) &_enviDiv_test_envidiv_tbb, 2},
     {"_enviDiv_create_ref_table_tbb_serial", (DL_FUNC) &_enviDiv_create_ref_table_tbb_serial, 6},
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},
     {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 0},
+    {"_enviDiv_param_from_prior_model_cpp", (DL_FUNC) &_enviDiv_param_from_prior_model_cpp, 1},
     {"_enviDiv_param_from_prior_exp_cpp", (DL_FUNC) &_enviDiv_param_from_prior_exp_cpp, 0},
     {"_enviDiv_get_waterlevel_cpp", (DL_FUNC) &_enviDiv_get_waterlevel_cpp, 2},
     {NULL, NULL, 0}

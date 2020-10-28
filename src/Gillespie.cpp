@@ -327,7 +327,7 @@ bool verify_consistency(const std::vector<species>& pop,
 {
   // pre-emptive return, disable if you want to debug!
   return true;
-
+/*
   std::vector< species > all_species;
   all_species.insert(all_species.end(), pop.begin(), pop.end());
   all_species.insert(all_species.end(), extinct_species.begin(), extinct_species.end());
@@ -349,6 +349,7 @@ bool verify_consistency(const std::vector<species>& pop,
     }
   }
   return true;
+ */
 }
 
 

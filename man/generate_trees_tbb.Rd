@@ -44,6 +44,8 @@ calculated in parallel. Should fit in memory so should not be too big.
 Default is 10000}
 
 \item{foreach_blocksize}{size of blocks used in parallel foreach code}
+
+\item{calc_stats}{calculate summary statistics?}
 }
 \value{
 a matrix with parameter values and the associated summary statistics

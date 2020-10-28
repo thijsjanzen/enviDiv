@@ -196,7 +196,7 @@ List create_ref_table_tbb_par(int model,
 
       if (loop_size < 10) loop_size = 10;
       if (accept_rate > 0) loop_size *= 1.0 / accept_rate;
-      if (loop_size > 1e6) loop_size = 1e6;
+      if (loop_size > 1e3) loop_size = 1e3;
 
 
       std::vector< std::string > add(loop_size);

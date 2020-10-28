@@ -208,7 +208,23 @@ float calc_nltt(const std::vector< float >& emp_brts,
 std::vector<float> param_from_prior_cpp() {
 
   rnd_t rndgen;
-  std::vector<float> output = parameters_from_prior(rndgen);
+  int model = 1 + rndgen.random_number(3);
+  std::vector<float> output = parameters_from_prior(rndgen, model);
+
+  return(output);
+}
+
+//' draw parameter combinations from the prior
+//' @param model chosen model
+//' @return vector with 6 entries: extinction, sympatric speciation at high
+//' water, sympatric speciation at low water, allopatric speciation, amount of
+//' perturbation, the chosen water model
+//' @export
+// [[Rcpp::export]]
+std::vector<float> param_from_prior_model_cpp(int model) {
+
+  rnd_t rndgen;
+  std::vector<float> output = parameters_from_prior(rndgen, model);
 
   return(output);
 }

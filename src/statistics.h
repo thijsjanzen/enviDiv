@@ -84,8 +84,16 @@ namespace statistics {
       if (rndgen.uniform() < prob_self) {
         return a;
       } else {
-        int b = d(rndgen.rndgen) ? a++ : a--;
-        return b % 3;
+
+        if (d(rndgen.rndgen)) {
+          int b = a + 1;
+          if (b > 3) b -= 3;
+          return b;
+        } else {
+          int b = a - 1;
+          if (b < 1) b+= 3;
+          return b;
+        }
       }
     }
   };

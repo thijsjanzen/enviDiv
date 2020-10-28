@@ -7,6 +7,7 @@
 #' @param write_to_file write output to file, or not. Should always be TRUE,
 #' because when chopping up in blocks, only the last block is returned if FALSE.
 #' Can be used for file-free debugging.
+#' @param calc_stats calculate summary statistics?
 #' @param file_name_trees_prefix prefix of file name to write trees to
 #' @param file_name_stats file name to write stats
 #' @param num_threads number of threads
@@ -33,7 +34,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
   }
-
 
   convert_to_phylo <- function(newick_string) {
     phylo_tree <- ape::read.tree(text = newick_string)
@@ -93,15 +93,15 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     index_matrix <- tibble::as_tibble(index_matrix)
 
     do_analysis <- function(phylo_trees, indices_matrix, i) {
-        output <- list()
-        cnt <- 1
-        start <- indices_matrix$lower[[i]]
-        end   <- indices_matrix$upper[[i]]
-        for (j in start:end) {
-          output[[cnt]] <- enviDiv::calc_sum_stats(phylo_trees[[j]])
-          cnt <- cnt + 1
-        }
-        return(output)
+      output <- list()
+      cnt <- 1
+      start <- indices_matrix$lower[[i]]
+      end   <- indices_matrix$upper[[i]]
+      for (j in start:end) {
+        output[[cnt]] <- enviDiv::calc_sum_stats(phylo_trees[[j]])
+        cnt <- cnt + 1
+      }
+      return(output)
     }
 
     indices <- seq_along(index_matrix$upper)
@@ -125,7 +125,6 @@ generate_trees_tbb <- function(number_of_trees = 1000,
         "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
 
     results <- tibble::as_tibble(results)
-
     if (write_to_file) {
       if (i == 1) {
         readr::write_tsv(results, path = file_name_stats)
@@ -147,6 +146,8 @@ generate_trees_tbb <- function(number_of_trees = 1000,
     cat("time remaining: ", time_remaining, " seconds for ",
         num_left, " trees\n")
   }
+
+  results <- readr::read_tsv(file_name_stats)
 
   cat(paste("reference table written to:", file_name_stats))
   return(results)

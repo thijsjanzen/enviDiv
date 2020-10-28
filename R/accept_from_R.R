@@ -11,21 +11,68 @@ accept_from_R <- function(emp_stats,
                           newick,
                           threshold,
                           sd,
-                          emp_brts) {
+                          emp_brts,
+                          foreach_blocksize = 100,
+                          num_threads = 1) {
+
+  `%dopar%` <- foreach::`%dopar%`
 
   results <- rep(0, length(newick))
-  for(i in 1:length(newick)) {
-    phy <- ape::read.tree(text = newick[i])
-    results[i] <- accept_this_tree(phy, emp_stats, threshold, sd)
+
+  num_cl <- num_threads
+  if (num_threads == -1) num_cl <- parallel::detectCores()
+
+  cl <- parallel::makeForkCluster(num_cl)
+  doParallel::registerDoParallel(cl)
+
+  # now we split everything up across threads:
+  index_matrix <- split_into_blocks(m = length(newick),
+                                    block_size = foreach_blocksize)
+
+  index_matrix <- tibble::as_tibble(index_matrix)
+
+  do_analysis <- function(newick_strings, indices_matrix, i) {
+    output <- list()
+    cnt <- 1
+    start <- indices_matrix$lower[[i]]
+    end   <- indices_matrix$upper[[i]]
+    for (j in start:end) {
+      phy <- ape::read.tree(text = newick_strings[j])
+      output[[cnt]] <- accept_this_tree(phy, emp_stats, threshold, sd, emp_brts)
+      cnt <- cnt + 1
+    }
+    return(output)
   }
-  return(results)
+
+  indices <- seq_along(index_matrix$upper)
+  results <- foreach::foreach(i = indices)  %dopar% {
+    do_analysis(newick, index_matrix, i)
+  }
+  parallel::stopCluster(cl)
+
+  return(unlist(results))
 }
+
+#' @keywords internal
+get_stats_in_order <- function(focal_tree, emp_brts) {
+  output_stats <- c()
+  for(i in 1:8) {
+    if (i < 8) {
+      output_stats[i] <- enviDiv::calc_stat(focal_tree, i, emp_brts)
+    } else {
+      add <- enviDiv::calc_stat(focal_tree, i, emp_brts)
+      output_stats <- c(output_stats, add)
+    }
+  }
+  return(output_stats)
+}
+
 
 #' @keywords internal
 accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
   phy <- ape::multi2di(phy)
 
-  for (i in 1:length(emp_stats)) {
+  for (i in 1:8) {
     phy_stat <- calc_stat(phy, i, emp_brts)
 
     for(j in 1:length(phy_stat)) {
@@ -37,7 +84,11 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
   return(TRUE)
 }
 
-#' @keywords internal
+#' calculate statistics
+#' @param focal_tree focal tree
+#' @param index index
+#' @param brts_emp_tree branching times emperical tree
+#' @export
 calc_stat <- function(focal_tree, index, brts_emp_tree) {
 
   if (index == 1) {  # gamma
@@ -63,11 +114,14 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
   if (index == 6) { # we assume the emp tree is in the global environment
     # nltt
     brts_focal_tree <- ape::branching.times(focal_tree)
-    lineages_emp_tree <- 2:length(brts_emp_tree)
-    lineages_focal_tree <- 2:length(brts_focal_tree)
+    lineages_emp_tree <- 1:length(brts_emp_tree)
+    lineages_focal_tree <- 1:length(brts_focal_tree)
 
-    return(nLTT::nltt_diff_exact_brts(brts_focal_tree, lineages_focal_tree,
-                                      brts_emp_tree, lineages_emp_tree))
+    return(nLTT::nltt_diff_exact_brts(b_times = brts_focal_tree,
+                               lineages = lineages_focal_tree,
+                               b_times2 = brts_emp_tree,
+                               lineages2 = lineages_emp_tree,
+           time_unit = "ago"))
   }
 
   if (index == 7) {

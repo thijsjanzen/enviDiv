@@ -9,9 +9,11 @@ smc_abc_batch(
   m2,
   m3,
   m_weights,
+  max_w,
   batch_size,
   crown_age,
-  num_lin,
+  min_lin,
+  max_lin,
   num_threads,
   sd_p,
   self_prob_m
@@ -26,11 +28,15 @@ smc_abc_batch(
 
 \item{m_weights}{a vector with weight of each model}
 
+\item{max_w}{a vector with the maximum weights of particles in each model}
+
 \item{batch_size}{number of particles to generate}
 
 \item{crown_age}{crown age}
 
-\item{num_lin}{number of lineages to condition on}
+\item{min_lin}{minimum number of lineages to condition on}
+
+\item{max_lin}{maximum number of lineages to condition on}
 
 \item{num_threads}{number of threads to use}
 

@@ -36,6 +36,33 @@ smc_abc_par <- function(num_particles, crown_age, num_lin, num_threads, batch_si
     .Call('_enviDiv_smc_abc_par', PACKAGE = 'enviDiv', num_particles, crown_age, num_lin, num_threads, batch_size, sd_p, self_prob_m, emp_stats, thresholds, emp_brts)
 }
 
+#' simulate a tree using environmental diversification
+#' @param model a vector of the four paramaters of the model
+#' @param num_repl a vector that indicates the time points of water level changes
+#' @param crown_age crown age of the tree to be simulated
+#' @param min_lin minimum number of lineages
+#' @param max_lin maximum number of lineages
+#' @param num_threads number of threads
+#' @return newick string
+#' @export
+abc_smc_2 <- function(m1, m2, m3, m_weights, max_w, batch_size, crown_age, min_lin, max_lin, num_threads, sd_p, self_prob_m) {
+    .Call('_enviDiv_abc_smc_2', PACKAGE = 'enviDiv', m1, m2, m3, m_weights, max_w, batch_size, crown_age, min_lin, max_lin, num_threads, sd_p, self_prob_m)
+}
+
+#' calculate weights
+#' @param m1 matrix with particles from model 1
+#' @param m2 matrix with particles from model 2
+#' @param m3 matrix with particles from model 3
+#' @param p  matrix with particles for which to calculate weight
+#' @param m_weights vector with model weights of m1, m2 and m3
+#' @param sd_p standard deviation of parameter change
+#' @param self_prob_m probability of drawing model
+#' @return vector with weights
+#' @export
+calc_weights <- function(m1, m2, m3, p, m_weights, sd_p, self_prob_m) {
+    .Call('_enviDiv_calc_weights', PACKAGE = 'enviDiv', m1, m2, m3, p, m_weights, sd_p, self_prob_m)
+}
+
 #' function to test table conversion
 #' @param model a vector of the four parameters of the model
 #' @param crown_age crown age of the tree to be simulated
@@ -87,6 +114,16 @@ sq_numbers_cpp_tbb <- function(n, num_threads) {
 #' @export
 param_from_prior_cpp <- function() {
     .Call('_enviDiv_param_from_prior_cpp', PACKAGE = 'enviDiv')
+}
+
+#' draw parameter combinations from the prior
+#' @param model chosen model
+#' @return vector with 6 entries: extinction, sympatric speciation at high
+#' water, sympatric speciation at low water, allopatric speciation, amount of
+#' perturbation, the chosen water model
+#' @export
+param_from_prior_model_cpp <- function(model) {
+    .Call('_enviDiv_param_from_prior_model_cpp', PACKAGE = 'enviDiv', model)
 }
 
 #' draw parameter combinations from the prior
