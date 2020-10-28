@@ -73,11 +73,12 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
   phy <- ape::multi2di(phy)
 
   for (i in 1:8) {
-    phystat <- tryCatch({
+    phy_stat <- tryCatch({
                           calc_stat(phy, i, emp_brts)
-                        }, error=function(cond) {
+                        }, error = function(cond) {
                           return(1e20)
                         })
+
     for(j in 1:length(phy_stat)) {
       fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
 
