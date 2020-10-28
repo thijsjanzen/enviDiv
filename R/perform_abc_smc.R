@@ -74,6 +74,9 @@ get_starting_params <- function(num_particles,
 #' @param num_threads number of threads
 #' @param sd_p standard deviation of parameter perturbation
 #' @param self_prob probability of drawing self model
+#' @param min_tips minimum number of tips
+#' @param max_tips maximum number of tips
+#' @param write_to_file write to file
 #' @return vector of weights
 #' @export
 perform_abc_smc <- function(emp_tree,
@@ -82,7 +85,8 @@ perform_abc_smc <- function(emp_tree,
                             sd_p = 0.05,
                             sd_self = 0.7,
                             min_tips = 40,
-                            max_tips = 120) {
+                            max_tips = 120,
+                            write_to_file = TRUE) {
 
   emp_brts <- ape::branching.times(emp_tree)
   emp_stats <- get_stats_in_order(emp_tree, emp_brts)
@@ -143,7 +147,7 @@ perform_abc_smc <- function(emp_tree,
 
       num_fitting <- sum(accept_trees)
       accept_rate <- num_fitting / bsize
-      cat(num_fitting, accept_rate, "\n")
+      # cat(num_fitting, accept_rate, "\n")
       if (num_fitting > 1) {
 
         particles <- new_batch$parameters[which(accept_trees == 1), ]
@@ -175,7 +179,7 @@ perform_abc_smc <- function(emp_tree,
       if (total_num[model] > 0)
         sum_w <- sum_w + sum(new_params[[model]][, 6])
     }
-    cat("sum_w: ", sum_w, "\n")
+    #cat("sum_w: ", sum_w, "\n")
     new_model_weights <- c(0, 0, 0)
     new_max_weights <- c(0, 0, 0)
     for(model in 1:3) {
@@ -192,6 +196,17 @@ perform_abc_smc <- function(emp_tree,
     cat(iter, model_weights, "\n")
     best_model <- which.max(model_weights)
     if (model_weights[best_model] > (1 - 1e-6)) break
+
+    if (write_to_file) {
+      for(x in model) {
+        output <- params[[x]]
+        output <- cbind(output, model)
+        readr::write_tsv(output,
+                         path = paste0("particles_", iter, ".txt"),
+                         append = TRUE)
+      }
+    }
+
   }
 
   best_model <- which.max(model_weights)

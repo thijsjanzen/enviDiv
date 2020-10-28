@@ -73,10 +73,13 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
   phy <- ape::multi2di(phy)
 
   for (i in 1:8) {
-    phy_stat <- calc_stat(phy, i, emp_brts)
-
+    phystat <- tryCatch({
+                          calc_stat(phy, i, emp_brts)
+                        }, error=function(cond) {
+                          return(1e20)
+                        })
     for(j in 1:length(phy_stat)) {
-       fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
+      fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
 
       if (fit > threshold) return(FALSE)
     }
@@ -118,10 +121,10 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
     lineages_focal_tree <- 1:length(brts_focal_tree)
 
     return(nLTT::nltt_diff_exact_brts(b_times = brts_focal_tree,
-                               lineages = lineages_focal_tree,
-                               b_times2 = brts_emp_tree,
-                               lineages2 = lineages_emp_tree,
-           time_unit = "ago"))
+                                      lineages = lineages_focal_tree,
+                                      b_times2 = brts_emp_tree,
+                                      lineages2 = lineages_emp_tree,
+                                      time_unit = "ago"))
   }
 
   if (index == 7) {
