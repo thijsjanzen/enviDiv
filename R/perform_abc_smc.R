@@ -201,6 +201,9 @@ perform_abc_smc <- function(emp_tree,
       for(x in model) {
         output <- params[[x]]
         output <- cbind(output, model)
+        colnames(output) <- c("extinct", "sym_high", "sym_low",
+                              "allo", "jiggle", "weight", "model")
+        output <- tibble::tibble(output)
         readr::write_tsv(output,
                          path = paste0("particles_", iter, ".txt"),
                          append = TRUE)
