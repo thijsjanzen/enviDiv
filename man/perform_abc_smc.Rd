@@ -6,12 +6,13 @@
 \usage{
 perform_abc_smc(
   emp_tree,
-  num_particles,
-  num_threads,
-  sd_p,
-  sd_self,
+  num_particles = 1000,
+  num_threads = -1,
+  sd_p = 0.05,
+  sd_self = 0.7,
   min_tips = 40,
-  max_tips = 120
+  max_tips = 120,
+  write_to_file = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,12 @@ perform_abc_smc(
 \item{num_threads}{number of threads}
 
 \item{sd_p}{standard deviation of parameter perturbation}
+
+\item{min_tips}{minimum number of tips}
+
+\item{max_tips}{maximum number of tips}
+
+\item{write_to_file}{write to file}
 
 \item{self_prob}{probability of drawing self model}
 }
