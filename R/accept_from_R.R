@@ -7,7 +7,7 @@
 #' @param sd recorded standard deviation in the population
 #' @return vector with true or false for each tree
 #' @export
-accept_from_R <- function(emp_stats,
+accept_from_r <- function(emp_stats,
                           newick,
                           threshold,
                           sd,
@@ -56,7 +56,7 @@ accept_from_R <- function(emp_stats,
 #' @keywords internal
 get_stats_in_order <- function(focal_tree, emp_brts) {
   output_stats <- c()
-  for(i in 1:8) {
+  for (i in 1:8) {
     if (i < 8) {
       output_stats[i] <- enviDiv::calc_stat(focal_tree, i, emp_brts)
     } else {
@@ -79,7 +79,7 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
                           return(1e20)
                         })
 
-    for(j in 1:length(phy_stat)) {
+    for (j in seq_len(phy_stat)) {
       fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
 
       if (fit > threshold) return(FALSE)
@@ -111,15 +111,15 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
     return(phyloTop::avgLadder(focal_tree))
   }
 
-  if(index == 5) { # colless
+  if (index == 5) { # colless
     return(apTreeshape::colless(apTreeshape::as.treeshape(focal_tree)))
   }
 
   if (index == 6) { # we assume the emp tree is in the global environment
     # nltt
     brts_focal_tree <- ape::branching.times(focal_tree)
-    lineages_emp_tree <- 1:length(brts_emp_tree)
-    lineages_focal_tree <- 1:length(brts_focal_tree)
+    lineages_emp_tree <- seq_len(brts_emp_tree)
+    lineages_focal_tree <- seq_len(brts_focal_tree)
 
     return(nLTT::nltt_diff_exact_brts(b_times = brts_focal_tree,
                                       lineages = lineages_focal_tree,
@@ -142,4 +142,3 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
     return(output)
   }
 }
-

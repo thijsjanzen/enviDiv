@@ -8,9 +8,9 @@ get_starting_params <- function(num_particles,
 
   for_sd <- c()
   output_par <- list()
-  for(i in 1:3) {
+  for (i in 1:3) {
     sim_result <- enviDiv::create_ref_table_tbb_par(model = i,
-                                                    num_repl = num_particles / 3,
+                                                  num_repl = num_particles / 3,
                                                     crown_age = crown_age,
                                                     min_lin = min_tips,
                                                     max_lin = max_tips,
@@ -108,7 +108,7 @@ perform_abc_smc <- function(emp_tree,
 
   model_weights <- c()
   max_weights <- c()
-  for(i in 1:3) {
+  for (i in 1:3) {
     model_weights[i] <- sum(params[[i]][, 6])
     max_weights[i] <- max(params[[i]][, 6])
   }
@@ -116,12 +116,12 @@ perform_abc_smc <- function(emp_tree,
 
   thresholds <- 10 * exp(-0.25 * (1:20 - 1))
 
-  for(iter in 1:20) {
+  for (iter in 1:20) {
     new_params <- list(c(), c(), c())
     number_accepted <- 0
     total_num <- c(0, 0, 0)
     accept_rate <- 1.0
-    while(number_accepted < num_particles) {
+    while (number_accepted < num_particles) {
       num_left <- num_particles - number_accepted
       bsize <- min(1000, (num_left) / accept_rate)
 
@@ -147,7 +147,6 @@ perform_abc_smc <- function(emp_tree,
 
       num_fitting <- sum(accept_trees)
       accept_rate <- num_fitting / bsize
-      # cat(num_fitting, accept_rate, "\n")
       if (num_fitting > 1) {
 
         particles <- new_batch$parameters[which(accept_trees == 1), ]
@@ -161,7 +160,7 @@ perform_abc_smc <- function(emp_tree,
                                            self_prob = sd_self)
 
 
-        for(i in 1:length(particles[, 1])) {
+        for (i in seq_len(particles[, 1])) {
           a <- particles[i, ]
           model <- a[6]
           a[6] <- weights[i]
@@ -169,7 +168,6 @@ perform_abc_smc <- function(emp_tree,
           total_num[model] <- total_num[model] + 1
         }
       }
-      # cat(number_accepted, "\n")
     }
 
     # update weights
@@ -179,10 +177,9 @@ perform_abc_smc <- function(emp_tree,
       if (total_num[model] > 0)
         sum_w <- sum_w + sum(new_params[[model]][, 6])
     }
-    #cat("sum_w: ", sum_w, "\n")
     new_model_weights <- c(0, 0, 0)
     new_max_weights <- c(0, 0, 0)
-    for(model in 1:3) {
+    for (model in 1:3) {
       if (total_num[model] > 0) {
         new_params[[model]][, 6] <- new_params[[model]][, 6] / sum_w
         new_model_weights[model] <- sum(new_params[[model]][, 6])
@@ -191,7 +188,7 @@ perform_abc_smc <- function(emp_tree,
     }
 
     if (write_to_file) {
-      cat(c(iter, model_weights), file = "model_weights.txt", append = T)
+      cat(iter, model_weights, "\n", file = "model_weights.txt", append = T)
     }
 
     params        <- new_params
@@ -205,9 +202,6 @@ perform_abc_smc <- function(emp_tree,
       for(x in 1:3) {
         output <- params[[x]]
         output <- cbind(output, x)
-        #colnames(output) <- c("extinct", "sym_high", "sym_low",
-        #                      "allo", "jiggle", "weight", "model")
-
         output <- as.matrix(output)
         output <-tibble::as_tibble(output)
         colnames(output) <- c("extinct", "sym_high", "sym_low",
