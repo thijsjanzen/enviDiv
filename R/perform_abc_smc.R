@@ -198,12 +198,17 @@ perform_abc_smc <- function(emp_tree,
     if (model_weights[best_model] > (1 - 1e-6)) break
 
     if (write_to_file) {
-      for(x in model) {
+      for(x in 1:3) {
         output <- params[[x]]
-        output <- cbind(output, model)
+        output <- cbind(output, x)
+        #colnames(output) <- c("extinct", "sym_high", "sym_low",
+        #                      "allo", "jiggle", "weight", "model")
+
+        output <- as.matrix(output)
+        output <-tibble::as_tibble(output)
         colnames(output) <- c("extinct", "sym_high", "sym_low",
                               "allo", "jiggle", "weight", "model")
-        output <- tibble::tibble(output)
+
         readr::write_tsv(output,
                          path = paste0("particles_", iter, ".txt"),
                          append = TRUE)
