@@ -190,6 +190,10 @@ perform_abc_smc <- function(emp_tree,
       }
     }
 
+    if (write_to_file) {
+      cat(c(iter, model_weights), file = "model_weights.txt", append = T)
+    }
+
     params        <- new_params
     model_weights <- new_model_weights
     max_weights   <- new_max_weights
