@@ -441,9 +441,6 @@ List abc_smc_2(const NumericMatrix& m1,
 
   std::vector< float > max_weights(max_w.begin(), max_w.end());
 
-  int num_accepted = 0;
-  int num_tried = 0;
-  float accept_rate = 1.0;
   try {
 
     std::vector< std::string > trees;

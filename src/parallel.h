@@ -2,6 +2,7 @@
 #define parallel_h
 
 #include <vector>
+#include "random_thijs.h"
 
 std::string do_run_tbb(const std::vector<float>& parameters,
                        const std::vector<float>& waterlevel_changes,
@@ -10,4 +11,4 @@ std::string do_run_tbb(const std::vector<float>& parameters,
                        std::vector< std::vector< float > >& l_table,
                        rnd_t& rndgen);
 
-#endif parallel_h  /* parallel */
+#endif /* parallel */
