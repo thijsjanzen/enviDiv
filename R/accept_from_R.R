@@ -118,8 +118,8 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
   if (index == 6) { # we assume the emp tree is in the global environment
     # nltt
     brts_focal_tree <- ape::branching.times(focal_tree)
-    lineages_emp_tree <- seq_len(brts_emp_tree)
-    lineages_focal_tree <- seq_len(brts_focal_tree)
+    lineages_emp_tree <- 1:length(brts_emp_tree)
+    lineages_focal_tree <- 1:length(brts_focal_tree)
 
     return(nLTT::nltt_diff_exact_brts(b_times = brts_focal_tree,
                                       lineages = lineages_focal_tree,
