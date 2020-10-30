@@ -138,7 +138,7 @@ perform_abc_smc <- function(emp_tree,
                                       sd_p = sd_p,
                                       self_prob_m = sd_self)
 
-      accept_trees <- enviDiv::accept_from_R(emp_stats,
+      accept_trees <- enviDiv::accept_from_r(emp_stats,
                                              new_batch$trees,
                                              threshold = thresholds[iter],
                                              sd = sd_vals,
