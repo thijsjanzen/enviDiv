@@ -160,10 +160,10 @@ perform_abc_smc <- function(emp_tree,
 
 
         for (i in 1:length(particles[, 1])) {
-          a <- particles[i, ]
-          model <- a[6]
-          a[6] <- weights[i]
-          new_params[[model]] <- rbind(new_params[[model]], a)
+          new_particle <- particles[i, ]
+          model <- new_particle[6]
+          new_particle[6] <- weights[i]
+          new_params[[model]] <- rbind(new_params[[model]], new_particle)
           total_num[model] <- total_num[model] + 1
         }
       }

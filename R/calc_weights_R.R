@@ -58,7 +58,7 @@ calc_weights_R <- function(m1, m2, m3, p, m_w, sd_p, self_prob) {
     }
   }
 
-  for (i in seq_len(p[, 1])) {
+  for (i in 1:length(p[, 1])) {
     focal_p <- p[i, ]
     model <- focal_p[6]
 
