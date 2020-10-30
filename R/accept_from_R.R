@@ -5,15 +5,16 @@
 #' @param newick  vector with newick strings
 #' @param threshold maximum threshold value
 #' @param sd recorded standard deviation in the population
+#' @param emp_tree empirical tree, necessary for nLTT calculation
 #' @return vector with true or false for each tree
 #' @export
 accept_from_r <- function(emp_stats,
                           newick,
                           threshold,
                           sd,
-                          emp_brts,
+                          emp_tree,
                           foreach_blocksize = 100,
-                          num_threads = 1) {
+                          num_threads = -1) {
 
   `%dopar%` <- foreach::`%dopar%`
 
@@ -38,7 +39,7 @@ accept_from_r <- function(emp_stats,
     end   <- indices_matrix$upper[[i]]
     for (j in start:end) {
       phy <- ape::read.tree(text = newick_strings[j])
-      output[[cnt]] <- accept_this_tree(phy, emp_stats, threshold, sd, emp_brts)
+      output[[cnt]] <- accept_this_tree(phy, emp_stats, threshold, sd, emp_tree)
       cnt <- cnt + 1
     }
     return(output)
@@ -54,13 +55,13 @@ accept_from_r <- function(emp_stats,
 }
 
 #' @keywords internal
-get_stats_in_order <- function(focal_tree, emp_brts) {
+get_stats_in_order <- function(focal_tree, emp_tree) {
   output_stats <- c()
   for (i in 1:8) {
     if (i < 8) {
-      output_stats[i] <- enviDiv::calc_stat(focal_tree, i, emp_brts)
+      output_stats[i] <- enviDiv::calc_stat(focal_tree, i, emp_tree)
     } else {
-      add <- enviDiv::calc_stat(focal_tree, i, emp_brts)
+      add <- enviDiv::calc_stat(focal_tree, i, emp_tree)
       output_stats <- c(output_stats, add)
     }
   }
@@ -69,12 +70,12 @@ get_stats_in_order <- function(focal_tree, emp_brts) {
 
 
 #' @keywords internal
-accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
+accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_tree) {
   phy <- ape::multi2di(phy)
 
   for (i in 1:8) {
     phy_stat <- tryCatch({
-                          calc_stat(phy, i, emp_brts)
+                          calc_stat(phy, i, emp_tree)
                         }, error = function(cond) {
                           return(1e20)
                         })
@@ -93,7 +94,7 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_brts) {
 #' @param index index
 #' @param brts_emp_tree branching times emperical tree
 #' @export
-calc_stat <- function(focal_tree, index, brts_emp_tree) {
+calc_stat <- function(focal_tree, index, emp_tree) {
 
   if (index == 1) {  # gamma
     return(ape::gammaStat(focal_tree))
@@ -116,16 +117,7 @@ calc_stat <- function(focal_tree, index, brts_emp_tree) {
   }
 
   if (index == 6) { # we assume the emp tree is in the global environment
-    # nltt
-    brts_focal_tree <- ape::branching.times(focal_tree)
-    lineages_emp_tree <- 1:length(brts_emp_tree)
-    lineages_focal_tree <- 1:length(brts_focal_tree)
-
-    return(nLTT::nltt_diff_exact_brts(b_times = brts_focal_tree,
-                                      lineages = lineages_focal_tree,
-                                      b_times2 = brts_emp_tree,
-                                      lineages2 = lineages_emp_tree,
-                                      time_unit = "ago"))
+    return(nLTT::nltt_diff(focal_tree, emp_tree))
   }
 
   if (index == 7) {

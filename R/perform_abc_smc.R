@@ -4,7 +4,7 @@ get_starting_params <- function(num_particles,
                                 max_tips,
                                 crown_age,
                                 num_threads = -1,
-                                emp_brts) {
+                                emp_tree) {
 
   for_sd <- c()
   output_par <- list()
@@ -38,7 +38,7 @@ get_starting_params <- function(num_particles,
       end   <- indices_matrix$upper[[i]]
       for (j in start:end) {
         phy <- ape::read.tree(text = newick_strings[j])
-        stats <- get_stats_in_order(phy, emp_brts)
+        stats <- get_stats_in_order(phy, emp_tree)
         output[[cnt]] <- stats
         cnt <- cnt + 1
       }
@@ -88,8 +88,7 @@ perform_abc_smc <- function(emp_tree,
                             max_tips = 120,
                             write_to_file = TRUE) {
 
-  emp_brts <- ape::branching.times(emp_tree)
-  emp_stats <- get_stats_in_order(emp_tree, emp_brts)
+  emp_stats <- get_stats_in_order(emp_tree, emp_tree)
 
   crown_age <- beautier::get_crown_age(emp_tree)
 
@@ -98,7 +97,7 @@ perform_abc_smc <- function(emp_tree,
                                          max_tips,
                                          crown_age,
                                          num_threads,
-                                         emp_brts)
+                                         emp_tree)
 
   # we need standard deviations of each parameter
   # and we need to isolate the parameter values
@@ -142,7 +141,7 @@ perform_abc_smc <- function(emp_tree,
                                              new_batch$trees,
                                              threshold = thresholds[iter],
                                              sd = sd_vals,
-                                             emp_brts,
+                                             emp_tree,
                                              num_threads = num_threads)
 
       num_fitting <- sum(accept_trees)
