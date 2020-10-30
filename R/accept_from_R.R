@@ -80,7 +80,7 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_tree) {
                           return(1e20)
                         })
 
-    for (j in 1:lenght(phy_stat)) {
+    for (j in 1:length(phy_stat)) {
       fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
 
       if (fit > threshold) return(FALSE)
