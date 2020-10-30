@@ -45,7 +45,7 @@ accept_from_r <- function(emp_stats,
     return(output)
   }
 
-  indices <- seq_along(index_matrix$upper)
+  indices <- 1:length(index_matrix$upper)
   results <- foreach::foreach(i = indices)  %dopar% {
     do_analysis(newick, index_matrix, i)
   }
@@ -80,7 +80,7 @@ accept_this_tree <- function(phy, emp_stats, threshold, sd, emp_tree) {
                           return(1e20)
                         })
 
-    for (j in seq_len(phy_stat)) {
+    for (j in 1:lenght(phy_stat)) {
       fit <- abs(phy_stat[j]  - emp_stats[i + j - 1]) / sd[i + j - 1]
 
       if (fit > threshold) return(FALSE)

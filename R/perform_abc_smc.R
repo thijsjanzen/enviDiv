@@ -45,7 +45,7 @@ get_starting_params <- function(num_particles,
       return(output)
     }
 
-    indices <- seq_along(index_matrix$upper)
+    indices <- 1:length(index_matrix$upper)
 
     results <- foreach::foreach(i = indices)  %dopar% {
       do_analysis(sim_result$trees, index_matrix, i)
@@ -159,7 +159,7 @@ perform_abc_smc <- function(emp_tree,
                                            self_prob = sd_self)
 
 
-        for (i in seq_len(particles[, 1])) {
+        for (i in 1:length(particles[, 1])) {
           a <- particles[i, ]
           model <- a[6]
           a[6] <- weights[i]
