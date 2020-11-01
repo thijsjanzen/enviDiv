@@ -4,7 +4,7 @@ prior_prob <- function(focal_particle) {
   particle_prob <- 1
   for (i in 1:5) {
     particle_prob <- particle_prob *
-            dunif(x = log10(focal_particle[i]), min = -4, max = 2)
+            stats::dunif(x = log10(focal_particle[i]), min = -4, max = 2)
   }
   return(particle_prob * model_prob)
 }
@@ -19,7 +19,7 @@ calc_w <- function(prev_particles,
   total_probs <- c(log10(prev_particles[, 6]))
   for (i in 1:5) {
     diff <- log10(prev_particles[, i]) - log10(focal_particle[i])
-    probs <- dnorm(diff, sd = sd_p, log = TRUE)
+    probs <- stats::dnorm(diff, sd = sd_p, log = TRUE)
     total_probs <- cbind(total_probs, probs)
   }
 
