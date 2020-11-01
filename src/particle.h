@@ -205,6 +205,20 @@ int sample_model(const std::vector<float>& w,
   return -1 + w.size();
 }
 
+int sample_model_perturb(const std::vector<float>& w,
+                 rnd_t& reng,
+                 statistics::model_dist model_change) {
+
+  // first, we sample a model
+  int model = sample_model(w, reng);
+  // then we perturb
+  int perturbed_model = model_change.perturb(model, reng);
+  while(w[perturbed_model] == 0.f) { // don't allow switching to dead models.
+    perturbed_model = model_change.perturb(model, reng);
+  }
+  return(perturbed_model);
+}
+
 int sample_param(const std::vector< particle >& p,
                  double max_p,
                  rnd_t& reng) {

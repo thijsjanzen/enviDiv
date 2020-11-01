@@ -387,16 +387,14 @@ int sample_param_float(const std::vector< std::vector< float >>& p,
   }
 }
 
-template <typename MK, typename PK>
-void perturb(std::vector< float >& parameters,
-             rnd_t& reng,
-             MK model_change,
-             PK param_change) {
+template <typename PK>
+void perturb_param(std::vector< float >& parameters,
+                   rnd_t& reng,
+                   PK param_change) {
 
   for(int i = 0; i < 5; ++i) {
     parameters[i] = param_change.perturb(parameters[i], reng);
   }
-  parameters[5] = model_change.perturb(parameters[5], reng);
   return;
 }
 
@@ -480,17 +478,14 @@ List abc_smc_2(const NumericMatrix& m1,
 
           for (unsigned i = r.begin(); i < r.end(); ++i) {
 
-            int model = sample_model(model_weights, reng);
+            int model = sample_model_perturb(model_weights, reng, model_change);
             int param_index = sample_param_float(pop[model],
                                                  max_weights[model],
-                                                            reng);
+                                                 reng);
 
             std::vector< float > parameters = pop[model][param_index];
             parameters[5] = model + 1; // model indication is in R notation...
-            perturb<statistics::model_dist,
-                    statistics::norm_dist_log>(parameters, reng,
-                                               model_change,
-                                               param_change);
+            perturb_param<statistics::norm_dist_log>(parameters, reng, param_change);
 
             std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
                                                                            crown_age,
