@@ -61,7 +61,7 @@ get_starting_params <- function(num_particles,
     output_par[[i]] <- sim_result$parameters
   }
 
-  sd_vals <- apply(for_sd, 2, sd)
+  sd_vals <- apply(for_sd, 2, stats::sd)
   output <- list("sd" = sd_vals,
                  "params" = output_par)
   return(output)
@@ -83,7 +83,7 @@ perform_abc_smc <- function(emp_tree,
                             num_particles = 1000,
                             num_threads = -1,
                             sd_p = 0.05,
-                            sd_self = 0.7,
+                            self_prob = 0.7,
                             min_tips = 40,
                             max_tips = 120,
                             write_to_file = TRUE) {
