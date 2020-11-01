@@ -66,35 +66,28 @@ namespace statistics {
 
   struct model_dist {
     double prob_self;
-    std::bernoulli_distribution d;
 
     model_dist() {
-      d = std::bernoulli_distribution(0.5);
+      prob_self = 1.0;
     }
 
     model_dist(double s) : prob_self(s) {
-      d = std::bernoulli_distribution(0.5);
     };
 
     double pdf(int a, int b) {
       return (a == b) ? prob_self : 0.5f * (1 - prob_self);
     }
 
-    double perturb(int a, rnd_t& rndgen) {
-      if (rndgen.uniform() < prob_self) {
-        return a;
-      } else {
+    int perturb(int a, rnd_t& rndgen) {
+      std::vector< float > probs(3, 0.5f * (1- prob_self));
+      probs[a] = prob_self;
 
-        if (d(rndgen.rndgen)) {
-          int b = a + 1;
-          if (b > 3) b -= 3;
-          return b;
-        } else {
-          int b = a - 1;
-          if (b < 1) b+= 3;
-          return b;
-        }
+      float r = rndgen.uniform();
+      int index = 0;
+      while(r > 0) {
+        r-= probs[index];
       }
+      return index;
     }
   };
 }
