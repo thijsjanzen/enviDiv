@@ -195,14 +195,13 @@ perform_abc_smc <- function(emp_tree,
     max_weights   <- new_max_weights
     cat(iter, model_weights, "\n")
     best_model <- which.max(model_weights)
-    if (model_weights[best_model] > (1 - 1e-6)) break
 
     if (write_to_file) {
       for(x in 1:3) {
         output <- params[[x]]
         output <- cbind(output, x)
         output <- as.matrix(output)
-        output <-tibble::as_tibble(output)
+        output <- tibble::as_tibble(output)
         colnames(output) <- c("extinct", "sym_high", "sym_low",
                               "allo", "jiggle", "weight", "model")
 

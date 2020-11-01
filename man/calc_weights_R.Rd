@@ -4,7 +4,7 @@
 \alias{calc_weights_R}
 \title{calculate weights}
 \usage{
-calc_weights_R(m1, m2, m3, p, m_w, sd_p, self_prob)
+calc_weights_R(m1, m2, m3, p, m_w, sd_p, self_prob, num_threads = -1)
 }
 \arguments{
 \item{m1}{previous particles of model 1}
@@ -20,6 +20,8 @@ calc_weights_R(m1, m2, m3, p, m_w, sd_p, self_prob)
 \item{sd_p}{standard deviation of parameter perturbation}
 
 \item{self_prob}{probability of drawing self model}
+
+\item{num_threads}{number of threads}
 }
 \value{
 vector of weights

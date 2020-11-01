@@ -11,9 +11,9 @@ accept_from_r(
   newick,
   threshold,
   sd,
-  emp_brts,
+  emp_tree,
   foreach_blocksize = 100,
-  num_threads = 1
+  num_threads = -1
 )
 }
 \arguments{
@@ -24,6 +24,8 @@ accept_from_r(
 \item{threshold}{maximum threshold value}
 
 \item{sd}{recorded standard deviation in the population}
+
+\item{emp_tree}{empirical tree, necessary for nLTT calculation}
 }
 \value{
 vector with true or false for each tree

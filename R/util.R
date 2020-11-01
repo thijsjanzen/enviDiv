@@ -100,3 +100,4 @@ split_into_blocks <- function(m,
        size <- c(upper[1], diff(upper))
        cbind(lower, upper, size)
 }
+

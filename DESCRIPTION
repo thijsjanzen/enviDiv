@@ -33,5 +33,6 @@ Imports:
     doParallel,
     foreach,
     future.apply,
-    future
+    future,
+    beautier
 SystemRequirements: GNU make

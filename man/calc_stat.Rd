@@ -4,7 +4,7 @@
 \alias{calc_stat}
 \title{calculate statistics}
 \usage{
-calc_stat(focal_tree, index, brts_emp_tree)
+calc_stat(focal_tree, index, emp_tree)
 }
 \arguments{
 \item{focal_tree}{focal tree}
