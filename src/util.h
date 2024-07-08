@@ -13,30 +13,32 @@
 #include "random_thijs.h"
 #include "Rcpp.h"
 
+enum param_type {extinction_rate, sym_high_rate, sym_low_rate, allo_rate, wobble_rate, water_rate, model};
 
-std::vector<float> param_from_prior_cpp();
-std::vector<float> param_from_prior_exp_cpp();
-std::vector<float> get_waterlevel_cpp(int water_model,
-                                      float maximum_time);
+std::vector<double> param_from_prior_cpp();
+std::vector<double> param_from_prior_exp_cpp();
+std::vector<double> get_waterlevel_cpp(int water_model,
+                                      double maximum_time);
 
-std::vector<float> parameters_from_prior(rnd_t& rndgen_);
-std::vector<float> parameters_from_prior(rnd_t& rndgen_,
+std::vector<double> parameters_from_prior(rnd_t& rndgen_);
+std::vector<double> parameters_from_prior(rnd_t& rndgen_,
                                          int model);
-std::vector<float> get_waterlevel_changes(int water_model,
-                                          float maximum_time,
-                                          rnd_t& rndgen_);
+std::vector<double> get_waterlevel_changes(int water_model,
+                                          double maximum_time,
+                                          rnd_t& rndgen_,
+                                          double rate);
 
 
 
 struct ltable_entry {
-  float bt;
-  float parent;
-  float daughter;
-  float extant;
-  float tend;
+  double bt;
+  double parent;
+  double daughter;
+  double extant;
+  double tend;
   std::string label;
 
-  ltable_entry(float b, float p, float d, float e) : bt(b),
+  ltable_entry(double b, double p, double d, double e) : bt(b),
         parent(p), daughter(d), extant(e) {
   }
 
@@ -44,8 +46,10 @@ struct ltable_entry {
   }
 };
 
-std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
-                             float crown_age);
+
+
+std::string ltable_to_newick(const std::vector< std::array< double, 4 > >& ltable,
+                             double crown_age);
 
 // returns low-entropy 512 bit array for seed sequence
 // based on std::chrono::high_resolution_clock.

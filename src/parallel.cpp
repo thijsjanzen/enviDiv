@@ -20,11 +20,11 @@ void force_output(std::string s) {
 }
 
 
-std::string do_run_tbb(const std::vector<float>& parameters,
-                       const std::vector<float>& waterlevel_changes,
-                       float maximum_time,
+std::string do_run_tbb(const std::vector<double>& parameters,
+                       const std::vector<double>& waterlevel_changes,
+                       double maximum_time,
                        int max_lin,
-                       std::vector< std::vector< float > >& l_table,
+                       std::vector< std::array< double, 4 > >& l_table,
                        rnd_t& rndgen);
 
 //' function to test table conversion
@@ -34,22 +34,23 @@ std::string do_run_tbb(const std::vector<float>& parameters,
 //' @export
 // [[Rcpp::export]]
 Rcpp::List test_envidiv_tbb(int model,
-                            float crown_age) {
+                            double crown_age) {
 
   rnd_t reng;
 
-  std::vector<float> parameters = parameters_from_prior(reng);
+  std::vector<double> parameters = parameters_from_prior(reng);
 
-  parameters[0] = 0.0;
-  parameters[1] = 0.3;
-  parameters[5] = model;
+  parameters[ param_type::extinction_rate ] = 0.0;
+  parameters[ param_type::sym_high_rate ]   = 0.3;
+  parameters[ param_type::model ]      = model;
 
-  std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+  std::vector<double> waterlevel_changes = get_waterlevel_changes(parameters[ param_type::model ],
                                                                  crown_age,
-                                                                 reng);
+                                                                 reng,
+                                                                 parameters[ param_type::water_rate ]);
 
   int max_lin = 1e6;
-  std::vector< std::vector< float > > l_table;
+  std::vector< std::array< double, 4 > > l_table;
 
   std::string code = do_run_tbb(parameters,
                                 waterlevel_changes,
@@ -91,7 +92,7 @@ Rcpp::List test_envidiv_tbb(int model,
 // [[Rcpp::export]]
 List create_ref_table_tbb_serial(int model,
                                  int num_repl,
-                                 float crown_age,
+                                 double crown_age,
                                  int min_lin,
                                  int max_lin,
                                  int num_threads) {
@@ -117,12 +118,13 @@ List create_ref_table_tbb_serial(int model,
      for(int i = 0; i < loop_size; ++i) {
      rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
-      std::vector<float> parameters = parameters_from_prior(reng);
-      std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+      std::vector<double> parameters = parameters_from_prior(reng);
+      std::vector<double> waterlevel_changes = get_waterlevel_changes(parameters[ param_type::model ],
                                                                      crown_age,
-                                                                     reng);
+                                                                     reng,
+                                                                     parameters[ param_type::water_rate ]);
 
-      std::vector< std::vector< float > > l_table;
+      std::vector< std::array< double, 4 > > l_table;
 
       std::string code = do_run_tbb(parameters,
                                     waterlevel_changes,
@@ -174,13 +176,13 @@ List create_ref_table_tbb_serial(int model,
 // [[Rcpp::export]]
 List create_ref_table_tbb_par(int model,
                               int num_repl,
-                              float crown_age,
+                              double crown_age,
                               int min_lin,
                               int max_lin,
                               int num_threads) {
 
   std::vector< std::string > trees;
-  std::vector< std::vector < float > > parameter_list;
+  std::vector< std::vector < double > > parameter_list;
 
   auto T0 = std::chrono::high_resolution_clock::now();
   int loop_size = num_repl - trees.size();
@@ -192,8 +194,8 @@ List create_ref_table_tbb_par(int model,
     loop_size = num_repl - trees.size();
 
     std::vector< std::string > add(loop_size);
-    std::vector< float > temp_filler(6);
-    std::vector< std::vector< float > > add_params(loop_size, temp_filler);
+    std::vector< double > temp_filler(7);
+    std::vector< std::vector< double > > add_params(loop_size, temp_filler);
     std::vector< bool > add_flag(loop_size, false);
 
     tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
@@ -205,12 +207,13 @@ List create_ref_table_tbb_par(int model,
         rnd_t reng; // = rnd_t( make_random_engine<std::mt19937>() );
 
         for (unsigned i = r.begin(); i < r.end(); ++i) {
-          std::vector<float> parameters = parameters_from_prior(reng, model);
-          std::vector<float> waterlevel_changes = get_waterlevel_changes(parameters[5],
+          std::vector<double> parameters = parameters_from_prior(reng, model);
+          std::vector<double> waterlevel_changes = get_waterlevel_changes(parameters[ param_type::model ],
                                                                          crown_age,
-                                                                         reng);
+                                                                         reng,
+                                                                         parameters[ param_type::water_rate ]);
 
-          std::vector< std::vector< float > > l_table;
+          std::vector< std::array< double, 4 > > l_table;
 
           std::string code = do_run_tbb(parameters,
                                         waterlevel_changes,
@@ -245,7 +248,7 @@ List create_ref_table_tbb_par(int model,
     output[k] = trees[k];
   }
 
-  Rcpp::NumericMatrix parameter_matrix(num_repl, 6);
+  Rcpp::NumericMatrix parameter_matrix(num_repl, 7);
   for(int k = 0; k < parameter_list.size(); ++k) {
     for(int j = 0; j < parameter_list[0].size(); ++j) {
       parameter_matrix(k, j) = parameter_list[k][j];
@@ -274,8 +277,8 @@ std::vector< int > get_parent_from_linlist(
 }
 
 
-std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
-                             float crown_age) {
+std::string ltable_to_newick(const std::vector< std::array< double, 4 > >& ltable,
+                             double crown_age) {
 
   std::vector< ltable_entry > ltab(ltable.size());
   for(int i = 0; i < ltable.size(); ++i) {
@@ -323,8 +326,8 @@ std::string ltable_to_newick(const std::vector< std::vector< float > >& ltable,
 
 
   std::vector< ltable_entry > linlist;
-  float age = ltab[0].bt;
-  float tend = age;
+  double age = ltab[0].bt;
+  double tend = age;
   // L[, 1] <- age - L[, 1]
   for(auto& i : ltab) {
     i.bt = age - i.bt;
@@ -422,15 +425,15 @@ NumericVector sq_numbers_cpp_tbb(int n,
 }
 
 
-std::vector< std::vector< float >> create_l_table_float(
+std::vector< std::array< double, 4 >> create_l_table_double(
     const std::vector< species > & s1,
     const std::vector< species > & s2) {
 
-  std::vector< std::vector< float > > output;
+  std::vector< std::array< double, 4 > > output;
   int num_rows = s1.size() + s2.size();
-  int num_cols = 4;
+
   for(int i = 0; i < num_rows; ++i) {
-    std::vector< float > row(num_cols);
+    std::array< double, 4 > row;
     output.push_back(row);
   }
 
@@ -455,20 +458,20 @@ std::vector< std::vector< float >> create_l_table_float(
 
 
 
-std::string do_run_tbb(const std::vector<float>& parameters,
-                       const std::vector<float>& waterlevel_changes,
-                       float maximum_time,
+std::string do_run_tbb(const std::vector<double>& parameters,
+                       const std::vector<double>& waterlevel_changes,
+                       double maximum_time,
                        int max_lin,
-                       std::vector< std::vector< float > >& l_table,
+                       std::vector< std::array< double, 4 > >& l_table,
                        rnd_t& rndgen)
 {
   std::vector< species > s1;
 
-  float jiggle_amount = parameters[4];
+  double jiggle_amount = parameters[4];
   rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
   //int idCount = 0;
-  std::vector < std::vector < float > > l_table1;
+  std::vector < std::vector < double > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
                        s1, maximum_time, max_lin,
                        rndgen);
@@ -497,8 +500,15 @@ std::string do_run_tbb(const std::vector<float>& parameters,
 
   jiggle(s1, s2, maximum_time, jiggle_amount, rndgen);
 
-  l_table = create_l_table_float(s1, s2);
+  l_table = create_l_table_double(s1, s2);
 
   std::string output = "success";
   return output;
 }
+
+
+
+
+
+
+

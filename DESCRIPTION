@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.1
 Depends:
     Rcpp,
     RcppParallel
@@ -18,18 +18,14 @@ LinkingTo:
     RcppParallel
 Imports: 
     ape,
-    nLTT,
-    phytools,
     readr,
     tibble,
     testthat,
-    apTreeshape,
-    phyloTop,
     DDD,
-    RPANDA,
     dplyr,
     TreeSim,
     abcrf,
     future.apply,
-    progressr
-SystemRequirements: GNU make
+    progressr,
+    treestats,
+    pbmcapply

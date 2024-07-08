@@ -13,7 +13,7 @@ generate_trees_tbb <- function(number_of_trees = 1000,
                                 max_tips = 150,
                                 model = NULL,
                                 crown_age = NULL,
-                                file_name= NULL,
+                                file_name = NULL,
                                 num_threads = -1) {
 
   if (is.null(crown_age)) {
@@ -39,32 +39,35 @@ generate_trees_tbb <- function(number_of_trees = 1000,
   # now we calculate stats
   cat("calculating summary statistics for all trees...\n")
 
-  indices <- seq_along(phylo_trees)
+#  indices <- seq_along(phylo_trees)
 
-  progressr::with_progress({
-    p <- progressr::progressor(along = phylo_trees)
-    stats <- future.apply::future_lapply(indices, function(x, ...) {
-      p(sprintf("x=%g", x))
-      calc_sum_stats(phylo_trees[[x]])
-    })
-  })
+ # progressr::with_progress({
+#    p <- progressr::progressor(along = phylo_trees)
+#    stats <- future.apply::future_lapply(indices, function(x, ...) {
+#      p(sprintf("x=%g", x))
+#      calc_sum_stats(phylo_trees[[x]])
+#    })
+#  })
+
+  stats <- pbmcapply::pbmclapply(phylo_trees, treestats::calc_all_stats,
+                                 mc.cores = num_threads)
 
   stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                        ncol = 15,
+                        ncol = 70,
                         byrow = TRUE)
 
   results <- cbind(sim_result$parameters, stat_matrix)
 
+  test_tree <- ape::rphylo(n = 5, 1, 0)
+  test_stats <- treestats::calc_all_stats(test_tree)
+
   colnames(results) <-
-    c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-      "nltt", "gamma", "mbr", "num_lin",
-      "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
-      "pitchforks", "stairs",
-      "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
+    c("extinct", "sym_high", "sym_low", "allo", "wobble", "water", "model",
+       names(test_stats))
 
   results <- tibble::as_tibble(results)
 
-  readr::write_tsv(results, path = file_name)
-  cat(paste("reference table written to:", file_name))
+  readr::write_tsv(results, file = file_name)
+  cat(paste("reference table written to:", file_name, "\n"))
   return(results)
 }

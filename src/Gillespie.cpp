@@ -5,7 +5,7 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
-
+/*
 //' simulate a tree using environmental diversification
 //' @param parameters a vector of the four paramaters of the model
 //' @param waterlevel_changes a vector that indicates the time points of water level changes
@@ -15,16 +15,15 @@ using namespace Rcpp;
 //' @return newick string
 //' @export
 // [[Rcpp::export]]
-List create_tree_cpp(std::vector<float> parameters,
-                     std::vector<float> waterlevel_changes,
+List create_tree_cpp(std::vector<double> parameters,
+                     std::vector<double> waterlevel_changes,
                      int seed,
-                     float crown_age,
+                     double crown_age,
                      int max_lin) {
   // read parameter values
 
   rnd_t rndgen;
   rndgen.set_seed(seed);
-
 
   NumericMatrix l_table;
 
@@ -37,23 +36,23 @@ List create_tree_cpp(std::vector<float> parameters,
 
   return List::create( Named("code") = code,
                        Named("Ltable") = l_table);
-}
+}*/
 
 
-std::string do_run_r(const std::vector<float>& parameters,
-                     const std::vector<float>& waterlevel_changes,
-                     float maximum_time,
+std::string do_run_r(const std::vector<double>& parameters,
+                     const std::vector<double>& waterlevel_changes,
+                     double maximum_time,
                      int max_lin,
-                     NumericMatrix& l_table,
+                     std::vector< std::array<double, 4>>& l_table,
                      rnd_t& rndgen)
 {
   std::vector< species > s1;
 
-  float jiggle_amount = parameters[4];
+  double jiggle_amount = parameters[4];
   rndgen.set_normal_trunc(0.0f, jiggle_amount);
 
   //int idCount = 0;
-  std::vector < std::vector < float > > l_table1;
+  std::vector < std::vector < double > > l_table1;
   int error_code = run(parameters, waterlevel_changes,
                         s1, maximum_time, max_lin,
                         rndgen);
@@ -90,12 +89,12 @@ std::string do_run_r(const std::vector<float>& parameters,
 
 
 
-int drawEvent(float E, float S, float A, rnd_t& rndgen) {
+int drawEvent(double E, double S, double A, rnd_t& rndgen) {
   // this is a rather naive implementation
   // but for such a low number of events it suffices.
-  float sum = E + S + A;
-  float events[3] = {E/sum, S/sum, A/sum};
-  float r = rndgen.uniform();
+  double sum = E + S + A;
+  double events[3] = {E/sum, S/sum, A/sum};
+  double r = rndgen.uniform();
   for (int i = 0; i < 3; ++i) {
     r -= events[i];
     if(r <= 0.f) return i;
@@ -125,7 +124,7 @@ bool onlyInstance(const std::vector<species>& v,
 
 void extinction(std::vector<species>& v,
                 std::vector<species>& extinct_species,
-                float time,
+                double time,
                 int wLevel,
                 rnd_t& rndgen) {
   int i = rndgen.random_number((int)v.size());
@@ -151,8 +150,8 @@ void extinction(std::vector<species>& v,
 void Symp_speciation(std::vector<species>& v,
                      int& id_count,
                      std::vector<species>& extinct_species,
-                     float time,
-                     float waterTime,
+                     double time,
+                     double waterTime,
                      int wLevel,
                      rnd_t& rndgen)  {
   if (wLevel == 1) {
@@ -247,7 +246,7 @@ void waterLevelChange(std::vector<species>& v, int& wLevel) {
 
   if (wLevel == 1) { //waterlevel is high and drops
     std::vector<species> copy = v;
-    v.insert(v.end(),copy.begin(),copy.end());  //all species are distributed over the two pockets, e.g. floatd
+    v.insert(v.end(),copy.begin(),copy.end());  //all species are distributed over the two pockets, e.g. doubled
     //std::move(copy.begin(),copy.end(),std::back_inserter(v));
   }
 
@@ -257,8 +256,8 @@ void waterLevelChange(std::vector<species>& v, int& wLevel) {
 
 void Allo_speciation(std::vector<species>& v,
                      int& id_count,
-                     float time,
-                     float water_time,
+                     double time,
+                     double water_time,
                      const std::vector<allo_pair>& p,
                      std::vector<species>& extinct_species,
                      rnd_t& rndgen) {
@@ -351,17 +350,17 @@ bool verify_consistency(const std::vector<species>& pop,
 }
 
 
-int run(const std::vector<float>& parameters,
-        const std::vector<float>& W,
+int run(const std::vector<double>& parameters,
+        const std::vector<double>& W,
         std::vector<species>& allSpecies,
-        float maximum_time,
+        double maximum_time,
         int max_lin,
         rnd_t& rndgen) {
 
-  float extinction_rate      = parameters[0];
-  float sympatric_high_water = parameters[1];
-  float sympatric_low_water  = parameters[2];
-  float allopatric_spec_rate = parameters[3];
+  double extinction_rate      = parameters[0];
+  double sympatric_high_water = parameters[1];
+  double sympatric_low_water  = parameters[2];
+  double allopatric_spec_rate = parameters[3];
 
   allSpecies.clear();
   int id_count = 1;
@@ -369,42 +368,43 @@ int run(const std::vector<float>& parameters,
   std::vector<species> pop;
   pop.push_back(species(id_count));
 
-  int numberExtinctions = 0;
+  // int numberExtinctions = 0;
 
-  float time = 0;
+  double time = 0;
   int waterLevel = 1;
 
-  int iter = 0;
-
   int numberWlevelChanges = 0;
+  if (W[0] == 0.f) {
+    numberWlevelChanges++;
+  }
 
   std::vector<species> extinct_species;
   std::vector<allo_pair> pairs;
 
   while (time < maximum_time)  {
     // verify_consistency(pop, extinct_species, "general_beforepairs");
-    iter ++;
 
-    float Pe = extinction_rate * pop.size();
+    double Pe = extinction_rate * pop.size();
 
-    float Ps = 0.0;
+    double Ps = 0.0;
 
     if (waterLevel == 0) Ps = sympatric_low_water  * pop.size();
     if (waterLevel == 1) Ps = sympatric_high_water * pop.size();
 
     if (waterLevel == 0) updatePairs2(pop, pairs); // low water
 
-    float Pa = (1 - waterLevel) * allopatric_spec_rate * (pairs.size() * 2);
+    double Pa = (1 - waterLevel) * allopatric_spec_rate * (pairs.size() * 2);
 
-    float rate = Pe + Ps + Pa;
+    double rate = Pe + Ps + Pa;
 
-    float timestep = rndgen.Expon(rate);
+    double timestep = rndgen.Expon(rate);
 
+    double prev_t = time;
     time += timestep;
 
     // verify_consistency(pop, extinct_species, "general_afterpairs");
-
-    if (time >= W[numberWlevelChanges] && (time-timestep) < W[numberWlevelChanges])
+    if (time >= W[numberWlevelChanges] && prev_t < W[numberWlevelChanges])
+    //if (time > W[numberWlevelChanges] && prev_t <= W[numberWlevelChanges])
     {
       time = W[numberWlevelChanges];
       numberWlevelChanges++;
@@ -414,7 +414,7 @@ int run(const std::vector<float>& parameters,
       if (time > maximum_time) break;
 
       int event_chosen = drawEvent(Pe, Ps, Pa, rndgen);
-      float time_of_previous_waterlevelchange = 0.0;
+      double time_of_previous_waterlevelchange = 0.0;
       if(numberWlevelChanges != 0)
         time_of_previous_waterlevelchange = W[numberWlevelChanges - 1];
 
@@ -422,7 +422,7 @@ int run(const std::vector<float>& parameters,
       {
         case 0:
           extinction(pop, extinct_species, time, waterLevel, rndgen);
-          numberExtinctions++;
+       //   numberExtinctions++;
           // verify_consistency(pop, extinct_species, "extinction");
           break;
         case 1:
@@ -495,7 +495,7 @@ void removeDuplicates(std::vector<T>& vec) {
   vec.erase(std::unique(vec.begin(), vec.end()), vec.end()); //species with an identical ID are removed (as we assume that they have had the same history)
 }
 
-species::species(const species& parent_species, int& id_count, float b_time) {
+species::species(const species& parent_species, int& id_count, double b_time) {
   ID = id_count;
   id_count++;
   death_time = -1;
@@ -506,9 +506,9 @@ species::species(const species& parent_species, int& id_count, float b_time) {
 
 
 void jiggle_species_vector( std::vector< species > & s,
-                            float focal_time,
-                            float maximum_time,
-                            float jiggle_amount,
+                            double focal_time,
+                            double maximum_time,
+                            double jiggle_amount,
                             rnd_t& rndgen) {
 
   for (auto brother = s.begin(); brother != s.end(); ++brother) {
@@ -527,8 +527,8 @@ void jiggle_species_vector( std::vector< species > & s,
         }
       }
 
-      float dist_to_upper = 1e6;
-      float dist_to_lower = maximum_time - (*brother).birth_time;
+      double dist_to_upper = 1e6;
+      double dist_to_lower = maximum_time - (*brother).birth_time;
 
       //find parent for upper limit
       //they both have the same parent, so we only have to check against one child
@@ -542,20 +542,20 @@ void jiggle_species_vector( std::vector< species > & s,
       //find youngest offspring for lower limit
       for (auto o = s.begin(); o != s.end(); ++o) {
         if ((*o).get_parent() == (*brother).get_ID()) {
-          float diff = (*o).birth_time - (*brother).birth_time;
+          double diff = (*o).birth_time - (*brother).birth_time;
           if(diff < dist_to_lower) dist_to_lower = diff;
         }
         if ((*o).get_parent() == (*sister).get_ID()) {
-          float diff = (*o).birth_time - (*sister).birth_time;
+          double diff = (*o).birth_time - (*sister).birth_time;
           if(diff < dist_to_lower) dist_to_lower = diff;
         }
       }
 
       //truncation should be shortest distance
-      float trunc = dist_to_lower;
+      double trunc = dist_to_lower;
       if(dist_to_upper < dist_to_lower) trunc = dist_to_upper;
 
-      float new_birth_time = focal_time + rndgen.trunc_norm_predif(trunc); //trunc_normal(0.0, jiggle_amount, trunc);
+      double new_birth_time = focal_time + rndgen.trunc_norm_predif(trunc); //trunc_normal(0.0, jiggle_amount, trunc);
       (*brother).birth_time = new_birth_time;
       (*sister).birth_time = new_birth_time;
 
@@ -576,12 +576,12 @@ void jiggle_species_vector( std::vector< species > & s,
 //new version
 void jiggle(std::vector< species > & s1,
             std::vector< species > & s2,
-            float maximum_time,
-            float jiggle_amount,
+            double maximum_time,
+            double jiggle_amount,
             rnd_t& rndgen) {
   //we have to identify all multiples
 
-  std::vector<float> b_times;
+  std::vector<double> b_times;
   for (auto it = s1.begin(); it != s1.end(); ++it) { //collect all branching times across both sides of the tree
     b_times.push_back((*it).birth_time);
   }
@@ -591,7 +591,7 @@ void jiggle(std::vector< species > & s1,
   std::sort(b_times.begin(), b_times.end()); //sort them (needed for remove_unique)
 
   //now we need to find those branching times that occur > 2 times
-  std::vector<float> focal_times;
+  std::vector<double> focal_times;
   int counter = 0;
   for (int i = 1; i < (int)b_times.size(); ++i) {
     if (b_times[i] == b_times[i-1]) {
@@ -606,7 +606,7 @@ void jiggle(std::vector< species > & s1,
 
   if (focal_times.size() > 0) {
     for (int i = 0; i < (int)focal_times.size(); ++i) {
-      float focal_time = focal_times[i];
+      double focal_time = focal_times[i];
 
       if (focal_time > 0) {
         jiggle_species_vector(s1, focal_time, maximum_time, jiggle_amount, rndgen); //jiggle all species with that time
@@ -619,38 +619,27 @@ void jiggle(std::vector< species > & s1,
 
 
 
-NumericMatrix create_l_table( const std::vector< species > & s1,
-                              const std::vector< species > & s2)
+ltab create_l_table(
+    const std::vector< species > & s1,
+    const std::vector< species > & s2)
 {
-  NumericMatrix output(s1.size() + s2.size(), 4);
-
-  NumericMatrix temp(s1.size(), 4);
+  ltab output(s1.size() + s2.size());
 
   int i = 0;
   for (auto it = s1.begin(); it != s1.end(); ++it, ++i) {
-    output(i, 0) = (*it).birth_time;
-    output(i, 1) = (*it).get_parent();
-    output(i, 2) = (*it).get_ID();
-    output(i, 3) = (*it).death_time;
-
-    temp(i, _) = output(i, _);
+    output[i][0] = (*it).birth_time;
+    output[i][1] = (*it).get_parent();
+    output[i][2] = (*it).get_ID();
+    output[i][3] = (*it).death_time;
   }
 
   // verify l_table
-  //verify_l_table(temp);
-
-
-  NumericMatrix temp2(s2.size(), 4);
   for (auto it = s2.begin(); it != s2.end(); ++it, ++i) {
-    output(i, 0) = (*it).birth_time;
-    output(i, 1) = -1 * ((*it).get_parent());
-    output(i, 2) = -1 * ((*it).get_ID());
-    output(i, 3) = (*it).death_time;
-
-    temp2(i - s1.size(), _) = output(i, _);
+    output[i][0] = (*it).birth_time;
+    output[i][1] = -1 * ((*it).get_parent());
+    output[i][2] = -1 * ((*it).get_ID());
+    output[i][3] = (*it).death_time;
   }
-
-  //verify_l_table2(temp2);
 
   return output;
 }
@@ -660,16 +649,16 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
 
 /*
 
- float max_l_table(const  NumericMatrix& v) {
- float max = -1.f;
+ double max_l_table(const  NumericMatrix& v) {
+ double max = -1.f;
  for(int i = 0; i < v.size(); ++i) {
  if(v(i, 2) > max) max = v(i, 2);
  }
  return max;
  }
 
- float min_l_table(const  NumericMatrix& v) {
- float min = 1e6f;
+ double min_l_table(const  NumericMatrix& v) {
+ double min = 1e6f;
  for(int i = 0; i < v.size(); ++i) {
  if(v(i, 2) < min) min = v(i, 2);
  }
@@ -677,7 +666,7 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
  }
 
  int which_min_l_table(const  NumericMatrix& v) {
- float min = min_l_table(v);
+ double min = min_l_table(v);
  for(int i = 0; i < v.size(); ++i) {
  if(v(i, 2) == min) {
  return i;
@@ -687,7 +676,7 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
  }
 
  int which_max_l_table(const  NumericMatrix& v) {
- float max = max_l_table(v);
+ double max = max_l_table(v);
  for(int i = 0; i < v.size(); ++i) {
  if(v(i, 2) == max) {
  return i;
@@ -697,7 +686,7 @@ NumericMatrix create_l_table( const std::vector< species > & s1,
  }
 
  int which_l_table(const  NumericMatrix& v,
- float x) {
+ double x) {
  for(int i = 0; i < v.size(); ++i) {
  if(v(i, 2) == x) {
  return i;

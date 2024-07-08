@@ -1,0 +1,29 @@
+// c_cpp_properties.json
+//
+// C/C++ extension config file
+// Some settings to augment IntelliSense for C/C++ files
+{
+    "configurations": [
+        {
+            "name": "Linux gdb",
+            "includePath": [
+                // recurse into workspace, picks up ./src/ and ./inst/include/ 
+                "${workspaceFolder}/**",
+                // R headers
+                "/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/",
+                // includes used by our package
+                "/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/include/",
+                // boost: "${env:HOME}/opt/bin/Rlibrary/BH/include"
+                "/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/"
+            ],
+            "defines": [],
+            // absolute path to compiler
+            "compilerPath": "/usr/bin/gcc",
+            // "compilerPath": "/usr/bin/clang"
+            "cStandard": "c11",
+            // should match [[Rcpp::plugins(cpp17)]]
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

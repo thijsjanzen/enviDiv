@@ -13,7 +13,7 @@ calc_sum_stats(focal_tree)
 summary statistics.}
 }
 \value{
-vector of 8 summary statistics
+vector of 70 summary statistics
 }
 \description{
 calculate summary statistics for a focal tree. The following summary
