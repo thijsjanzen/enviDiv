@@ -9,7 +9,8 @@
 
 //' simulate a tree using environmental diversification
 //' @param model chosen model
-//' @param parameters a vector of parameters
+//' @param parameters a vector of parameters in order: [extinction,
+//' sym_spec_high, sym_spec_low, allo_spec, perturbance, water_rate, model]
 //' @param crown_age crown age of the tree to be simulated
 //' @param min_lin minimum number of lineages
 //' @param max_lin maximum number of lineages

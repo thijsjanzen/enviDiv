@@ -28,6 +28,10 @@ calculate_weight <- function(weights,
     cat(numerator, vals, current,"\n")
   }
 
+  #if (numerator == 0) {
+  #  cat(numerator, vals, current, "\n")
+  #}
+
   return(numerator / sum(vals))
 }
 
@@ -58,17 +62,18 @@ calculate_weight <- function(weights,
 #'   parameter inference and model selection in dynamical systems.
 #'   Journal of the Royal Society Interface, 6(31), 187-202.
 #' @export
-abc_smc <- function(
-  ref_tree,
-  statistics,
-  simulation_function,
-  init_epsilon_value,
-  prior_generating_function,
-  prior_density_function,
-  number_of_particles = 1000,
-  sigma = 0.05,
-  stop_rate = 1e-5,
-  num_iterations = 50
+abc_smc_par <- function(
+    ref_tree,
+    statistics,
+    simulation_function,
+    init_epsilon_value,
+    prior_generating_function,
+    prior_density_function,
+    number_of_particles = 1000,
+    sigma = 0.05,
+    stop_rate = 1e-5,
+    num_iterations = 50,
+    num_threads = 1
 ) {
   if (!inherits(ref_tree, "phylo")) {
     # Just checking
@@ -105,16 +110,16 @@ abc_smc <- function(
 
   all_res <- list()
   all_wlevel <- list()
+  all_weights <- list()
 
   # first we do the initial generation from the prior
   cat("\nGenerating from the prior\n")
   new_params <- enviDiv::initial_draw_from_prior(num_particles = number_of_particles,
-                                        crown_age = treestats::crown_age(ref_tree),
-                                        min_lin = 5,
-                                        max_lin = 500,
-                                        verbose = TRUE)
+                                                 crown_age = treestats::crown_age(ref_tree),
+                                                 min_lin = 5,
+                                                 max_lin = 500,
+                                                 verbose = TRUE)
   new_weights <- rep(1, number_of_particles)
-
 
   for (gen in 2:num_iterations) {
     cat("\nGenerating Particles for iteration\t", gen, "\n")
@@ -139,101 +144,134 @@ abc_smc <- function(
     }
 
     stoprate_reached <- FALSE
-
     while (number_accepted < number_of_particles) {
 
-      #in this initial step, generate parameters from the prior
-      if (gen == 1) {
-        parameters <- prior_generating_function()
-      } else {
-        #if not in the initial step, generate parameters
-        #from the weighted previous distribution:
-        index <- sample(x = indices, size = 1,
-                        replace = TRUE, prob = previous_weights)
+      block_size <- number_of_particles - number_accepted
+      if (tried > 0 && number_accepted > 0)
+        block_size <- block_size * tried / number_accepted # 1 / (number_accepted / tried)
 
-        parameters <- previous_params[index, ]
+      block_size <- floor(block_size)
 
-        #only perturb one parameter, to avoid extremely
-        #low acceptance rates due to simultaneous perturbation
-        to_change <- sample(seq_along(parameters), 1)
+      #cat("\n", block_size, "\n")
 
-        # perturb the parameter a little bit,
-        #on log scale, so parameter doesn't go < 0
-        if (to_change != 7) {
-          eta <- log(parameters[to_change]) + stats::rnorm(1, 0, sigma)
-          parameters[to_change] <- exp(eta)
+      new_parameters <- list()
+      for (np in 1:block_size) {
+        if (gen == 1) {
+          new_parameters[[np]] <- prior_generating_function()
         } else {
-          all_models <- 1:4
-          prev_model <- parameters[to_change]
-          all_models <- all_models[-prev_model]
-          parameters[to_change] <- sample(all_models, size = 1)
+          #if not in the initial step, generate parameters
+          #from the weighted previous distribution:
+          index <- sample(x = indices, size = 1,
+                          replace = TRUE, prob = previous_weights)
+
+          parameters <- previous_params[index, ]
+
+          #only perturb one parameter, to avoid extremely
+          #low acceptance rates due to simultaneous perturbation
+          to_change <- sample(seq_along(parameters), 1)
+
+          # perturb the parameter a little bit,
+          #on log scale, so parameter doesn't go < 0
+          if (to_change != 7) {
+            eta <- log(parameters[to_change]) + stats::rnorm(1, 0, sigma)
+            parameters[to_change] <- exp(eta)
+          } else {
+            all_models <- 1:4
+            prev_model <- parameters[to_change]
+            all_models <- all_models[-prev_model]
+            parameters[to_change] <- sample(all_models, size = 1)
+          }
+          new_parameters[[np]] <- parameters
         }
       }
 
-      #reject if outside the prior
-      if (prior_density_function(parameters) > 0) {
-        #simulate a new tree, given the proposed parameters
+      process_particle <- function(parameters) {
+        pd <- prior_density_function(parameters)
+        if (prior_density_function(parameters) < 0) {
+          return(list(parameters = NA,
+                      water = NA,
+                      accept = "prior_dens"))
+        }
+
+        out <- list(parameters = NA,
+                    water = NA,
+                    accept = "UNSET")
+
         new_data <- simulation_function(parameters)
         new_tree <- new_data$phy
 
         if (inherits(new_tree, "phylo")) {
 
-          accept <- TRUE
+          local_accept <- TRUE
           for (s in 1:length(statistics)) {
             local_s <- statistics[[s]](new_tree)
             if (length(local_s) > 1) {
-                local_s <- unlist(local_s)
+              local_s <- unlist(local_s)
             }
             diff <- local_s - obs_statistics[[s]]
             rel_diff <- (diff * diff) / abs(obs_statistics[[s]])
             misses <- rel_diff > epsilon[gen]
             if (sum(misses, na.rm = TRUE) > 0) {
-              accept <- FALSE
+              local_accept <- FALSE
+              out$accept <- paste0("miss_",s,"_",rel_diff)
               break
             }
           }
 
-
-
-          if (1 == 2) {
-            stats <- statistics(new_tree)
-            #check if the summary statistics are sufficiently
-            #close to the observed summary statistics
-            #
-            accept <- TRUE
-            if (gen > 1) {
-              diff <- stats - obs_statistics
-              rel_diff <- (diff * diff) / abs(obs_statistics)
-              misses <- rel_diff > epsilon[gen]
-
-              if (sum(misses, na.rm = TRUE) > 0) accept <- FALSE
-            }
+          if (local_accept == TRUE) {
+            out <- list(parameters = parameters,
+                        water = new_data$water,
+                        accept = "TRUE")
           }
+        } else {
+          out$accept <- "NO_TREE"
+        }
+        return(out)
+      }
 
-          if (accept) {
-            number_accepted <- number_accepted + 1
-            new_params[number_accepted, ] <- parameters
+      # res <- lapply(new_parameters, process_particle)
+      res <- parallel::mclapply(new_parameters, process_particle,
+                                mc.cores = num_threads)
+      #res <- pbmcapply::pbmclapply(new_parameters, process_particle,
+      #                             mc.cores = num_threads)
+      #res <- list()
+      #for (r in 1:length(new_parameters)) {
+      #  res[[r]] <- process_particle(new_parameters[[r]])
+      #}
+
+
+      for (l in 1:length(res)) {
+        if (res[[l]]$accept == "TRUE") {
+          number_accepted <- number_accepted + 1
+          if (number_accepted <= number_of_particles) {
+            # sometimes, the loop accepted too much, so we have to discard some
+            # results
+            new_params[number_accepted, ] <- res[[l]]$parameters
             accepted_weight <- 1
-            water_levels[[number_accepted]] <- new_data$water
+            water_levels[[number_accepted]] <- res[[l]]$water
             #calculate the weight
             if (gen > 1) {
               accepted_weight <- calculate_weight(previous_weights,
-                                                  previous_params, parameters,
-                                                  sigma, prior_density_function)
+                                                  previous_params,
+                                                  res[[l]]$parameters,
+                                                  sigma,
+                                                  prior_density_function)
             }
             new_weights[number_accepted] <- accepted_weight
-
             if ((number_accepted) %%
                 (number_of_particles / print_frequency) == 0) {
               cat("**")
               utils::flush.console()
             }
+          } else {
+            # we are done.
+            break
           }
         }
       }
 
       #convergence if the acceptance rate gets too low
-      tried <- tried + 1
+      tried <- tried + block_size
       if (tried > (1 / stop_rate)) {
         if ((number_accepted / tried) < stop_rate) {
           stoprate_reached <- TRUE
@@ -244,6 +282,7 @@ abc_smc <- function(
 
     all_res[[gen - 1]] <- previous_params
     all_wlevel[[gen]] <- water_levels
+    all_weights[[gen]] <- new_weights
 
     if (stoprate_reached) {
       break
@@ -254,7 +293,8 @@ abc_smc <- function(
   all_wlevel[[length(all_wlevel) + 1]] <- water_levels
 
   return(list("all_parameters" = all_res,
-              "all_water" = all_wlevel))
+              "all_water" = all_wlevel,
+              "all_weights" = all_weights))
 }
 
 

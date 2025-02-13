@@ -9,7 +9,7 @@ sim_envidiv_cpp(model, parameters, crown_age, max_lin)
 \arguments{
 \item{model}{chosen model}
 
-\item{parameters}{a vector of four parameters}
+\item{parameters}{a vector of parameters}
 
 \item{crown_age}{crown age of the tree to be simulated}
 

@@ -4,12 +4,14 @@
 \alias{get_waterlevel_cpp}
 \title{draw water level change2}
 \usage{
-get_waterlevel_cpp(water_model, maximum_time)
+get_waterlevel_cpp(water_model, maximum_time, rate = 10)
 }
 \arguments{
 \item{water_model}{water model}
 
 \item{maximum_time}{crown age}
+
+\item{water}{level change rate per MY, default is 10}
 }
 \value{
 water level changes

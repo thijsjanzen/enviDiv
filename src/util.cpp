@@ -7,20 +7,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-std::vector<double> parameters_from_prior(rnd_t& rndgen_,
-                                         int model) {
-  std::vector<double> output(7, 0.f);
 
-  output[param_type::extinction_rate] = powf(10, (-3 + 5 * rndgen_.uniform()));  // extinction
-  output[param_type::sym_high_rate]   = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec high
-  output[param_type::sym_low_rate]    = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec low
-  output[param_type::allo_rate]       = powf(10, (-3 + 5 * rndgen_.uniform()));  // allo spec
-  output[param_type::wobble_rate]     = powf(10, (-3 + 3 * rndgen_.uniform()));  // jiggle
-  output[param_type::water_rate]      = powf(10, (-2 + 5 * rndgen_.uniform()));  // water rate
-  output[param_type::model]           = model; // model
-
-  return(output);
-}
 
 std::vector<double> parameters_from_prior(rnd_t& rndgen_) {
   std::vector<double> output(7, 0.f);
@@ -30,8 +17,16 @@ std::vector<double> parameters_from_prior(rnd_t& rndgen_) {
   output[param_type::sym_low_rate]    = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec low
   output[param_type::allo_rate]       = powf(10, (-3 + 5 * rndgen_.uniform()));  // allo spec
   output[param_type::wobble_rate]     = powf(10, (-3 + 3 * rndgen_.uniform()));  // jiggle
-  output[param_type::water_rate]      = powf(10, (-2 + 5 * rndgen_.uniform()));  // water rate
+  output[param_type::water_rate]      = powf(10, ( 0 + 3 * rndgen_.uniform()));  // water rate
   output[param_type::model]           = 1 + rndgen_.random_number(4); // model
+
+  return(output);
+}
+
+std::vector<double> parameters_from_prior(rnd_t& rndgen_,
+                                          int model) {
+  std::vector<double> output = parameters_from_prior(rndgen_);
+  output[param_type::model] = model;
 
   return(output);
 }

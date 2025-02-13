@@ -28,4 +28,5 @@ Imports:
     future.apply,
     progressr,
     treestats,
-    pbmcapply
+    pbmcapply,
+    parallel
