@@ -15,8 +15,9 @@
 
 enum param_type {extinction_rate, sym_high_rate, sym_low_rate, allo_rate, wobble_rate, water_rate, model};
 
-std::vector<double> param_from_prior_cpp();
-std::vector<double> param_from_prior_exp_cpp();
+std::vector<double> param_from_prior_cpp(int model);
+std::vector<double> param_from_prior_exp_cpp(int model);
+
 std::vector<double> get_waterlevel_cpp(int water_model,
                                       double maximum_time);
 

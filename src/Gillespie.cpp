@@ -5,7 +5,7 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
-/*
+
 //' simulate a tree using environmental diversification
 //' @param parameters a vector of the four paramaters of the model
 //' @param waterlevel_changes a vector that indicates the time points of water level changes
@@ -17,15 +17,13 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 List create_tree_cpp(std::vector<double> parameters,
                      std::vector<double> waterlevel_changes,
-                     int seed,
                      double crown_age,
                      int max_lin) {
   // read parameter values
 
   rnd_t rndgen;
-  rndgen.set_seed(seed);
 
-  NumericMatrix l_table;
+  std::vector< std::array<double, 4>> l_table;
 
   std::string code = do_run_r(parameters,
                               waterlevel_changes,
@@ -34,9 +32,17 @@ List create_tree_cpp(std::vector<double> parameters,
                               l_table,
                               rndgen);
 
+  Rcpp::NumericMatrix l_table_out(l_table.size(), 4);
+  for (size_t i = 0; i < l_table.size(); ++i) {
+    for (size_t j = 0; j < 4; ++j) {
+      l_table_out(i, j) = l_table[i][j];
+    }
+  }
+
+
   return List::create( Named("code") = code,
-                       Named("Ltable") = l_table);
-}*/
+                       Named("Ltable") = l_table_out);
+}
 
 
 std::string do_run_r(const std::vector<double>& parameters,

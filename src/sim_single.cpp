@@ -99,8 +99,8 @@ Rcpp::NumericMatrix initial_draw_from_prior(int num_particles,
 
         while(num_accepted < num_particles_per_model) {
 
-            auto parameters = param_from_prior_cpp();
-            parameters[param_type::model] = model;
+            auto parameters = param_from_prior_cpp(model);
+            // parameters[param_type::model] = model;
 
             auto rate = parameters[ param_type::water_rate];
 

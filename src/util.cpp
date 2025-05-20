@@ -115,11 +115,13 @@ std::vector<double> get_waterlevel_changes(int water_model,
 //' perturbation, the chosen water model
 //' @export
 // [[Rcpp::export]]
-std::vector<double> param_from_prior_cpp() {
+std::vector<double> param_from_prior_cpp(int model = -1) {
 
   rnd_t rndgen;
 
   std::vector<double> output = parameters_from_prior(rndgen);
+
+  if (model >= 0) output[param_type::model] = model;
 
   return(output);
 }
@@ -130,10 +132,10 @@ std::vector<double> param_from_prior_cpp() {
 //' perturbation, the chosen water model
 //' @export
 // [[Rcpp::export]]
-std::vector<double> param_from_prior_exp_cpp() {
+std::vector<double> param_from_prior_exp_cpp(int model = -1) {
   rnd_t rndgen;
 
-  std::vector<double> output(6, 0.f);
+  std::vector<double> output(7, 0.f);
   output[param_type::extinction_rate] = rndgen.Expon(0.05); // extinction
   output[param_type::sym_high_rate] = rndgen.Expon(0.1);  // symp spec high
   output[param_type::sym_low_rate] = rndgen.Expon( 0.1);  // symp spec low
@@ -141,6 +143,8 @@ std::vector<double> param_from_prior_exp_cpp() {
   output[param_type::wobble_rate] = rndgen.Expon( 0.05);  // jiggle
   output[param_type::water_rate] = rndgen.Expon(10); // water rate
   output[param_type::model] = 1 + rndgen.random_number(4);
+
+  if (model >= 0) output[param_type::model] = model;
 
   return(output);
 }

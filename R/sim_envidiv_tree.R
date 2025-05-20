@@ -29,17 +29,11 @@ sim_envidiv_tree <- function(params,
     warning("crown age should be larger than zero\n")
     return(NULL)
   }
-  seed <- round(as.numeric(seed))
-  if (is.null(seed) || is.na(seed) || length(seed) == 0)
-    seed <- as.numeric(Sys.time())
-
-  set.seed(round(as.numeric(seed)))
 
   water_changes <- generate_water(params[6], crown_age)
 
   sim_result <- create_tree_cpp(params,
                                 water_changes,
-                                seed,
                                 crown_age,
                                 max_lin)
 
@@ -56,7 +50,7 @@ sim_envidiv_tree <- function(params,
   }
 
   phy_tree <- enviDiv::sim_table_to_phy(sim_result$Ltable,
-                               crown_age)
+                                        crown_age)
 
   return(phy_tree)
 }

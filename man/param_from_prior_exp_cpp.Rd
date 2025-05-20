@@ -4,7 +4,7 @@
 \alias{param_from_prior_exp_cpp}
 \title{draw parameter combinations from the prior}
 \usage{
-param_from_prior_exp_cpp()
+param_from_prior_exp_cpp(model = -1L)
 }
 \value{
 vector with 6  entries: extinction, sympatric speciation at high

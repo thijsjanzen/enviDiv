@@ -16,26 +16,25 @@
 #' @param crown_age crown age
 #' @param write_to_file boolean, if TRUE, results are written to file.
 #' @param file_name file name
+#' @param num_threads number of threads
 #' @return a tibble containing the results
 #' @export
 generate_stack <- function(number_of_replicates = 1000,
-                           parameters = NULL,
+                           use_exp_prior = FALSE,
+                           focal_model = 1,
                            min_tips = 50,
                            max_tips = 150,
                            emp_tree = NULL,
                            crown_age = NULL,
                            write_to_file = FALSE,
-                           file_name = NULL) {
+                           file_name = NULL,
+                           num_threads = 1) {
 
   if (!is.null(emp_tree)) {
     crown_age <- max(ape::branching.times(emp_tree))
   }
   if (is.null(crown_age)) {
     stop("Please either provide a reference tree, or provide the crown age")
-  }
-
-  if (is.null(parameters)) {
-    parameters <- enviDiv::param_from_prior()
   }
 
   number_accepted <- 0
@@ -47,15 +46,21 @@ generate_stack <- function(number_of_replicates = 1000,
     cat(remaining_particles, "\n")
     sample_size <- max(1000, remaining_particles) #increase if not testing
 
-    param_matrix <- matrix(parameters,
-                           nrow = sample_size,
-                           ncol = 7, byrow = T)  #6 parameters
+    candidate_particles <- list()
 
-    candidate_particles <- param_matrix
+    for (i in 1:sample_size) {
+      if (use_exp_prior) {
+        candidate_particles[[i]] <- param_from_prior_exp_cpp(focal_model)
+      } else {
+        candidate_particles[[i]] <- param_from_prior_cpp(focal_model)
+      }
+    }
 
+    dummy_tree <- ape::rphylo(n = 10, birth = 1, death = 0)
+    dummy_stats <- treestats::calc_all_stats(dummy_tree)
 
-    calc_tree_stats <- function(x) {
-      stats <- rep(Inf, 15)
+    calc_tree_and_stats <- function(x) {
+      stats <- rep(NA, length(dummy_stats))
 
       found_tree <- c()
       if (x[6] == 4) {
@@ -78,32 +83,37 @@ generate_stack <- function(number_of_replicates = 1000,
       }
 
       if (is.null(found_tree)) {
-        return(stats)
+        return(c(x, stats))
       }
 
-      num_tips <- found_tree$Nnode + 1
+      num_tips <- treestats::number_of_lineages(found_tree)
 
       if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- enviDiv::calc_sum_stats(found_tree, emp_tree)
+        stats <- treestats::calc_all_stats(found_tree)
       }
-      return(stats)
+      return(c(x, as.vector(stats)))
     }
 
-    input <- lapply(seq_len(nrow(candidate_particles)),
-                    function(i) candidate_particles[i, ])
 
-    stats <- future.apply::future_lapply(input, calc_tree_stats)
+    res <- list()
+    if (num_threads == 1) {
 
-    stat_matrix <- matrix(unlist(stats, use.names = FALSE),
-                          ncol = 15,
+      for (i in 1:length(candidate_particles)) {
+        res[[i]] <- calc_tree_and_stats(candidate_particles[[i]])
+      }
+    } else {
+      res <- parallel::mclapply(candidate_particles, calc_tree_and_stats,
+                                mc.cores = num_threads,
+                                mc.preschedule = FALSE)
+    }
+
+    results <- matrix(unlist(res, use.names = FALSE),
+                          ncol = length(dummy_stats) + length(candidate_particles[[1]]), # 7 parameters
                           byrow = TRUE)
 
-    results <- cbind(candidate_particles, stat_matrix)
+    results <- results[!is.na(results[, 8]), ]
 
-    stat_matrix <- stat_matrix[!is.infinite(results[, 8]), ]
-    results <- results[!is.infinite(results[, 8]), ]
-
-    if (length(stat_matrix) > 0) {
+    if (length(results) > 0) {
 
       num_local_accepted <- nrow(results)
       if (!is.null(num_local_accepted)) {
@@ -113,10 +123,8 @@ generate_stack <- function(number_of_replicates = 1000,
         colnames(results) <-
           c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
             "weight",
-            "nltt", "gamma", "mbr", "num_lin",
-            "beta", "colless", "sackin", "ladder", "cherries", "ILnumber",
-            "pitchforks", "stairs",
-            "spectr_eigen", "spectr_asymmetry", "spectr_peakedness")
+            names(dummy_stats))
+
         results <- tibble::as_tibble(results)
         if (write_to_file) {
           readr::write_tsv(results, path = file_name,
