@@ -115,7 +115,10 @@ sim_envidiv_tree2 <- function(params,
               "ltable" = sim_result$Ltable))
 }
 
-#' @keywords internal
+#' correct ltable
+#' @param input_matrix ltable
+#' @param crown_age age
+#' @keywords export
 correct_ltable_internal <- function(input_matrix, crown_age) {
   local_l_table <- input_matrix
   local_l_table <- local_l_table[order(local_l_table[, 1]), 1:4]

@@ -12,3 +12,6 @@ crown_age <- 3
 found_tree <- enviDiv::sim_envidiv_tree_new(params = params,
                                             crown_age = crown_age,
                                             max_lin = 500)
+plot(found_tree$phy)
+found_tree$ltable
+tab2 <- correct_ltable_internal(found_tree$ltable, crown_age)
