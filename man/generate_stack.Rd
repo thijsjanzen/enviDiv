@@ -13,7 +13,8 @@ generate_stack(
   emp_tree = NULL,
   crown_age = NULL,
   write_to_file = FALSE,
-  file_name = NULL
+  file_name = NULL,
+  num_threads = 1
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ the SMC algorithm}
 \item{write_to_file}{boolean, if TRUE, results are written to file.}
 
 \item{file_name}{file name}
+
+\item{num_threads}{number of threads}
 
 \item{parameters}{parameters, a vector with:
 1) extinction rate,

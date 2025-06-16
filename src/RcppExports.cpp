@@ -11,13 +11,13 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // create_tree_cpp
-List create_tree_cpp(std::vector<double> parameters, std::vector<double> waterlevel_changes, double crown_age, int max_lin);
+List create_tree_cpp(const std::vector<double>& parameters, const std::vector<double>& waterlevel_changes, double crown_age, int max_lin);
 RcppExport SEXP _enviDiv_create_tree_cpp(SEXP parametersSEXP, SEXP waterlevel_changesSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type parameters(parametersSEXP);
-    Rcpp::traits::input_parameter< std::vector<double> >::type waterlevel_changes(waterlevel_changesSEXP);
+    Rcpp::traits::input_parameter< const std::vector<double>& >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< const std::vector<double>& >::type waterlevel_changes(waterlevel_changesSEXP);
     Rcpp::traits::input_parameter< double >::type crown_age(crown_ageSEXP);
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     rcpp_result_gen = Rcpp::wrap(create_tree_cpp(parameters, waterlevel_changes, crown_age, max_lin));
@@ -77,6 +77,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
     rcpp_result_gen = Rcpp::wrap(sq_numbers_cpp_tbb(n, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sim_envidiv2_cpp
+Rcpp::List sim_envidiv2_cpp(std::vector<double> parameters, double crown_age, int max_lin);
+RcppExport SEXP _enviDiv_sim_envidiv2_cpp(SEXP parametersSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< double >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_envidiv2_cpp(parameters, crown_age, max_lin));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -151,6 +164,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_ref_table_tbb_serial", (DL_FUNC) &_enviDiv_create_ref_table_tbb_serial, 6},
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},
     {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
+    {"_enviDiv_sim_envidiv2_cpp", (DL_FUNC) &_enviDiv_sim_envidiv2_cpp, 3},
     {"_enviDiv_sim_envidiv_cpp", (DL_FUNC) &_enviDiv_sim_envidiv_cpp, 4},
     {"_enviDiv_initial_draw_from_prior", (DL_FUNC) &_enviDiv_initial_draw_from_prior, 5},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 1},

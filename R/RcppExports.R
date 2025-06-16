@@ -57,6 +57,10 @@ sq_numbers_cpp_tbb <- function(n, num_threads) {
     .Call('_enviDiv_sq_numbers_cpp_tbb', PACKAGE = 'enviDiv', n, num_threads)
 }
 
+sim_envidiv2_cpp <- function(parameters, crown_age, max_lin) {
+    .Call('_enviDiv_sim_envidiv2_cpp', PACKAGE = 'enviDiv', parameters, crown_age, max_lin)
+}
+
 #' simulate a tree using environmental diversification
 #' @param model chosen model
 #' @param parameters a vector of parameters in order: [extinction,

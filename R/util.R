@@ -2,6 +2,7 @@
 #' @param L ltable
 #' @param dropextinct drop extinct
 #' @return newick
+#' @rawNamespace import(Rcpp)
 #' @rawNamespace useDynLib(enviDiv)
 #' @rawNamespace importFrom(RcppParallel, RcppParallelLibs)
 #' @export

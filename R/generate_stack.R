@@ -41,10 +41,14 @@ generate_stack <- function(number_of_replicates = 1000,
   remaining_particles <- number_of_replicates - number_accepted
 
   all_results <- c()
+  accept_rate <- 1
+  num_tried <- 0
+
+  first_run <- 1
 
   while (remaining_particles > 0) {
-    cat(remaining_particles, "\n")
-    sample_size <- max(1000, remaining_particles) #increase if not testing
+    sample_size <- remaining_particles * 1 / accept_rate
+    cat(remaining_particles, " ", sample_size, "\n")
 
     candidate_particles <- list()
 
@@ -97,14 +101,13 @@ generate_stack <- function(number_of_replicates = 1000,
 
     res <- list()
     if (num_threads == 1) {
-
       for (i in 1:length(candidate_particles)) {
         res[[i]] <- calc_tree_and_stats(candidate_particles[[i]])
       }
     } else {
       res <- parallel::mclapply(candidate_particles, calc_tree_and_stats,
                                 mc.cores = num_threads,
-                                mc.preschedule = FALSE)
+                                mc.preschedule = TRUE)
     }
 
     results <- matrix(unlist(res, use.names = FALSE),
@@ -112,6 +115,8 @@ generate_stack <- function(number_of_replicates = 1000,
                           byrow = TRUE)
 
     results <- results[!is.na(results[, 8]), ]
+
+    num_tried <- num_tried + sample_size
 
     if (length(results) > 0) {
 
@@ -121,19 +126,27 @@ generate_stack <- function(number_of_replicates = 1000,
 
         remaining_particles <- number_of_replicates - number_accepted
         colnames(results) <-
-          c("extinct", "sym_high", "sym_low", "allo", "jiggle", "model",
-            "weight",
+          c("extinct", "sym_high", "sym_low", "allo", "jiggle", "water_rate", "model",
             names(dummy_stats))
 
         results <- tibble::as_tibble(results)
         if (write_to_file) {
-          readr::write_tsv(results, path = file_name,
-                           append = TRUE)
+
+          if (first_run == 1) {
+            readr::write_tsv(results, file = file_name, col_names = TRUE)
+            first_run <- 0
+          } else {
+            readr::write_tsv(results, file = file_name,
+                             append = TRUE)
+          }
+
         } else {
           all_results <- rbind(all_results, results)
         }
       }
     }
+    accept_rate <- (1 + number_accepted) / num_tried
+
   }
   return(all_results)
 }

@@ -2,6 +2,7 @@
 #include <cmath>
 #include "random_thijs.h"
 #include <string>
+#include <array>
 
 #include <Rcpp.h>
 using namespace Rcpp;
@@ -15,12 +16,11 @@ using namespace Rcpp;
 //' @return newick string
 //' @export
 // [[Rcpp::export]]
-List create_tree_cpp(std::vector<double> parameters,
-                     std::vector<double> waterlevel_changes,
+List create_tree_cpp(const std::vector<double>& parameters,
+                     const std::vector<double>& waterlevel_changes,
                      double crown_age,
                      int max_lin) {
   // read parameter values
-
   rnd_t rndgen;
 
   std::vector< std::array<double, 4>> l_table;
@@ -98,8 +98,8 @@ std::string do_run_r(const std::vector<double>& parameters,
 int drawEvent(double E, double S, double A, rnd_t& rndgen) {
   // this is a rather naive implementation
   // but for such a low number of events it suffices.
-  double sum = E + S + A;
-  double events[3] = {E/sum, S/sum, A/sum};
+  auto sum = E + S + A;
+  std::array<double, 3> events = {E/sum, S/sum, A/sum};
   double r = rndgen.uniform();
   for (int i = 0; i < 3; ++i) {
     r -= events[i];
@@ -139,7 +139,7 @@ void extinction(std::vector<species>& v,
 
   if (wLevel == 0) { //low water level, there might be two instances of the same species
     std::vector< int > indices; // not used here
-    bool no_other_instance_in_other_pocket = onlyInstance(v,i, indices);
+    bool no_other_instance_in_other_pocket = onlyInstance(v, i, indices);
 
     if(no_other_instance_in_other_pocket) extinct_species.push_back(v[i]);
   }

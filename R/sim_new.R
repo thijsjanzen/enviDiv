@@ -1,0 +1,48 @@
+#' simulate a tree using the environmental diversification model
+#' @param params parameters used to simulate:
+#' \itemize{
+#'   \item{extinction}{per lineage extinction rate}
+#'   \item{sympatric speciation rate at high water}{per lineage rate of
+#'   speciation when the water level is high}
+#'   \item{sympatric speciation rate at low water}{per lineage rate of
+#'   speciation when the water level is low}
+#'   \item{allopatric speciation rate}{per allopatric pair rate of speciation}
+#'   \item{perturbation}{standard deviation of post-hoc
+#'                       branching time perturbation}
+#'   \item{water model}{Water model: 1) no water level changes, 2) literature
+#'                     water level change, 3) extrapolated water level changes}
+#' }
+#' @param crown_age age of the crown of the tree
+#' @param max_lin maximum number of extant lineages in the tree.
+#' @return phy object
+#' @export
+sim_envidiv_tree_new <- function(params,
+                                 crown_age,
+                                 max_lin = 500) {
+
+  if (crown_age < 0) {
+    warning("crown age should be larger than zero\n")
+    return(NULL)
+  }
+
+  sim_result <- sim_envidiv2_cpp(params,
+                                 crown_age,
+                                 max_lin)
+
+  error_code <- sim_result$code
+
+  phy_tree <- NULL
+ sim_result$Ltable[, 1] <- crown_age - sim_result$Ltable[, 1]
+    not_min1 <- which(sim_result$Ltable[, 4] != -1)
+    sim_result$Ltable[not_min1, 4] <- crown_age - sim_result$Ltable[not_min1, 4]
+
+  if (error_code == "done") {
+    phy_tree <- treestats::l_to_phylo(sim_result$Ltable,
+                                      TRUE)
+  }
+
+  return(list("phy" = phy_tree,
+              "water" = sim_result$water_changes,
+              "error_code" = error_code,
+              "ltable" = sim_result$Ltable))
+}

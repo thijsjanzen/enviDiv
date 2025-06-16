@@ -11,11 +11,7 @@ struct rnd_t {
     rndgen = rndgen_t;
   }
 
-  std::uniform_real_distribution<float> unif_dist =
-    std::uniform_real_distribution<float>(0.0f, 1.0f);
 
-  std::normal_distribution<float> norm_dist_trunc =
-    std::normal_distribution<float>(0.0f, 0.1f);
 
   int random_number(int n)    {
     if(n <= 1) return 0;
@@ -64,6 +60,17 @@ struct rnd_t {
     return output;
   }
 
+  double uniform(double min, double max) {
+    std::uniform_real_distribution<double> d(min, max);
+    return d(rndgen);
+  }
+
+private:
+ std::uniform_real_distribution<float> unif_dist =
+  std::uniform_real_distribution<float>(0.0f, 1.0f);
+
+  std::normal_distribution<float> norm_dist_trunc =
+    std::normal_distribution<float>(0.0f, 0.1f);
 };
 
 
