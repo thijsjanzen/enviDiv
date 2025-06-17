@@ -4,7 +4,7 @@
 \alias{sim_envidiv_tree_new}
 \title{simulate a tree using the environmental diversification model}
 \usage{
-sim_envidiv_tree_new(params, crown_age, max_lin = 500)
+sim_envidiv_tree_new(params, model, crown_age, max_lin = 500, seed = -1)
 }
 \arguments{
 \item{params}{parameters used to simulate:
@@ -17,9 +17,11 @@ sim_envidiv_tree_new(params, crown_age, max_lin = 500)
   \item{allopatric speciation rate}{per allopatric pair rate of speciation}
   \item{perturbation}{standard deviation of post-hoc
                       branching time perturbation}
-  \item{water model}{Water model: 1) no water level changes, 2) literature
-                    water level change, 3) extrapolated water level changes}
+  \item{water rate}{rate of water level change if model = 4 (see below)}
 }}
+
+\item{model}{Water model: 1) no water level changes, 2) literature water level change, 
+3) extrapolated water level changes, 4) using random rates, until literature values.}
 
 \item{crown_age}{age of the crown of the tree}
 

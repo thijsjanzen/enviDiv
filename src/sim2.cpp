@@ -1,5 +1,5 @@
 #include "sim2.h"
-#include "util.h"
+
 
  //' simulate a tree using environmental diversification
  //' @param model chosen model
@@ -11,23 +11,19 @@
  //' @export
  // [[Rcpp::export]]
  Rcpp::List sim_envidiv2_cpp(std::vector<double> parameters,
+                             int model,
                              double crown_age,
-                             int max_lin) {
-
-   rnd_t reng;
-   std::vector<double> waterlevel_changes = get_waterlevel_changes(model,
-                                                                   crown_age,
-                                                                   reng,
-                                                                   parameters[ param_type::water_rate]);
+                             int max_lin,
+                             int seed) {
 
    std::array<double, 4> params = {parameters[0], parameters[1], parameters[2], parameters[3]};
-
-   new_sim::simulation sim(params, crown_age, waterlevel_changes, max_lin);
+   
+   new_sim::simulation sim(params, model, crown_age, max_lin, seed);
    sim.run();
 
    
   return Rcpp::List::create( Rcpp::Named("code") = sim.run_info,
                                 Rcpp::Named("Ltable") = sim.get_ltable(),
                                 Rcpp::Named("num_spec") = sim.crowns[0] + sim.crowns[1],
-                                Rcpp::Named("water") = waterlevel_changes);
+                                Rcpp::Named("water") = sim.waterlevelchanges);
  }

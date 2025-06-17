@@ -47,7 +47,6 @@ std::vector<double> get_waterlevel_changes(int water_model,
     int water_level = 1;
     double time = 0;
 
-
     while (time < maximum_time) {
       time += rndgen_.Expon(rate);
       if (time > maximum_time) break;
@@ -59,16 +58,7 @@ std::vector<double> get_waterlevel_changes(int water_model,
     return output;
   }
 
-  if (water_model == 40) { // fake testing model
-    std::vector<double> output;
-    output.push_back(0.0);
-    output.push_back(maximum_time * 0.5);
-    output.push_back(maximum_time * 0.55);
-    output.push_back(maximum_time * 2);
-    return output;
-  }
-
-  std::vector< double > output;
+  std::vector< double > output{0.0};
 
   if (water_model == 3) {
     int water_level = 1;

@@ -2,11 +2,12 @@
 #include <string>
 #include <array>
 #include "random_thijs.h"
+#include "util.h"
 
 #include "Rcpp.h"
 
 enum info {btime, parent, id, death};
-enum pars {extinction, sym_high, sym_low, allo};
+enum pars {extinction, sym_high, sym_low, allo, wobble, water};
 enum ww   {low, high};
 
 class entry {
@@ -73,14 +74,16 @@ namespace new_sim {
 struct simulation {
 
   double t;
-  const double max_time;
+  
   const std::array<double, 4> params_;
+  const double max_time;
   const int max_species;
+  const int focal_model;
+
   std::vector<entry> ltable;
-  const std::vector<double> waterlevels;
   std::array<double, 4> rates;
   ww waterlevel;
-  rnd_t rndgen;
+  rnd_t rnd;
   std::string run_info;
   int waterlevelchanges;
   double last_w_change;
@@ -89,20 +92,27 @@ struct simulation {
 
 
   simulation(const std::array<double, 4>& p,
+             int chosen_model,
              double crown_age,
-             const std::vector<double>& w,
-             int max_num_spec) :
+             int max_num_spec,
+             int seed) :
     params_(p),
     max_time(crown_age),
-    waterlevels(w),
-    max_species(max_num_spec) {
+    max_species(max_num_spec),
+    focal_model(chosen_model) {
+      seed > 0 ? rnd.set_seed(seed) : rnd.set_seed(time(NULL));
   }
 
   void run() {
-    rndgen.set_seed(time(NULL));
     run_info = "not_run_yet";
     t = 0.0;
-    waterlevelchanges = 0;
+    // water levels start at t = 0.0
+    const std::vector<double> waterlevels = get_waterlevel_changes(focal_model,
+                                                                   max_time,
+                                                                   rnd,
+                                                                   params_[ pars::water ]);
+
+    waterlevelchanges = 1;
     last_w_change = -1;
     auto next_w_change = waterlevels[waterlevelchanges];
     ltable.clear();
@@ -117,6 +127,9 @@ struct simulation {
       update_rates();
 
       double dt = draw_dt();
+
+     // std::cerr << t << " " << dt << "\n";
+
       t += dt;
 
       if (t >= next_w_change) {
@@ -134,6 +147,18 @@ struct simulation {
       }
 
       pars event = draw_event();
+      std::string txt = "place_holder";
+      switch(event) {
+        case allo: txt =  "allo"; break;
+        case sym_high: txt = "sym_high"; break;
+        case sym_low: txt = "sym_low"; break;
+        case extinction: txt = "extinction"; break;
+        case water: txt = "water"; break;
+        case wobble: txt = "wobble"; break;
+      }
+      //std::cerr << txt << "\n";
+
+
       apply_event(event);
 
       if (crowns[0] < 1 || crowns[1] < 1) {
@@ -192,15 +217,15 @@ struct simulation {
   }
 
   void event_sym_high() {
-    size_t index = rndgen.random_number(ltable.size());
-    while(ltable[index].dead()) index = rndgen.random_number(ltable.size());
+    size_t index = rnd.random_number(ltable.size());
+    while(ltable[index].dead()) index = rnd.random_number(ltable.size());
 
     birth(t, index);
   }
 
   void event_sym_low(const double& last_waterlevel_change) {
-    size_t index = rndgen.random_number(ltable.size());
-    while(ltable[index].dead()) index = rndgen.random_number(ltable.size());
+    size_t index = rnd.random_number(ltable.size());
+    while(ltable[index].dead()) index = rnd.random_number(ltable.size());
 
     if (ltable[index].in_num_pockets == 1) {
       // 'normal' sympatric speciation
@@ -217,9 +242,10 @@ struct simulation {
   }
 
   void event_allo(const double& last_waterlevel_change) {
-    size_t index = rndgen.random_number(ltable.size());
-    while(ltable[index].dead() && ltable[index].in_num_pockets != 2)
-      index = rndgen.random_number(ltable.size());
+    size_t index = rnd.random_number(ltable.size());
+    while(ltable[index].dead() && ltable[index].in_num_pockets != 2) {
+      index = rnd.random_number(ltable.size());
+    }
 
     ltable[index].in_num_pockets = 1;
 
@@ -246,7 +272,7 @@ struct simulation {
 
   pars draw_event() {
     double total_rate = std::accumulate(rates.begin(), rates.end(), 0.0);
-    double r = rndgen.uniform(0.0, total_rate);
+    double r = rnd.uniform(0.0, total_rate);
     for (size_t i = 0; i < rates.size(); ++i) {
       r -= rates[i];
       if (r <= 0.0) {
@@ -258,7 +284,7 @@ struct simulation {
 
   double draw_dt() {
     double total_rate = std::accumulate(rates.begin(), rates.end(), 0.0);
-    return rndgen.Expon(total_rate);
+    return rnd.Expon(total_rate);
   }
 
   void change_water_level(double w_t) {
@@ -280,14 +306,14 @@ struct simulation {
   }
 
   size_t draw_extinct_species() {
-    size_t index = rndgen.random_number(ltable.size());
+    size_t index = rnd.random_number(ltable.size());
     while( true ) {
       if (ltable[index].dead()) continue;
 
       double prob = ltable[index].in_num_pockets * 0.5;
-      if (rndgen.uniform() < prob) break;
+      if (rnd.uniform() < prob) break;
 
-      index = rndgen.random_number(ltable.size());
+      index = rnd.random_number(ltable.size());
     }
     return index;
   }

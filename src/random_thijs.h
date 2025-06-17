@@ -11,7 +11,10 @@ struct rnd_t {
     rndgen = rndgen_t;
   }
 
-
+  rnd_t(int seed) {
+    std::mt19937 new_randomizer(seed);
+    rndgen = new_randomizer;
+  }
 
   int random_number(int n)    {
     if(n <= 1) return 0;
@@ -31,7 +34,7 @@ struct rnd_t {
     return std::normal_distribution<float>(m, s)(rndgen);
   }
 
-  void set_seed(unsigned seed)    {
+  void set_seed(int seed)    {
     std::mt19937 new_randomizer(seed);
     rndgen = new_randomizer;
   }

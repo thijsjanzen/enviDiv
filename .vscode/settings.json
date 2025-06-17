@@ -80,6 +80,13 @@
         "numbers": "cpp",
         "queue": "cpp",
         "semaphore": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "__verbose_abort": "cpp",
+        "charconv": "cpp",
+        "execution": "cpp",
+        "forward_list": "cpp",
+        "fstream": "cpp",
+        "print": "cpp",
+        "stack": "cpp"
     }
 }

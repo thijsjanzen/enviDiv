@@ -9,16 +9,19 @@
 #'   \item{allopatric speciation rate}{per allopatric pair rate of speciation}
 #'   \item{perturbation}{standard deviation of post-hoc
 #'                       branching time perturbation}
-#'   \item{water model}{Water model: 1) no water level changes, 2) literature
-#'                     water level change, 3) extrapolated water level changes}
+#'   \item{water rate}{rate of water level change if model = 4 (see below)}
 #' }
+#' @param model Water model: 1) no water level changes, 2) literature water level change, 
+#' 3) extrapolated water level changes, 4) using random rates, until literature values.
 #' @param crown_age age of the crown of the tree
 #' @param max_lin maximum number of extant lineages in the tree.
 #' @return phy object
 #' @export
 sim_envidiv_tree_new <- function(params,
+                                 model,
                                  crown_age,
-                                 max_lin = 500) {
+                                 max_lin = 500,
+                                 seed = -1) {
 
   if (crown_age < 0) {
     warning("crown age should be larger than zero\n")
@@ -26,8 +29,10 @@ sim_envidiv_tree_new <- function(params,
   }
 
   sim_result <- sim_envidiv2_cpp(params,
+                                 model,
                                  crown_age,
-                                 max_lin)
+                                 max_lin,
+                                 seed)
 
   error_code <- sim_result$code
 
