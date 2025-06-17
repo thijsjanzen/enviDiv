@@ -16,14 +16,15 @@
                              int max_lin,
                              int seed) {
 
-   std::array<double, 4> params = {parameters[0], parameters[1], parameters[2], parameters[3]};
-   
+   std::array<double, 6> params = {parameters[0], parameters[1], parameters[2], parameters[3],
+                                   parameters[4], parameters[5]};
+
    new_sim::simulation sim(params, model, crown_age, max_lin, seed);
    sim.run();
 
-   
+
   return Rcpp::List::create( Rcpp::Named("code") = sim.run_info,
                                 Rcpp::Named("Ltable") = sim.get_ltable(),
                                 Rcpp::Named("num_spec") = sim.crowns[0] + sim.crowns[1],
-                                Rcpp::Named("water") = sim.waterlevelchanges);
+                                Rcpp::Named("water") = sim.waterlevels);
  }

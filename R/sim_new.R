@@ -11,7 +11,7 @@
 #'                       branching time perturbation}
 #'   \item{water rate}{rate of water level change if model = 4 (see below)}
 #' }
-#' @param model Water model: 1) no water level changes, 2) literature water level change, 
+#' @param model Water model: 1) no water level changes, 2) literature water level change,
 #' 3) extrapolated water level changes, 4) using random rates, until literature values.
 #' @param crown_age age of the crown of the tree
 #' @param max_lin maximum number of extant lineages in the tree.
@@ -37,9 +37,9 @@ sim_envidiv_tree_new <- function(params,
   error_code <- sim_result$code
 
   phy_tree <- NULL
- sim_result$Ltable[, 1] <- crown_age - sim_result$Ltable[, 1]
-    not_min1 <- which(sim_result$Ltable[, 4] != -1)
-    sim_result$Ltable[not_min1, 4] <- crown_age - sim_result$Ltable[not_min1, 4]
+  sim_result$Ltable[, 1] <- crown_age - sim_result$Ltable[, 1]
+  not_min1 <- which(sim_result$Ltable[, 4] != -1)
+  sim_result$Ltable[not_min1, 4] <- crown_age - sim_result$Ltable[not_min1, 4]
 
   if (error_code == "done") {
     phy_tree <- treestats::l_to_phylo(sim_result$Ltable,
@@ -47,7 +47,7 @@ sim_envidiv_tree_new <- function(params,
   }
 
   return(list("phy" = phy_tree,
-              "water" = sim_result$water_changes,
+              "water" = sim_result$water,
               "error_code" = error_code,
               "ltable" = sim_result$Ltable))
 }

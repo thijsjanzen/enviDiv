@@ -74,8 +74,8 @@ namespace new_sim {
 struct simulation {
 
   double t;
-  
-  const std::array<double, 4> params_;
+
+  const std::array<double, 6> params_;
   const double max_time;
   const int max_species;
   const int focal_model;
@@ -87,11 +87,12 @@ struct simulation {
   std::string run_info;
   int waterlevelchanges;
   double last_w_change;
+  std::vector<double> waterlevels;
 
   std::array<int, 2> crowns;
 
 
-  simulation(const std::array<double, 4>& p,
+  simulation(const std::array<double, 6>& p,
              int chosen_model,
              double crown_age,
              int max_num_spec,
@@ -107,10 +108,10 @@ struct simulation {
     run_info = "not_run_yet";
     t = 0.0;
     // water levels start at t = 0.0
-    const std::vector<double> waterlevels = get_waterlevel_changes(focal_model,
-                                                                   max_time,
-                                                                   rnd,
-                                                                   params_[ pars::water ]);
+    waterlevels = get_waterlevel_changes(focal_model,
+                                         max_time,
+                                         rnd,
+                                         params_[ pars::water ]);
 
     waterlevelchanges = 1;
     last_w_change = -1;
@@ -179,6 +180,8 @@ struct simulation {
        case sym_high  : event_sym_high();   break;
        case sym_low   : event_sym_low(last_w_change);    break;
        case allo      : event_allo(last_w_change)   ;    break;
+       case wobble    : throw "no wobble event"; break;
+       case water     : throw "no water event"; break; 
      }
   }
 
