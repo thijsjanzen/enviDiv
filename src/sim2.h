@@ -69,11 +69,38 @@ private:
   const int id_;
 };
 
+class time_struct {
+public:
+  time_struct() {
+    t_ = 0.0;
+  }
+
+  time_struct(double init) :
+    t_(init) {}
+
+  void add_time(double dt) {
+    t_ += dt;
+  }
+
+  void set_time(double a) {
+    t_ = a;
+  }
+
+  double get_time() const {
+    return t_;
+  }
+
+
+
+private:
+  double t_;
+};
+
 namespace new_sim {
 
 struct simulation {
 
-  double t;
+  time_struct t;
 
   const std::array<double, 6> params_;
   const double max_time;
@@ -106,7 +133,7 @@ struct simulation {
 
   void run() {
     run_info = "not_run_yet";
-    t = 0.0;
+    t = time_struct(0.0);
     // water levels start at t = 0.0
     waterlevels = get_waterlevel_changes(focal_model,
                                          max_time,
@@ -128,37 +155,34 @@ struct simulation {
       update_rates();
 
       double dt = draw_dt();
-
-     // std::cerr << t << " " << dt << "\n";
-
-      t += dt;
-
-      if (t >= next_w_change) {
-        change_water_level(next_w_change);
-        t = next_w_change;
-        last_w_change = next_w_change;
-        waterlevelchanges++;
-        next_w_change = waterlevels[waterlevelchanges];
-        continue;
+      if (dt < 0) {
+        std::cerr << t.get_time() << " " << dt << "\n";
       }
 
-      if (t >= max_time)  {
+      if (t.get_time() + dt >= next_w_change) {
+        change_water_level(next_w_change);
+        t.set_time(next_w_change);
+        last_w_change = next_w_change;
+        waterlevelchanges++;
+        next_w_change = waterlevelchanges < waterlevels.size() ? 
+                        waterlevels[waterlevelchanges] : 
+                        1e20;
+        if (t.get_time() >= max_time)  {
+          run_info = "done";
+          break;
+        }
+        
+        continue;
+      } else {
+        t.add_time(dt);
+      }
+
+      if (t.get_time() >= max_time)  {
         run_info = "done";
         break;
       }
 
       pars event = draw_event();
-      std::string txt = "place_holder";
-      switch(event) {
-        case allo: txt =  "allo"; break;
-        case sym_high: txt = "sym_high"; break;
-        case sym_low: txt = "sym_low"; break;
-        case extinction: txt = "extinction"; break;
-        case water: txt = "water"; break;
-        case wobble: txt = "wobble"; break;
-      }
-      //std::cerr << txt << "\n";
-
 
       apply_event(event);
 
@@ -186,7 +210,7 @@ struct simulation {
   }
 
   void death(size_t index) {
-    ltable[index].die(t);
+    ltable[index].die(t.get_time());
     if (ltable[index].ID() < 0) {
       crowns[0]--;
     } else {
@@ -194,9 +218,11 @@ struct simulation {
     }
   }
 
-  void birth(double t, double parent_index) {
+  void birth(double local_t, double parent_index) {
     auto parent_id = ltable[parent_index].ID();
     int new_id = static_cast<int>(ltable.size()) + 1; // start counting at 1, add one
+   
+   
     if (parent_id < 0) {
       new_id *= -1;
       crowns[0]++;
@@ -204,7 +230,12 @@ struct simulation {
       crowns[1]++;
     }
 
-    ltable.emplace_back(entry(t, parent_id, new_id));
+    auto last_t = ltable.back().get_btime();
+    if (local_t < last_t) {
+      std::cerr << "error";
+    }
+
+    ltable.emplace_back(entry(local_t, parent_id, new_id));
   }
 
 
@@ -223,7 +254,7 @@ struct simulation {
     size_t index = rnd.random_number(ltable.size());
     while(ltable[index].dead()) index = rnd.random_number(ltable.size());
 
-    birth(t, index);
+    birth(t.get_time(), index);
   }
 
   void event_sym_low(const double& last_waterlevel_change) {
@@ -232,7 +263,7 @@ struct simulation {
 
     if (ltable[index].in_num_pockets == 1) {
       // 'normal' sympatric speciation
-      birth(t, index);
+      birth(t.get_time(), index);
     } else {
       // sympatric speciation in one pocket, but not in the other (!)
       // remove parent species from one pocket
@@ -240,7 +271,7 @@ struct simulation {
 
       birth(last_waterlevel_change, index);
 
-      birth(t, ltable.size() - 1);
+      birth(t.get_time(), ltable.size() - 1);
     }
   }
 
