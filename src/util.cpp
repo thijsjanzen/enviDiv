@@ -18,7 +18,7 @@ std::vector<double> parameters_from_prior(rnd_t& rndgen_) {
   output[param_type::allo_rate]       = powf(10, (-3 + 5 * rndgen_.uniform()));  // allo spec
   output[param_type::wobble_rate]     = powf(10, (-3 + 3 * rndgen_.uniform()));  // jiggle
   output[param_type::water_rate]      = powf(10, ( 0 + 3 * rndgen_.uniform()));  // water rate
-  output[param_type::model]           = 1 + rndgen_.random_number(4); // model
+  output[param_type::model]           = 1 + rndgen_.random_number(3); // model
 
   return(output);
 }
@@ -78,17 +78,16 @@ std::vector<double> get_waterlevel_changes(int water_model,
     }
   }
 
-  output.push_back(maximum_time - 1.1)	;		// 0
-  output.push_back(maximum_time - 0.55)	;	// 1
-  output.push_back(maximum_time - 0.393);		// 0
+  output.push_back(maximum_time - 1.1)	;	  // 0
+  output.push_back(maximum_time - 0.55)	;	  // 1
+  output.push_back(maximum_time - 0.393);	  // 0
   output.push_back(maximum_time - 0.363);		// 1
   output.push_back(maximum_time - 0.295);		// 0
   output.push_back(maximum_time - 0.262);		// 1
   output.push_back(maximum_time - 0.193);		// 0
   output.push_back(maximum_time - 0.169);		// 1
-  output.push_back(maximum_time - 0.04)	;	// 0
-  output.push_back(maximum_time - 0.035);	// 1
-  output.push_back(maximum_time)				; // 1
+  output.push_back(maximum_time - 0.04)	;	  // 0
+  output.push_back(maximum_time - 0.035);	  // 1
 
   return(output);
 }

@@ -114,11 +114,15 @@ abc_smc_par <- function(
 
   # first we do the initial generation from the prior
   cat("\nGenerating from the prior\n")
-  new_params <- enviDiv::initial_draw_from_prior(num_particles = number_of_particles,
-                                                 crown_age = treestats::crown_age(ref_tree),
-                                                 min_lin = 5,
-                                                 max_lin = 500,
-                                                 verbose = TRUE)
+
+
+
+  new_params <- matrix(data = NA, nrow = number_of_particles,
+                       ncol = num_parameters)
+  for (r in 1:number_of_particles) {
+    new_params[r, ] <- prior_func()
+  }
+
   new_weights <- rep(1, number_of_particles)
 
   for (gen in 2:num_iterations) {
@@ -213,7 +217,7 @@ abc_smc_par <- function(
             misses <- rel_diff > epsilon[gen]
             if (sum(misses, na.rm = TRUE) > 0) {
               local_accept <- FALSE
-              out$accept <- paste0("miss_",s,"_",rel_diff)
+              out$accept <- paste0("miss_",s[[1]],"_",rel_diff[[1]])
               break
             }
           }
@@ -229,9 +233,10 @@ abc_smc_par <- function(
         return(out)
       }
 
-      # res <- lapply(new_parameters, process_particle)
+      #res <- lapply(new_parameters, process_particle)
       res <- parallel::mclapply(new_parameters, process_particle,
-                                mc.cores = num_threads)
+                                mc.cores = num_threads,
+                                mc.preschedule = TRUE)
       #res <- pbmcapply::pbmclapply(new_parameters, process_particle,
       #                             mc.cores = num_threads)
       #res <- list()
@@ -239,8 +244,13 @@ abc_smc_par <- function(
       #  res[[r]] <- process_particle(new_parameters[[r]])
       #}
 
+      if (gen == 5) {
+        cat("gen\n")
+      }
+
 
       for (l in 1:length(res)) {
+        if (gen == 5) {cat(res[[l]]$accept, "\n")}
         if (res[[l]]$accept == "TRUE") {
           number_accepted <- number_accepted + 1
           if (number_accepted <= number_of_particles) {

@@ -102,13 +102,14 @@ struct simulation {
 
   time_struct t;
 
-  const std::array<double, 6> params_;
+  std::vector<double> params_;
   const double max_time;
   const int max_species;
   const int focal_model;
 
   std::vector<entry> ltable;
   std::array<double, 4> rates;
+
   ww waterlevel;
   rnd_t rnd;
   std::string run_info;
@@ -119,7 +120,7 @@ struct simulation {
   std::array<int, 2> crowns;
 
 
-  simulation(const std::array<double, 6>& p,
+  simulation(const std::vector<double>& p,
              int chosen_model,
              double crown_age,
              int max_num_spec,
@@ -128,8 +129,24 @@ struct simulation {
     max_time(crown_age),
     max_species(max_num_spec),
     focal_model(chosen_model) {
-      seed > 0 ? rnd.set_seed(seed) : rnd.set_seed(time(NULL));
+
+    if (seed < 0) {
+      std::random_device rd;
+      seed = rd();
+    }
+    rnd.set_seed(seed);
   }
+
+  simulation(int chosen_model,
+             double crown_age,
+             int max_num_spec) :
+    max_time(crown_age),
+    max_species(max_num_spec),
+    focal_model(chosen_model) {
+    std::random_device rd;
+    rnd.set_seed(rd());
+  }
+
 
   void run() {
     run_info = "not_run_yet";
@@ -155,23 +172,20 @@ struct simulation {
       update_rates();
 
       double dt = draw_dt();
-      if (dt < 0) {
-        std::cerr << t.get_time() << " " << dt << "\n";
-      }
 
       if (t.get_time() + dt >= next_w_change) {
         change_water_level(next_w_change);
         t.set_time(next_w_change);
         last_w_change = next_w_change;
         waterlevelchanges++;
-        next_w_change = waterlevelchanges < waterlevels.size() ? 
-                        waterlevels[waterlevelchanges] : 
-                        1e20;
+        next_w_change = waterlevelchanges < waterlevels.size() ?
+        waterlevels[waterlevelchanges] :
+          1e20;
         if (t.get_time() >= max_time)  {
           run_info = "done";
           break;
         }
-        
+
         continue;
       } else {
         t.add_time(dt);
@@ -199,14 +213,14 @@ struct simulation {
   }
 
   void apply_event(pars event) {
-     switch(event) {
-       case extinction: event_extinction(); break;
-       case sym_high  : event_sym_high();   break;
-       case sym_low   : event_sym_low(last_w_change);    break;
-       case allo      : event_allo(last_w_change)   ;    break;
-       case wobble    : throw "no wobble event"; break;
-       case water     : throw "no water event"; break; 
-     }
+    switch(event) {
+    case extinction: event_extinction(); break;
+    case sym_high  : event_sym_high();   break;
+    case sym_low   : event_sym_low(last_w_change);    break;
+    case allo      : event_allo(last_w_change)   ;    break;
+    case wobble    : throw "no wobble event"; break;
+    case water     : throw "no water event"; break;
+    }
   }
 
   void death(size_t index) {
@@ -221,8 +235,7 @@ struct simulation {
   void birth(double local_t, double parent_index) {
     auto parent_id = ltable[parent_index].ID();
     int new_id = static_cast<int>(ltable.size()) + 1; // start counting at 1, add one
-   
-   
+
     if (parent_id < 0) {
       new_id *= -1;
       crowns[0]++;
@@ -230,23 +243,16 @@ struct simulation {
       crowns[1]++;
     }
 
-    auto last_t = ltable.back().get_btime();
-    if (local_t < last_t) {
-      std::cerr << "error";
-    }
-
     ltable.emplace_back(entry(local_t, parent_id, new_id));
   }
 
 
   void event_extinction() {
-    size_t index = draw_extinct_species();
+    size_t index = draw_prop_pockets();
 
-    if (waterlevel == high) {
+    ltable[index].in_num_pockets--;
+    if (ltable[index].in_num_pockets < 1) {
       death(index);
-    } else {
-      bool local_extinction = ltable[index].die_pocket();
-      if (local_extinction) death(index);
     }
   }
 
@@ -258,8 +264,7 @@ struct simulation {
   }
 
   void event_sym_low(const double& last_waterlevel_change) {
-    size_t index = rnd.random_number(ltable.size());
-    while(ltable[index].dead()) index = rnd.random_number(ltable.size());
+    size_t index = draw_prop_pockets();
 
     if (ltable[index].in_num_pockets == 1) {
       // 'normal' sympatric speciation
@@ -276,10 +281,7 @@ struct simulation {
   }
 
   void event_allo(const double& last_waterlevel_change) {
-    size_t index = rnd.random_number(ltable.size());
-    while(ltable[index].dead() && ltable[index].in_num_pockets != 2) {
-      index = rnd.random_number(ltable.size());
-    }
+    size_t index = draw_allo();
 
     ltable[index].in_num_pockets = 1;
 
@@ -288,19 +290,22 @@ struct simulation {
 
   void update_rates() {
     rates = {0.0, 0.0, 0.0, 0.0};
-    for (const auto& i : ltable) {
-      if (i.alive()) {
-        rates[extinction] += params_[extinction] * i.in_num_pockets;
-        if (waterlevel == high) {
-          rates[sym_high] += params_[sym_high];
-        } else {
-          rates[sym_low] += params_[sym_low] * i.in_num_pockets;
-
-          if (i.in_num_pockets == 2) {
-            rates[allo]    += params_[allo];
-          }
-        }
+    if (waterlevel == high) {
+      // count alive species
+      int num_alive = crowns[0] + crowns[1];
+      rates[extinction] = num_alive * params_[extinction];
+      rates[sym_high]   = num_alive * params_[sym_high];
+    } else {
+      // count pockets
+      int total_pockets = 0;
+      int double_pockets = 0;
+      for (const auto& i : ltable) {
+        total_pockets += i.in_num_pockets;
+        if (i.in_num_pockets == 2) double_pockets++;
       }
+      rates[extinction] = total_pockets * params_[extinction];
+      rates[sym_low]    = total_pockets * params_[sym_low];
+      rates[allo]       = double_pockets * params_[allo];
     }
   }
 
@@ -339,17 +344,49 @@ struct simulation {
     }
   }
 
-  size_t draw_extinct_species() {
-    size_t index = rnd.random_number(ltable.size());
-    while( true ) {
-      if (ltable[index].dead()) continue;
 
-      double prob = ltable[index].in_num_pockets * 0.5;
-      if (rnd.uniform() < prob) break;
 
-      index = rnd.random_number(ltable.size());
+
+
+  size_t draw_prop_pockets() {
+    if (waterlevel == high) {
+      size_t index = rnd.random_number(ltable.size());
+      while(ltable[index].dead()) index = rnd.random_number(ltable.size());
+
+      return index;
     }
-    return index;
+
+
+    // if water level is low
+    std::vector<size_t> alive_indices;
+    for (size_t i = 0; i < ltable.size(); ++i) {
+      if (ltable[i].alive()) {
+        for(size_t j = 0; j < ltable[i].in_num_pockets; ++j) {
+          alive_indices.push_back(i);
+        }
+      }
+    }
+    if (alive_indices.empty()) {
+      throw "tree is extinct";
+    }
+    size_t rand_entry = rnd.random_number(alive_indices.size());
+    return alive_indices[rand_entry];
+
+  }
+
+  size_t draw_allo() {
+    std::vector<size_t> valid_indices;
+    for (size_t i = 0; i < ltable.size(); ++i) {
+      if (ltable[i].alive() && ltable[i].in_num_pockets == 2) {
+        valid_indices.push_back(i);
+
+      }
+    }
+    if (valid_indices.empty()) {
+      throw "tree is extinct";
+    }
+    size_t rand_entry = rnd.random_number(valid_indices.size());
+    return valid_indices[rand_entry];
   }
 
   Rcpp::NumericMatrix get_ltable() {
@@ -361,6 +398,10 @@ struct simulation {
       out(i, 3) = ltable[i].get_dtime();
     }
     return out;
+  }
+
+  size_t get_num_lin() {
+    return crowns[0] + crowns[1];
   }
 };
 

@@ -19,16 +19,15 @@
 #' @param num_threads number of threads
 #' @return a tibble containing the results
 #' @export
-generate_stack <- function(number_of_replicates = 1000,
-                           use_exp_prior = FALSE,
-                           focal_model = 1,
-                           min_tips = 50,
-                           max_tips = 150,
-                           emp_tree = NULL,
-                           crown_age = NULL,
-                           write_to_file = FALSE,
-                           file_name = NULL,
-                           num_threads = 1) {
+generate_stack_simple <- function(number_of_replicates = 1000,
+                                 focal_model = 1,
+                                 min_tips = 50,
+                                 max_tips = 150,
+                                 emp_tree = NULL,
+                                 crown_age = NULL,
+                                 write_to_file = FALSE,
+                                 file_name = NULL,
+                                 num_threads = 1) {
 
   if (!is.null(emp_tree)) {
     crown_age <- max(ape::branching.times(emp_tree))
@@ -50,55 +49,33 @@ generate_stack <- function(number_of_replicates = 1000,
     sample_size <- remaining_particles * 1 / accept_rate
     cat(remaining_particles, " ", sample_size, "\n")
 
-    candidate_particles <- list()
-
-    for (i in 1:sample_size) {
-      if (use_exp_prior) {
-        candidate_particles[[i]] <- param_from_prior_exp_cpp(focal_model)
-      } else {
-        candidate_particles[[i]] <- param_from_prior_cpp(focal_model)
-      }
-    }
-
     dummy_tree <- ape::rphylo(n = 10, birth = 1, death = 0)
     dummy_stats <- treestats::calc_all_stats(dummy_tree)
 
-    calc_tree_and_stats <- function(x) {
+    calc_tree_and_stats <- function(dummy) {
       stats <- rep(NA, length(dummy_stats))
 
-      found_tree <- c()
-      if (x[7] == 4) {
-        found_tree <- TreeSim::sim.bd.age(age = crown_age,
-                                          numbsim = 1,
-                                          lambda = x[2],
-                                          mu = x[1],
-                                          mrca = TRUE,
-                                          complete = FALSE)[[1]]
-        while (is.numeric(found_tree)) {
-          found_tree <- TreeSim::sim.bd.age(age = crown_age,
-                                            numbsim = 1,
-                                            lambda = x[2],
-                                            mu = x[1],
-                                            mrca = TRUE,
-                                            complete = FALSE)[[1]]
-        }
-      } else {
-        found_tree <- enviDiv::sim_envidiv_tree_new(x, model = x[7], crown_age)$phy
-        #found_tree <- enviDiv::sim_envidiv_tree(x, crown_age, abc = TRUE)
+      found_tree <- enviDiv::sim_envidiv_tree_new_cond(model = focal_model,
+                                                       crown_age = crown_age,
+                                                       min_lin = min_tips,
+                                                       max_lin = max_tips,
+                                                       num_tries = 1000)
+
+      pars <- found_tree$params
+
+      if (found_tree$error_code != "done" ) {
+        return(c(pars, stats))
       }
 
-      if (is.null(found_tree)) {
-        return(c(x, stats))
-      }
-
-      num_tips <- treestats::number_of_lineages(found_tree)
+      num_tips <- treestats::number_of_lineages(found_tree$phy)
 
       if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- treestats::calc_all_stats(found_tree)
+        stats <- treestats::calc_all_stats(found_tree$phy)
       }
-      return(c(x, as.vector(stats)))
+      return(c(pars, as.vector(stats)))
     }
 
+    candidate_particles <- rep(1, sample_size)
 
     res <- list()
     if (num_threads == 1) {
@@ -112,8 +89,8 @@ generate_stack <- function(number_of_replicates = 1000,
     }
 
     results <- matrix(unlist(res, use.names = FALSE),
-                          ncol = length(dummy_stats) + length(candidate_particles[[1]]), # 7 parameters
-                          byrow = TRUE)
+                      ncol = length(res[[1]]),
+                      byrow = TRUE)
 
     results <- results[!is.na(results[, 8]), ]
 

@@ -30,7 +30,7 @@ sim_envidiv_tree <- function(params,
     return(NULL)
   }
 
-  water_changes <- generate_water(params[6], crown_age)
+  water_changes <- generate_water(params[7], crown_age)
 
   sim_result <- create_tree_cpp(params,
                                 water_changes,
@@ -87,7 +87,7 @@ sim_envidiv_tree2 <- function(params,
     return(NULL)
   }
 
-  water_changes <- generate_water(params[6], crown_age)
+  water_changes <- generate_water(params[7], crown_age)
 
   sim_result <- create_tree_cpp(params,
                                 water_changes,

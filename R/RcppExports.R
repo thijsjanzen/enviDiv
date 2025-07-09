@@ -57,8 +57,15 @@ sq_numbers_cpp_tbb <- function(n, num_threads) {
     .Call('_enviDiv_sq_numbers_cpp_tbb', PACKAGE = 'enviDiv', n, num_threads)
 }
 
+#' simulate a tree using environmental diversification
+NULL
+
 sim_envidiv2_cpp <- function(parameters, model, crown_age, max_lin, seed) {
     .Call('_enviDiv_sim_envidiv2_cpp', PACKAGE = 'enviDiv', parameters, model, crown_age, max_lin, seed)
+}
+
+sim_new_cond_cpp <- function(model, crown_age, min_lin, max_lin, num_tries) {
+    .Call('_enviDiv_sim_new_cond_cpp', PACKAGE = 'enviDiv', model, crown_age, min_lin, max_lin, num_tries)
 }
 
 #' simulate a tree using environmental diversification

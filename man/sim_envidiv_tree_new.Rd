@@ -20,7 +20,7 @@ sim_envidiv_tree_new(params, model, crown_age, max_lin = 500, seed = -1)
   \item{water rate}{rate of water level change if model = 4 (see below)}
 }}
 
-\item{model}{Water model: 1) no water level changes, 2) literature water level change, 
+\item{model}{Water model: 1) no water level changes, 2) literature water level change,
 3) extrapolated water level changes, 4) using random rates, until literature values.}
 
 \item{crown_age}{age of the crown of the tree}

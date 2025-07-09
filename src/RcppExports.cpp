@@ -95,6 +95,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sim_new_cond_cpp
+Rcpp::List sim_new_cond_cpp(int model, double crown_age, int min_lin, int max_lin, int num_tries);
+RcppExport SEXP _enviDiv_sim_new_cond_cpp(SEXP modelSEXP, SEXP crown_ageSEXP, SEXP min_linSEXP, SEXP max_linSEXP, SEXP num_triesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< double >::type crown_age(crown_ageSEXP);
+    Rcpp::traits::input_parameter< int >::type min_lin(min_linSEXP);
+    Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
+    Rcpp::traits::input_parameter< int >::type num_tries(num_triesSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_new_cond_cpp(model, crown_age, min_lin, max_lin, num_tries));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sim_envidiv_cpp
 Rcpp::List sim_envidiv_cpp(int model, std::vector<double> parameters, double crown_age, int max_lin);
 RcppExport SEXP _enviDiv_sim_envidiv_cpp(SEXP modelSEXP, SEXP parametersSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP) {
@@ -167,6 +182,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},
     {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
     {"_enviDiv_sim_envidiv2_cpp", (DL_FUNC) &_enviDiv_sim_envidiv2_cpp, 5},
+    {"_enviDiv_sim_new_cond_cpp", (DL_FUNC) &_enviDiv_sim_new_cond_cpp, 5},
     {"_enviDiv_sim_envidiv_cpp", (DL_FUNC) &_enviDiv_sim_envidiv_cpp, 4},
     {"_enviDiv_initial_draw_from_prior", (DL_FUNC) &_enviDiv_initial_draw_from_prior, 5},
     {"_enviDiv_param_from_prior_cpp", (DL_FUNC) &_enviDiv_param_from_prior_cpp, 1},
