@@ -73,7 +73,9 @@ abc_smc_par <- function(
     sigma = 0.05,
     stop_rate = 1e-5,
     num_iterations = 50,
-    num_threads = 1
+    num_threads = 1,
+    write_to_file = FALSE,
+    file_name_start = "out_"
 ) {
   if (!inherits(ref_tree, "phylo")) {
     # Just checking
@@ -244,11 +246,6 @@ abc_smc_par <- function(
       #  res[[r]] <- process_particle(new_parameters[[r]])
       #}
 
-      if (gen == 5) {
-        cat("gen\n")
-      }
-
-
       for (l in 1:length(res)) {
         if (gen == 5) {cat(res[[l]]$accept, "\n")}
         if (res[[l]]$accept == "TRUE") {
@@ -291,8 +288,24 @@ abc_smc_par <- function(
     }
 
     all_res[[gen - 1]] <- previous_params
-    all_wlevel[[gen]] <- water_levels
+    all_wlevel[[gen]]  <- water_levels
     all_weights[[gen]] <- new_weights
+
+    if (write_to_file) {
+      file_name <- paste0(file_name_start, "_par_", gen, ".txt")
+      out_file <- new_params
+      colnames(out_file) <- c("extinction", "sim_high", "sim_low",
+                              "allo", "wobble", "water", "model")
+      out_file <- tibble::as_tibble(out_file)
+      out_file$weights <- as.vector(new_weights)
+      readr::write_csv(x = out_file,
+                       file = file_name)
+
+      file_name <- paste0(file_name_start, "_water_", gen, ".txt")
+      saveRDS(water_levels, file_name)
+    }
+
+
 
     if (stoprate_reached) {
       break
@@ -306,5 +319,3 @@ abc_smc_par <- function(
               "all_water" = all_wlevel,
               "all_weights" = all_weights))
 }
-
-

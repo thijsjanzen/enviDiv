@@ -1,7 +1,8 @@
 #include "sim2.h"
 
 
- //' simulate a tree using environmental diversification
+ //' new simulations of a tree using environmental diversification
+ //' @description simulating
  //' @param model chosen model
  //' @param parameters a vector of parameters in order: [extinction,
  //' sym_spec_high, sym_spec_low, allo_spec, perturbance, water_rate, model]
@@ -15,8 +16,6 @@
                              double crown_age,
                              int max_lin,
                              int seed) {
-
-
    new_sim::simulation sim(parameters, model, crown_age, max_lin, seed);
    sim.run();
 

@@ -30,3 +30,50 @@ while (TRUE) {
     }
   }
 }
+
+ref_water <- ref_tree$waterlevel
+ref_tree <- ref_tree$phy
+
+ca <- treestats::crown_age(ref_tree)
+num_lin <- treestats::number_of_lineages(ref_tree)
+
+ca
+num_lin
+
+
+prior_func <- function() {
+  vv <- enviDiv::param_from_prior_cpp()
+  return(vv)
+}
+
+prior_dens_func <- function(params) {
+  for (i in 1:6) {
+    if (params[i] < 0) return(-Inf)
+    x <- log10(params[i])
+    if (x < -3 || x > 5) return(-Inf)
+  }
+  if (params[7] < 1 || params[7] > 3) return(-Inf)
+
+  return(1)
+}
+
+test_pars <- prior_func()
+test_tree <- sim_func(test_pars)
+
+stat_func <- create_statistics_list()
+
+res <- enviDiv::abc_smc_par(ref_tree = ref_tree,
+                            statistics = stat_func,
+                            simulation_function = sim_func,
+                            init_epsilon_value = 100000,
+                            prior_generating_function = prior_func,
+                            prior_density_function = prior_dens_func,
+                            number_of_particles = 1000,
+                            sigma = 0.01,
+                            stop_rate = 1e-10,
+                            num_iterations = 3,
+                            num_threads = 8,
+                            write_to_file = TRUE,
+                            file_name_start = "out_")
+
+

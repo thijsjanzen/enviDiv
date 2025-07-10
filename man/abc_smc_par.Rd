@@ -15,7 +15,9 @@ abc_smc_par(
   sigma = 0.05,
   stop_rate = 1e-05,
   num_iterations = 50,
-  num_threads = 1
+  num_threads = 1,
+  write_to_file = FALSE,
+  file_name_start = "out_"
 )
 }
 \arguments{
