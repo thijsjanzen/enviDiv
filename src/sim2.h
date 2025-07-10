@@ -132,8 +132,9 @@ struct simulation {
 
     if (seed < 0) {
       std::random_device rd;
-      seed = rd();
+      seed = static_cast<int>(rd());
     }
+
     rnd.set_seed(seed);
   }
 
