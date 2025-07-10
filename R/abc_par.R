@@ -128,6 +128,18 @@ abc_smc_par <- function(
   new_weights <- rep(1, number_of_particles)
 
   for (gen in 2:num_iterations) {
+    if (write_to_file) {
+      file_name <- paste0(file_name_start, "_par_", gen - 1, ".txt")
+      out_file <- new_params
+      colnames(out_file) <- c("extinction", "sim_high", "sim_low",
+                              "allo", "wobble", "water", "model")
+      out_file <- tibble::as_tibble(out_file)
+      out_file$weights <- as.vector(new_weights)
+      readr::write_csv(x = out_file,
+                       file = file_name)
+    }
+
+
     cat("\nGenerating Particles for iteration\t", gen, "\n")
     cat("0--------25--------50--------75--------100\n")
     cat("*")
@@ -292,15 +304,6 @@ abc_smc_par <- function(
     all_weights[[gen]] <- new_weights
 
     if (write_to_file) {
-      file_name <- paste0(file_name_start, "_par_", gen, ".txt")
-      out_file <- new_params
-      colnames(out_file) <- c("extinction", "sim_high", "sim_low",
-                              "allo", "wobble", "water", "model")
-      out_file <- tibble::as_tibble(out_file)
-      out_file$weights <- as.vector(new_weights)
-      readr::write_csv(x = out_file,
-                       file = file_name)
-
       file_name <- paste0(file_name_start, "_water_", gen, ".txt")
       saveRDS(water_levels, file_name)
     }
