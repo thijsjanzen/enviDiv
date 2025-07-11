@@ -117,8 +117,6 @@ abc_smc_par <- function(
   # first we do the initial generation from the prior
   cat("\nGenerating from the prior\n")
 
-
-
   new_params <- matrix(data = NA, nrow = number_of_particles,
                        ncol = num_parameters)
   for (r in 1:number_of_particles) {
@@ -150,6 +148,8 @@ abc_smc_par <- function(
     number_accepted <- 0
 
     water_levels <- list()
+    accepted_stats <- matrix(NA, nrow = number_of_particles,
+                             ncol = length(enviDiv::names_statistics_list()))
 
     #replace all vectors
     if (gen > 1) {
@@ -221,6 +221,8 @@ abc_smc_par <- function(
         if (inherits(new_tree, "phylo")) {
 
           local_accept <- TRUE
+          all_stats <- c()
+          cnt <- 1
           for (s in 1:length(statistics)) {
             local_s <- statistics[[s]](new_tree)
             if (length(local_s) > 1) {
@@ -233,13 +235,16 @@ abc_smc_par <- function(
               local_accept <- FALSE
               out$accept <- paste0("miss_",s[[1]],"_",rel_diff[[1]])
               break
+            } else {
+              all_stats <- c(all_stats, local_s)
             }
           }
 
           if (local_accept == TRUE) {
             out <- list(parameters = parameters,
                         water = new_data$water,
-                        accept = "TRUE")
+                        accept = "TRUE",
+                        stats = all_stats)
           }
         } else {
           out$accept <- "NO_TREE"
@@ -259,7 +264,7 @@ abc_smc_par <- function(
       #}
 
       for (l in 1:length(res)) {
-        if (gen == 5) {cat(res[[l]]$accept, "\n")}
+
         if (res[[l]]$accept == "TRUE") {
           number_accepted <- number_accepted + 1
           if (number_accepted <= number_of_particles) {
@@ -282,6 +287,9 @@ abc_smc_par <- function(
               cat("**")
               utils::flush.console()
             }
+
+            accepted_stats[number_accepted, ] <- res[[l]]$stats
+
           } else {
             # we are done.
             break
@@ -306,6 +314,11 @@ abc_smc_par <- function(
     if (write_to_file) {
       file_name <- paste0(file_name_start, "_water_", gen, ".txt")
       saveRDS(water_levels, file_name)
+
+      file_name <- paste0(file_name_start, "_stats_", gen, ".txt")
+      colnames(accepted_stats) <- enviDiv::names_statistics_list()
+      accepted_stats <- tibble::as_tibble(accepted_stats)
+      readr::write_csv(x = accepted_stats, file = file_name)
     }
 
 

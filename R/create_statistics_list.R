@@ -145,3 +145,27 @@ create_statistics_list <- function() {
 
   return(stats)
 }
+
+#' return a vector of statistics names used
+#' @export
+#' @return vector of names
+names_statistics_list <- function() {
+  basic_names <- create_statistics_list()
+  basic_names <- names(basic_names)
+  # last three are compound
+  av <- which(basic_names == "minmax_lapl")
+  basic_names <- basic_names[-av]
+  basic_names <- c(basic_names, c("min_lapl", "max_lapl"))
+
+  av <- which(basic_names == "minmax_adj")
+  basic_names <- basic_names[-av]
+  basic_names <- c(basic_names, c("min_adjl", "max_adjl"))
+
+  av <- which(basic_names == "laplacian_d")
+  basic_names <- basic_names[-av]
+  basic_names <- c(basic_names, c("laplace_spectrum_a",
+                                  "laplace_spectrum_p",
+                                  "laplace_spectrum_e",
+                                  "laplace_spectrum_g"))
+  return(basic_names)
+}
