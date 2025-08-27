@@ -170,7 +170,7 @@ abc_smc_par <- function(
 
       block_size <- floor(block_size)
 
-      #cat("\n", block_size, "\n")
+      cat("\n",number_accepted, " ", block_size, "\n")
 
       new_parameters <- list()
       for (np in 1:block_size) {
@@ -253,9 +253,13 @@ abc_smc_par <- function(
       }
 
       #res <- lapply(new_parameters, process_particle)
-      res <- parallel::mclapply(new_parameters, process_particle,
-                                mc.cores = num_threads,
-                                mc.preschedule = TRUE)
+      #res <- parallel::mclapply(new_parameters, process_particle,
+      #                          mc.cores = num_threads,
+      #                          mc.preschedule = TRUE)
+      future::plan(future::multisession, workers = num_threads)
+      res <- future.apply::future_lapply(new_parameters,
+                                         process_particle,
+                                         future.seed = TRUE)
       #res <- pbmcapply::pbmclapply(new_parameters, process_particle,
       #                             mc.cores = num_threads)
       #res <- list()
