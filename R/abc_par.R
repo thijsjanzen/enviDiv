@@ -169,6 +169,7 @@ abc_smc_par <- function(
         block_size <- block_size * tried / number_accepted # 1 / (number_accepted / tried)
 
       block_size <- floor(block_size)
+      block_size <- min(block_size, 1e6) # too large block size causes extreme memory usage.
 
       cat("\n",number_accepted, " ", block_size, "\n")
 
