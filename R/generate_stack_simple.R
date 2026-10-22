@@ -47,43 +47,71 @@ generate_stack_simple <- function(number_of_replicates = 1000,
 
   while (remaining_particles > 0) {
     sample_size <- remaining_particles * 1 / accept_rate
+    sample_size <- min(sample_size, 10000)
+    sample_size <- max(100, sample_size)
+
     cat(remaining_particles, " ", sample_size, "\n")
+
+
 
     dummy_tree <- ape::rphylo(n = 10, birth = 1, death = 0)
     dummy_stats <- treestats::calc_all_stats(dummy_tree)
 
     calc_tree_and_stats <- function(dummy) {
-      stats <- rep(NA, length(dummy_stats))
 
-      found_tree <- enviDiv::sim_envidiv_tree_new_cond(model = focal_model,
-                                                       crown_age = crown_age,
-                                                       min_lin = min_tips,
-                                                       max_lin = max_tips,
-                                                       num_tries = 1000)
+      tryCatch({
 
-      pars <- found_tree$params
+        stats <- rep(NA, length(dummy_stats))
 
-      if (found_tree$error_code != "done" ) {
-        return(c(pars, stats))
-      }
+        found_tree <- enviDiv::sim_envidiv_tree_new_cond(
+          model = focal_model,
+          crown_age = crown_age,
+          min_lin = min_tips,
+          max_lin = max_tips,
+          num_tries = 100000
+        )
 
-      num_tips <- treestats::number_of_lineages(found_tree$phy)
+        pars <- found_tree$params
 
-      if (num_tips >= min_tips && num_tips <= max_tips) {
-        stats <- treestats::calc_all_stats(found_tree$phy)
-      }
-      return(c(pars, as.vector(stats)))
+        if (found_tree$error_code != "done") {
+          return(c(pars, stats))
+        }
+
+        num_tips <- treestats::number_of_lineages(found_tree$phy)
+
+        if (num_tips >= min_tips && num_tips <= max_tips) {
+          stats <- treestats::calc_all_stats(found_tree$phy)
+          #funcs <- create_statistics_list()
+          #stats <- c()
+          #for (i in seq_along(funcs)) {
+          #  cat(names(funcs)[i], " ")
+          #  stats <- c(stats, funcs[[i]](found_tree$phy))
+          #}
+          cat("\n")
+        }
+
+        c(pars, as.vector(stats))
+
+      }, error = function(e) {
+        print(e)
+        stats <- rep(NA, length(dummy_stats))
+        c(pars, as.vector(stats))
+      })
+
     }
 
     candidate_particles <- rep(1, sample_size)
 
     res <- list()
     if (num_threads == 1) {
+      pb <- txtProgressBar(max = length(candidate_particles), style = 3)
       for (i in 1:length(candidate_particles)) {
         res[[i]] <- calc_tree_and_stats(candidate_particles[[i]])
+        setTxtProgressBar(pb, i)
       }
     } else {
-      res <- parallel::mclapply(candidate_particles, calc_tree_and_stats,
+      res <- pbmcapply::pbmclapply(candidate_particles,
+                                calc_tree_and_stats,
                                 mc.cores = num_threads,
                                 mc.preschedule = TRUE)
     }

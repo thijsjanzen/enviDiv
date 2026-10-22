@@ -12,13 +12,13 @@ using namespace Rcpp;
 std::vector<double> parameters_from_prior(rnd_t& rndgen_) {
   std::vector<double> output(7, 0.f);
 
-  output[param_type::extinction_rate] = powf(10, (-3 + 5 * rndgen_.uniform()));  // extinction
-  output[param_type::sym_high_rate]   = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec high
-  output[param_type::sym_low_rate]    = powf(10, (-3 + 5 * rndgen_.uniform()));  // symp spec low
-  output[param_type::allo_rate]       = powf(10, (-3 + 5 * rndgen_.uniform()));  // allo spec
-  output[param_type::wobble_rate]     = powf(10, (-3 + 3 * rndgen_.uniform()));  // jiggle
-  output[param_type::water_rate]      = powf(10, ( 0 + 3 * rndgen_.uniform()));  // water rate
-  output[param_type::model]           = 1 + rndgen_.random_number(3); // model
+  output[param_type::extinction_rate] = powf(10, (-4 + 4 * rndgen_.uniform()));  // extinction
+  output[param_type::sym_high_rate]   = powf(10, (-3 + 4 * rndgen_.uniform()));  // symp spec high
+  output[param_type::sym_low_rate]    = powf(10, (-3 + 4 * rndgen_.uniform()));  // symp spec low
+  output[param_type::allo_rate]       = powf(10, (-3 + 4 * rndgen_.uniform()));  // allo spec
+  output[param_type::wobble_rate]     = 0.0; //powf(10, (-3 + 4 * rndgen_.uniform()));  // jiggle
+  output[param_type::water_rate]      = powf(10, (-4 + 4 * rndgen_.uniform()));  // water rate
+  output[param_type::model]           = 1 + rndgen_.random_number(4); // model
 
   return(output);
 }
@@ -42,22 +42,6 @@ std::vector<double> get_waterlevel_changes(int water_model,
     return output;
   }
 
-  if (water_model == 4) { // fake testing model
-    std::vector< double > output = {0.0};
-    int water_level = 1;
-    double time = 0;
-
-    while (time < maximum_time) {
-      time += rndgen_.Expon(rate);
-      if (time > maximum_time) break;
-
-      output.push_back(time);
-      water_level = 1 - water_level;
-    }
-
-    return output;
-  }
-
   std::vector< double > output{0.0};
 
   if (water_model == 3) {
@@ -67,6 +51,28 @@ std::vector<double> get_waterlevel_changes(int water_model,
 
     while (temp_time < (maximum_time - 1.1)) {
       temp_time = temp_time + rndgen_.Expon(rate);
+      if (temp_time > (maximum_time - 1.1)) break;
+
+      time = temp_time;
+      output.push_back(time);
+      water_level = 1 - water_level;
+    }
+    if (water_level == 0) {
+      output.pop_back(); // water level has to be high
+    }
+  }
+
+  if (water_model == 4) {
+    std::vector<double> intervals = {0.55, 0.157, 0.03, 0.068, 0.033,
+                                     0.069, 0.024, 0.129, 0.005, 0.035};
+
+    int water_level = 1;
+    double time = 0;
+    double temp_time = time;
+
+    while (temp_time < (maximum_time - 1.1)) {
+      double dt = intervals[ rndgen_.random_number(intervals.size())];
+      temp_time = temp_time + dt;
       if (temp_time > (maximum_time - 1.1)) break;
 
       time = temp_time;

@@ -31,6 +31,7 @@ struct rnd_t {
   }
 
   float normal(float m, float s) {
+    if (s < 1e-10) return m;
     return std::normal_distribution<float>(m, s)(rndgen);
   }
 

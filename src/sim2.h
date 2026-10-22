@@ -19,6 +19,7 @@ public:
     d_time_ = -1.0;
     in_num_pockets = 1;
     dead_ = false;
+    youngest_offspring_time = 1e12; // very large value, to test against later.
   }
 
   void die(const double& t) {
@@ -55,16 +56,21 @@ public:
     return d_time_;
   }
 
+  void set_btime(double val) {
+    b_time_ = val;
+  }
 
 
   int in_num_pockets;
+  double youngest_offspring_time;
 
 private:
   double d_time_;
   bool dead_;
 
+  
 
-  const double b_time_;
+  double b_time_;
   const int parent_id_;
   const int id_;
 };
@@ -345,10 +351,6 @@ struct simulation {
     }
   }
 
-
-
-
-
   size_t draw_prop_pockets() {
     if (waterlevel == high) {
       size_t index = rnd.random_number(ltable.size());
@@ -388,6 +390,35 @@ struct simulation {
     }
     size_t rand_entry = rnd.random_number(valid_indices.size());
     return valid_indices[rand_entry];
+  }
+
+  void wobble_ltable() {
+    // we need to go over each node and perturb the time
+    // we best go from present to past, as we know the parent age (and we can
+    // not perturb past that)
+    // we don't perturb the crown, this would destroy the crown age conditioning
+    for (size_t i = ltable.size() - 1; i > 2; i--) {
+      double upper_limit = max_time;
+      if (ltable[i].dead()) upper_limit = ltable[i].get_dtime();
+      auto parent = std::abs(ltable[i].parent()) - 1; // minus one for C++ counting
+      double lower_limit = ltable[parent].get_btime();
+      if (ltable[parent].dead()) {
+        upper_limit = ltable[parent].get_dtime();
+      }
+      if (ltable[i].youngest_offspring_time < max_time) {
+        upper_limit = ltable[i].youngest_offspring_time;
+      }
+      
+      double new_btime = -1;
+      while( true ) {
+        new_btime = rnd.normal(ltable[i].get_btime(), params_[pars::wobble]);
+        if (new_btime > lower_limit && new_btime < upper_limit) break;
+      }
+      ltable[i].set_btime(new_btime);
+      if (new_btime < ltable[parent].youngest_offspring_time) {
+        ltable[parent].youngest_offspring_time = new_btime; 
+      }
+    }
   }
 
   Rcpp::NumericMatrix get_ltable() {
