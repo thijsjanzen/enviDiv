@@ -198,7 +198,7 @@ List create_ref_table_tbb_par(int model,
     std::vector< std::vector< double > > add_params(loop_size, temp_filler);
     std::vector< bool > add_flag(loop_size, false);
 
-    tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+    auto global_control = tbb::global_control(tbb::global_control::max_allowed_parallelism, num_threads);
 
 
     tbb::parallel_for(
@@ -411,7 +411,7 @@ std::string ltable_to_newick(const std::vector< std::array< double, 4 > >& ltabl
 NumericVector sq_numbers_cpp_tbb(int n,
                                  int num_threads) {
   NumericVector results(n);
-  tbb::task_scheduler_init _tbb((num_threads > 0) ? num_threads : tbb::task_scheduler_init::automatic);
+  auto global_control = tbb::global_control(tbb::global_control::max_allowed_parallelism, num_threads);
 
   tbb::parallel_for(
     tbb::blocked_range<unsigned>(0, n),
