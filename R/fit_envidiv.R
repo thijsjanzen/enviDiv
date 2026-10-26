@@ -1,6 +1,14 @@
-# Maximum-likelihood fit of the envidiv model for a known water history.
-# Requires envidiv_loglik.R. Parameters are optimised on log scale.
-
+#' Maximum-likelihood fit of the envidiv model for a known water history.
+#' @description
+#' Parameters are optimised on log scale.
+#' @param phy a phylo object
+#' @param init initial values
+#' @param fixed values not optimised, e.g. c(mu = 0) for a model without extinction
+#' @param tol tolerance
+#' @param maxit maximum iterations of the ML algorithm
+#' @param trace verbose output of the optimisation
+#' @param return maximum likelihood
+#' @export
 fit_envidiv <- function(phy, stands,
                         init = c(mu = 0.1, lambda_H = 0.5,
                                  lambda_L = 0.5, alpha = 0.5),

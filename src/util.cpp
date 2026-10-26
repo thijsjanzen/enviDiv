@@ -34,12 +34,17 @@ std::vector<double> parameters_from_prior(rnd_t& rndgen_,
 std::vector<double> get_waterlevel_changes(int water_model,
                                           double maximum_time,
                                           rnd_t& rndgen_,
-                                          double rate) {
+                                          double rate,
+                                          std::vector<double> ext_ww_) {
   if (water_model == 1) {
     std::vector<double> output(2);
     output[0] = 0.0;
     output[1] = maximum_time * 2;
     return output;
+  }
+
+  if (water_model == 5) {
+    return ext_ww_;
   }
 
   std::vector< double > output{0.0};

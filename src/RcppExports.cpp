@@ -24,6 +24,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// envidiv_loglik_cpp
+double envidiv_loglik_cpp(NumericVector pars, IntegerMatrix edge, NumericVector ages, int n_tip, NumericVector rise, NumericVector drop, double sigma, double max_z, double tol, double f, std::string method, double atol, double rtol);
+RcppExport SEXP _enviDiv_envidiv_loglik_cpp(SEXP parsSEXP, SEXP edgeSEXP, SEXP agesSEXP, SEXP n_tipSEXP, SEXP riseSEXP, SEXP dropSEXP, SEXP sigmaSEXP, SEXP max_zSEXP, SEXP tolSEXP, SEXP fSEXP, SEXP methodSEXP, SEXP atolSEXP, SEXP rtolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type pars(parsSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type edge(edgeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ages(agesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_tip(n_tipSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rise(riseSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type drop(dropSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type max_z(max_zSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< double >::type f(fSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< double >::type atol(atolSEXP);
+    Rcpp::traits::input_parameter< double >::type rtol(rtolSEXP);
+    rcpp_result_gen = Rcpp::wrap(envidiv_loglik_cpp(pars, edge, ages, n_tip, rise, drop, sigma, max_z, tol, f, method, atol, rtol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_envidiv_tbb
 Rcpp::List test_envidiv_tbb(int model, double crown_age);
 RcppExport SEXP _enviDiv_test_envidiv_tbb(SEXP modelSEXP, SEXP crown_ageSEXP) {
@@ -177,6 +200,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_tree_cpp", (DL_FUNC) &_enviDiv_create_tree_cpp, 4},
+    {"_enviDiv_envidiv_loglik_cpp", (DL_FUNC) &_enviDiv_envidiv_loglik_cpp, 13},
     {"_enviDiv_test_envidiv_tbb", (DL_FUNC) &_enviDiv_test_envidiv_tbb, 2},
     {"_enviDiv_create_ref_table_tbb_serial", (DL_FUNC) &_enviDiv_create_ref_table_tbb_serial, 6},
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},

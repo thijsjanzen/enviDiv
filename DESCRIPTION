@@ -14,7 +14,8 @@ Depends:
     RcppParallel
 LinkingTo: 
     Rcpp,
-    RcppParallel
+    RcppParallel,
+    BH
 Imports: 
     ape,
     readr,

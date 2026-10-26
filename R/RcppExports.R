@@ -13,6 +13,10 @@ create_tree_cpp <- function(parameters, waterlevel_changes, crown_age, max_lin) 
     .Call('_enviDiv_create_tree_cpp', PACKAGE = 'enviDiv', parameters, waterlevel_changes, crown_age, max_lin)
 }
 
+envidiv_loglik_cpp <- function(pars, edge, ages, n_tip, rise, drop, sigma = 0.0, max_z = 5.0, tol = 1e-6, f = 1.0, method = "odeint::runge_kutta_cash_karp54", atol = 1e-12, rtol = 1e-10) {
+    .Call('_enviDiv_envidiv_loglik_cpp', PACKAGE = 'enviDiv', pars, edge, ages, n_tip, rise, drop, sigma, max_z, tol, f, method, atol, rtol)
+}
+
 #' function to test table conversion
 #' @param model a vector of the four parameters of the model
 #' @param crown_age crown age of the tree to be simulated

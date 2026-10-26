@@ -68,7 +68,7 @@ private:
   double d_time_;
   bool dead_;
 
-  
+
 
   double b_time_;
   const int parent_id_;
@@ -123,6 +123,8 @@ struct simulation {
   double last_w_change;
   std::vector<double> waterlevels;
 
+  std::vector<double> external_ww;
+
   std::array<int, 2> crowns;
 
 
@@ -130,11 +132,13 @@ struct simulation {
              int chosen_model,
              double crown_age,
              int max_num_spec,
-             int seed) :
+             int seed,
+             std::vector<double> ext_ww_ = std::vector<double>()) :
     params_(p),
     max_time(crown_age),
     max_species(max_num_spec),
-    focal_model(chosen_model) {
+    focal_model(chosen_model),
+    external_ww(ext_ww_) {
 
     if (seed < 0) {
       std::random_device rd;
@@ -162,7 +166,8 @@ struct simulation {
     waterlevels = get_waterlevel_changes(focal_model,
                                          max_time,
                                          rnd,
-                                         params_[ pars::water ]);
+                                         params_[ pars::water ],
+                                         external_ww);
 
     waterlevelchanges = 1;
     last_w_change = -1;
@@ -408,7 +413,7 @@ struct simulation {
       if (ltable[i].youngest_offspring_time < max_time) {
         upper_limit = ltable[i].youngest_offspring_time;
       }
-      
+
       double new_btime = -1;
       while( true ) {
         new_btime = rnd.normal(ltable[i].get_btime(), params_[pars::wobble]);
@@ -416,7 +421,7 @@ struct simulation {
       }
       ltable[i].set_btime(new_btime);
       if (new_btime < ltable[parent].youngest_offspring_time) {
-        ltable[parent].youngest_offspring_time = new_btime; 
+        ltable[parent].youngest_offspring_time = new_btime;
       }
     }
   }
