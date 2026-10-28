@@ -15,13 +15,16 @@
 #' 3) extrapolated water level changes, 4) using random rates, until literature values.
 #' @param crown_age age of the crown of the tree
 #' @param max_lin maximum number of extant lineages in the tree.
+#' @param seed seed
+#' @param ww water levels only used with model 5)
 #' @return phy object
 #' @export
 sim_envidiv_tree_new <- function(params,
                                  model,
                                  crown_age,
                                  max_lin = 500,
-                                 seed = -1) {
+                                 seed = -1,
+                                 ww = NULL) {
 
   if (crown_age < 0) {
     warning("crown age should be larger than zero\n")
@@ -32,7 +35,8 @@ sim_envidiv_tree_new <- function(params,
                                  model,
                                  crown_age,
                                  max_lin,
-                                 seed)
+                                 seed,
+                                 ww)
 
   error_code <- sim_result$code
 

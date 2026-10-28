@@ -104,8 +104,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_envidiv2_cpp
-Rcpp::List sim_envidiv2_cpp(std::vector<double> parameters, int model, double crown_age, int max_lin, int seed);
-RcppExport SEXP _enviDiv_sim_envidiv2_cpp(SEXP parametersSEXP, SEXP modelSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP, SEXP seedSEXP) {
+Rcpp::List sim_envidiv2_cpp(std::vector<double> parameters, int model, double crown_age, int max_lin, int seed, std::vector<double> ww);
+RcppExport SEXP _enviDiv_sim_envidiv2_cpp(SEXP parametersSEXP, SEXP modelSEXP, SEXP crown_ageSEXP, SEXP max_linSEXP, SEXP seedSEXP, SEXP wwSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -114,7 +114,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type crown_age(crown_ageSEXP);
     Rcpp::traits::input_parameter< int >::type max_lin(max_linSEXP);
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_envidiv2_cpp(parameters, model, crown_age, max_lin, seed));
+    Rcpp::traits::input_parameter< std::vector<double> >::type ww(wwSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_envidiv2_cpp(parameters, model, crown_age, max_lin, seed, ww));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -205,7 +206,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_enviDiv_create_ref_table_tbb_serial", (DL_FUNC) &_enviDiv_create_ref_table_tbb_serial, 6},
     {"_enviDiv_create_ref_table_tbb_par", (DL_FUNC) &_enviDiv_create_ref_table_tbb_par, 6},
     {"_enviDiv_sq_numbers_cpp_tbb", (DL_FUNC) &_enviDiv_sq_numbers_cpp_tbb, 2},
-    {"_enviDiv_sim_envidiv2_cpp", (DL_FUNC) &_enviDiv_sim_envidiv2_cpp, 5},
+    {"_enviDiv_sim_envidiv2_cpp", (DL_FUNC) &_enviDiv_sim_envidiv2_cpp, 6},
     {"_enviDiv_sim_new_cond_cpp", (DL_FUNC) &_enviDiv_sim_new_cond_cpp, 5},
     {"_enviDiv_sim_envidiv_cpp", (DL_FUNC) &_enviDiv_sim_envidiv_cpp, 4},
     {"_enviDiv_initial_draw_from_prior", (DL_FUNC) &_enviDiv_initial_draw_from_prior, 5},

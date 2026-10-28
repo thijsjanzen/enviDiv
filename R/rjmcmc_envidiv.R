@@ -33,6 +33,19 @@ valid_stands <- function(st, T) {
   TRUE
 }
 
+#' Reversible-jump MCMC for the envidiv model with an unknown water-level
+#' @description
+#' Reversible-jump MCMC for the envidiv model with an unknown water-level
+#' @param phy phy
+#' @param n_iter number of iterations
+#' @param thin thinning interval
+#' @param init initial values for pars, sigma, r and stands
+#' @param control list of control parameters (see rj_defaults)
+#' @param prior_only if TRUE, only the prior is evaluated (no likelihood)
+#' @param fix character vector of parameters to fix (e.g. c("mu = 0"))
+#' @param verbose if TRUE, print progress every 200 samples
+#' @return list with trace, stands, acceptance rates, T and control
+#' @export
 rjmcmc_envidiv <- function(phy, n_iter = 1e5, thin = 50,
                            init = list(pars = c(mu = 0.1, lambda_H = 0.5,
                                                 lambda_L = 0.5, alpha = 0.5),

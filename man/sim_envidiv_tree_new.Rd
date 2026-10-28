@@ -4,7 +4,14 @@
 \alias{sim_envidiv_tree_new}
 \title{simulate a tree using the environmental diversification model}
 \usage{
-sim_envidiv_tree_new(params, model, crown_age, max_lin = 500, seed = -1)
+sim_envidiv_tree_new(
+  params,
+  model,
+  crown_age,
+  max_lin = 500,
+  seed = -1,
+  ww = NULL
+)
 }
 \arguments{
 \item{params}{parameters used to simulate:
@@ -26,6 +33,10 @@ sim_envidiv_tree_new(params, model, crown_age, max_lin = 500, seed = -1)
 \item{crown_age}{age of the crown of the tree}
 
 \item{max_lin}{maximum number of extant lineages in the tree.}
+
+\item{seed}{seed}
+
+\item{ww}{water levels only used with model 5)}
 }
 \value{
 phy object

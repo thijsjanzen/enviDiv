@@ -27,7 +27,13 @@ export(param_from_prior)
 export(param_from_prior_cpp)
 export(param_from_prior_exp)
 export(param_from_prior_exp_cpp)
+export(plot_rj_diagnostics)
+export(plot_water_posterior)
+export(plot_water_samples)
 export(read_reference_table)
+export(rj_drop_clusters)
+export(rj_water_summary)
+export(rjmcmc_envidiv)
 export(sim_envidiv_cpp)
 export(sim_envidiv_tree)
 export(sim_envidiv_tree2)
@@ -41,4 +47,14 @@ export(test_envidiv_tbb)
 export(water_to_stands)
 import(Rcpp)
 importFrom(RcppParallel, RcppParallelLibs)
+importFrom(grDevices,
+  adjustcolor,
+  grey,
+  hcl.colors
+)
+importFrom(graphics,hist)
+importFrom(stats,
+  median,
+  sd
+)
 useDynLib(enviDiv)
